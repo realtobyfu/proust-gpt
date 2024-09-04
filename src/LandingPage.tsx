@@ -154,8 +154,8 @@ const LandingPage: React.FC = () => {
 
     const navigate = useNavigate();
 
-    const handleButtonClick = (message: string) => {
-        navigate('/chat', { state: { message } });
+    const handleButtonClick = (mode: string, prompt: string) => {
+        navigate('/chat', { state: { mode, prompt } });
     };
 
     return (
@@ -170,18 +170,27 @@ const LandingPage: React.FC = () => {
             <Question>How can I help you today?</Question>
 
             <ButtonContainer>
-                <Button onClick={() => handleButtonClick('I would like to ask Proust to refine my prose.')}>
+                <Button onClick={() => handleButtonClick('refine_prose', '')}>
                     I would like to ask Proust to refine my prose.
                 </Button>
-
-                {/*<Button>I would like to ask Proust to refine my prose.</Button>*/}
-                <Button>I would like to learn more about In Search of Lost Time.</Button>
-                <Button>Just want to ask some questions or have a conversation.</Button>
-                <Button>Tell me about a place.</Button>
-                <Button>Tell me about a memory.</Button>
-                <Button>Tell me about a Sunday afternoon.</Button>
-
+                <Button onClick={() => handleButtonClick('explore_lost_time', '')}>
+                    I would like to learn more about In Search of Lost Time.
+                </Button>
+                <Button onClick={() => handleButtonClick('qa', '')}>
+                    Just want to ask some questions or have a conversation.
+                </Button>
+                <Button onClick={() => handleButtonClick('explore_lost_time', 'Tell me about a place.')}>
+                    Tell me about a place.
+                </Button>
+                <Button onClick={() => handleButtonClick('explore_lost_time', 'Tell me about a memory.')}>
+                    Tell me about a memory.
+                </Button>
+                <Button onClick={() => handleButtonClick('explore_lost_time', 'Tell me about a Sunday afternoon.')}>
+                    Tell me about a Sunday afternoon.
+                </Button>
             </ButtonContainer>
+
+
 
             <ProustSection>
                 <ProustImageContainer src={ProustImage} alt="Marcel Proust" />

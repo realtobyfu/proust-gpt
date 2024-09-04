@@ -15,6 +15,7 @@ const Sidebar = styled.div`
   border-right: 1px solid #ccc;
   padding: 2rem;
   box-sizing: border-box;
+  color: #333;
 `;
 
 const ChatArea = styled.div`
@@ -24,6 +25,7 @@ const ChatArea = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  color: #333;
 `;
 
 const ChatHeader = styled.div`
@@ -31,6 +33,15 @@ const ChatHeader = styled.div`
   font-size: 1.2rem;
   font-weight: 500;
   margin-bottom: 1rem;
+  color: #333;
+`;
+
+const ChatMode = styled.div`
+  font-family: 'IBM Plex Sans', serif;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #555;
+  margin-bottom: 10px;
 `;
 
 const ChatBubble = styled.div`
@@ -40,6 +51,7 @@ const ChatBubble = styled.div`
   padding: 1rem;
   margin-bottom: 1rem;
   width: fit-content;
+  color: #333;
 `;
 
 const InputArea = styled.div`
@@ -47,6 +59,7 @@ const InputArea = styled.div`
   border-radius: 20px;
   display: flex;
   align-items: center;
+  position: relative;
 `;
 
 const Input = styled.input`
@@ -55,14 +68,39 @@ const Input = styled.input`
   border: none;
   border-radius: 20px;
   font-size: 1rem;
+  color: #333;
+  background-color: #fff;
+`;
+
+const LoadingIndicator = styled.div`
+  position: absolute;
+  right: 1rem;
+  font-size: 0.9rem;
+  color: #8b4513;
 `;
 
 const ChatPage: React.FC = () => {
     const location = useLocation();
-    const { message } = location.state || { message: 'No message received' };
+    const { mode, prompt } = location.state || { mode: 'qa', prompt: '' };
 
-    const [conversationList, setConversationList] = useState<string[]>([message]);
+    // Initialize conversation list based on whether the prompt is empty
+    const initialConversation = prompt ? [`Prompt: ${prompt}`] : [];
+    const [conversationList, setConversationList] = useState<string[]>(initialConversation);
     const [userInput, setUserInput] = useState<string>('');
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [initialPromptSent, setInitialPromptSent] = useState<boolean>(false);
+
+    // Debugging logs
+    console.log("Component Rendered with:", { mode, prompt, initialPromptSent });
+
+    useEffect(() => {
+        if (prompt && prompt.trim() !== '' && !initialPromptSent) {
+            console.log("Sending initial prompt to backend:", prompt);
+            setIsLoading(true);
+            sendMessageToBackend(prompt);
+            setInitialPromptSent(true);  // Ensure this prompt is only sent once
+        }
+    }, [prompt, initialPromptSent]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setUserInput(e.target.value);
@@ -74,14 +112,25 @@ const ChatPage: React.FC = () => {
         // Append user's message to the conversation list
         setConversationList((prevList) => [...prevList, `You: ${userInput}`]);
 
+        // Set loading state to true to show loading indicator and disable input
+        setIsLoading(true);
+
         // Send the message to the backend and get a response
+        sendMessageToBackend(userInput);
+
+        // Clear user input
+        setUserInput('');
+    };
+
+    const sendMessageToBackend = async (message: string) => {
+        console.log("Sending message to backend:", message);
         try {
             const response = await fetch('http://127.0.0.1:5000/api/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ message: userInput }),
+                body: JSON.stringify({ message, mode }),
             });
 
             const data = await response.json();
@@ -91,23 +140,34 @@ const ChatPage: React.FC = () => {
             setConversationList((prevList) => [...prevList, `ProustGPT: ${llmResponse}`]);
         } catch (error) {
             console.error('Error sending message:', error);
+            setConversationList((prevList) => [
+                ...prevList,
+                'ProustGPT: Sorry, there was an error processing your message.',
+            ]);
         }
 
-        // Clear user input
-        setUserInput('');
+        // Set loading state to false
+        setIsLoading(false);
     };
 
     return (
         <ChatContainer>
             <Sidebar>
-                <p><a href="#">Past Conversations</a></p>
+                <p><a href="#" style={{ color: '#333', textDecoration: 'none' }}>Past Conversations</a></p>
             </Sidebar>
             <ChatArea>
                 <div>
-                    <ChatHeader>{message}</ChatHeader>
+                    {/* Display the mode at the top */}
+                    <ChatMode>Mode: {mode.replace('_', ' ')}</ChatMode>
+
+                    {/* Display initial prompt if available */}
+                    {prompt && <ChatHeader>{prompt}</ChatHeader>}
+
                     {conversationList.map((msg, index) => (
                         <ChatBubble key={index}>{msg}</ChatBubble>
                     ))}
+
+                    {isLoading && <LoadingIndicator>Loading...</LoadingIndicator>}
                 </div>
                 <InputArea>
                     <Input
@@ -115,9 +175,10 @@ const ChatPage: React.FC = () => {
                         value={userInput}
                         onChange={handleInputChange}
                         placeholder="Type your message here..."
-                        onKeyPress={(e) => {
-                            if (e.key === 'Enter') handleSendMessage();
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !isLoading) handleSendMessage();
                         }}
+                        disabled={isLoading}
                     />
                 </InputArea>
             </ChatArea>
