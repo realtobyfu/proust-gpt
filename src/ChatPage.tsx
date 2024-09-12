@@ -28,14 +28,6 @@ const ChatArea = styled.div`
   color: #333;
 `;
 
-const ChatHeader = styled.div`
-  font-family: 'IBM Plex Sans', serif;
-  font-size: 1.2rem;
-  font-weight: 500;
-  margin-bottom: 1rem;
-  color: #333;
-`;
-
 const ChatMode = styled.div`
   font-family: 'IBM Plex Sans', serif;
   font-size: 1rem;
@@ -44,14 +36,18 @@ const ChatMode = styled.div`
   margin-bottom: 10px;
 `;
 
-const ChatBubble = styled.div`
-  background-color: rgba(255, 255, 255, 0.6);
-  border: 1px solid #8b4513;
+// General ChatBubble styling
+const ChatBubble = styled.div<{ isUser: boolean }>`
+  background-color: ${(props) => ('rgba(255, 255, 255, 0.6)')}; /* User messages and Proust responses */
+  border: ${(props) => ('none')}; /* No outline for user messages */
   border-radius: 10px;
   padding: 1rem;
   margin-bottom: 1rem;
-  width: fit-content;
-  color: #333;
+  max-width: 60%; /* Ensure bubbles don't take full width */
+  align-self: ${(props) => (props.isUser ? 'flex-start' : 'flex-end')}; /* Align user messages to the left, Proust to the right */
+  margin-left: ${(props) => (props.isUser ? '0' : 'auto')}; /* Give space on the left for Proust */
+  margin-right: ${(props) => (props.isUser ? 'auto' : '0')}; /* Give space on the right for user */
+  color: #333; /* Text color */
 `;
 
 const InputArea = styled.div`
@@ -84,14 +80,27 @@ const ChatPage: React.FC = () => {
     const { mode, prompt } = location.state || { mode: 'qa', prompt: '' };
 
     // Initialize conversation list based on whether the prompt is empty
-    const initialConversation = prompt ? [`Prompt: ${prompt}`] : [];
+    const initialConversation = prompt ? [`You: ${prompt}`] : [];
     const [conversationList, setConversationList] = useState<string[]>(initialConversation);
     const [userInput, setUserInput] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [initialPromptSent, setInitialPromptSent] = useState<boolean>(false);
 
-    // Debugging logs
-    console.log("Component Rendered with:", { mode, prompt, initialPromptSent });
+    // Map mode to display string
+    const getModeDisplayString = (mode: string) => {
+        switch (mode) {
+            case 'qa':
+                return 'Q & A';
+            case 'explore_lost_time':
+                return 'Explore In Search of Lost Time';
+            case 'refine_prose':
+                return 'Refine Prose';
+            default:
+                return 'Q & A'; // Default mode if unknown
+        }
+    };
+
+    const modeDisplayString = getModeDisplayString(mode);
 
     useEffect(() => {
         if (prompt && prompt.trim() !== '' && !initialPromptSent) {
@@ -124,13 +133,30 @@ const ChatPage: React.FC = () => {
 
     const sendMessageToBackend = async (message: string) => {
         console.log("Sending message to backend:", message);
+        let apiEndpoint = '';
+
+        // Determine which API route to call based on the mode
+        switch (mode) {
+            case 'qa':
+                apiEndpoint = 'http://127.0.0.1:5000/api/qa';
+                break;
+            case 'explore_lost_time':
+                apiEndpoint = 'http://127.0.0.1:5000/api/explore_lost_time';
+                break;
+            case 'refine_prose':
+                apiEndpoint = 'http://127.0.0.1:5000/api/refine_prose';
+                break;
+            default:
+                apiEndpoint = 'http://127.0.0.1:5000/api/qa'; // Default route
+        }
+
         try {
-            const response = await fetch('http://127.0.0.1:5000/api/chat', {
+            const response = await fetch(apiEndpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ message, mode }),
+                body: JSON.stringify({ message }),  // No mode included here
             });
 
             const data = await response.json();
@@ -158,14 +184,17 @@ const ChatPage: React.FC = () => {
             <ChatArea>
                 <div>
                     {/* Display the mode at the top */}
-                    <ChatMode>Mode: {mode.replace('_', ' ')}</ChatMode>
+                    <ChatMode>Mode: {modeDisplayString}</ChatMode>
 
-                    {/* Display initial prompt if available */}
-                    {prompt && <ChatHeader>{prompt}</ChatHeader>}
-
-                    {conversationList.map((msg, index) => (
-                        <ChatBubble key={index}>{msg}</ChatBubble>
-                    ))}
+                    {conversationList.map((msg, index) => {
+                        const isUser = msg.startsWith('You:'); // Check if message is from the user
+                        const messageText = isUser ? msg.replace('You: ', '') : msg.replace('ProustGPT: ', ''); // Remove the prefix
+                        return (
+                            <ChatBubble key={index} isUser={isUser}>
+                                {messageText}
+                            </ChatBubble>
+                        );
+                    })}
 
                     {isLoading && <LoadingIndicator>Loading...</LoadingIndicator>}
                 </div>
