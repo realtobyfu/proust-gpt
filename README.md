@@ -69,8 +69,9 @@ The backend should now be running at `http://127.0.0.1:5000`.
 
 ### Step 5: Running the Frontend
 
+Open a *different* terminal, and run the following:
+
 ```bash
-cd frontend
 npm start
 ```
 
@@ -104,13 +105,12 @@ You can then choose one of the three modes:
 │   ├── app.py              # Main Flask application
 │   ├── parsed.json         # Parsed data from In Search of Lost Time
 │   └── requirements.txt    # Python dependencies
-├── frontend
-│   ├── public
-│   ├── src
-│   │   ├── components
-│   │   │   └── ChatPage.tsx  # Main chat page component
-│   │   └── App.tsx         # Main app entry point
-│   └── package.json        # Node.js dependencies
+├── public
+├── src
+├── components
+│   └── ChatPage.tsx  # Main chat page component
+│   └── App.tsx         # Main app entry point
+│── package.json        # Node.js dependencies
 └── README.md               # Project documentation
 ```
 
