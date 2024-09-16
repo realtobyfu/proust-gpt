@@ -116,9 +116,9 @@ You can then choose one of the three modes:
 
 ## Work in Progress
 
-[x] Need to complete the 'Combray' page (gallery)
-[x] Need to add a fine-tuned model for the qa
-[x] Need to add conversation history feature
+- [ ] Need to complete the 'Combray' page (gallery)
+- [ ] Need to add a fine-tuned model for the QA
+- [ ] Need to add conversation history feature
 
 ## Future Improvements
 
