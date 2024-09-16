@@ -18,7 +18,8 @@ embedding_model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 model_path = "/Users/realtobyfu/jan/models/llama3-8b-instruct/Meta-Llama-3-8B-Instruct-Q4_K_M.gguf"
 llm = Llama(
     model_path=model_path,
-    n_gpu_layers=-1
+    n_gpu_layers=-1,
+    # max_tokens=32
 )
 
 # Load the parsed data (parsed.json)
@@ -59,6 +60,8 @@ def compute_embeddings_and_retrieve(user_message, parsed_data):
 
     # Return the most relevant passages
     relevant_passages = [parsed_data[i] for i in top_k_indices]
+
+
     return relevant_passages
 
 # 4. RAG retrieval logic for relevant passages based on keyword search
@@ -123,7 +126,7 @@ def explore_lost_time():
 
     system_prompt = (
         "You are Marcel Proust, the author of 'In Search of Lost Time'. Engage with the user by providing insights "
-        "or relevant passages from your work."
+        "or relevant passages from your work. "
     )
 
     if user_message:
@@ -135,20 +138,13 @@ def explore_lost_time():
 
         # Prepare the retrieved passage for response
         if isinstance(retrieved_passages, str):  # Handle case where no relevant passages are found
-            response_content = retrieved_passages
+            response_content = {'passages': []}
         else:
-            passages_text = "\n\n".join(
-                f"{passage['text']} \n Book: {passage['book']} \n Chapter: {passage['chapter']} \n Passage: "
-                for passage in retrieved_passages
-            )
-
-            # Combine with the language model's response
-            # full_message = f"{passages_text}\n\nProustGPT: Based on this, "
-            # llm_response = llm.create_chat_completion(messages=conversation)['choices'][0]['message']['content']
-            response_content = passages_text
+            passages = [{"book": passage['book'], "chapter": passage['chapter'], "text": passage['text']} for passage in retrieved_passages]
+            response_content = {'passages': passages}
 
         update_conversation_history("assistant", response_content)
-        return jsonify({'reply': response_content})
+        return jsonify(response_content)
 
     return jsonify({'reply': 'No message received.'})
 

@@ -81,12 +81,11 @@ const ChatPage: React.FC = () => {
 
     // Initialize conversation list based on whether the prompt is empty
     const initialConversation = prompt ? [`You: ${prompt}`] : [];
-    const [conversationList, setConversationList] = useState<string[]>(initialConversation);
+    const [conversationList, setConversationList] = useState<any[]>(initialConversation);  // Allow for both text and passage objects
     const [userInput, setUserInput] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [initialPromptSent, setInitialPromptSent] = useState<boolean>(false);
 
-    // Map mode to display string
     const getModeDisplayString = (mode: string) => {
         switch (mode) {
             case 'qa':
@@ -96,7 +95,7 @@ const ChatPage: React.FC = () => {
             case 'refine_prose':
                 return 'Refine Prose';
             default:
-                return 'Q & A'; // Default mode if unknown
+                return 'Q & A';
         }
     };
 
@@ -104,10 +103,9 @@ const ChatPage: React.FC = () => {
 
     useEffect(() => {
         if (prompt && prompt.trim() !== '' && !initialPromptSent) {
-            console.log("Sending initial prompt to backend:", prompt);
             setIsLoading(true);
             sendMessageToBackend(prompt);
-            setInitialPromptSent(true);  // Ensure this prompt is only sent once
+            setInitialPromptSent(true);
         }
     }, [prompt, initialPromptSent]);
 
@@ -118,24 +116,15 @@ const ChatPage: React.FC = () => {
     const handleSendMessage = async () => {
         if (userInput.trim() === '') return;
 
-        // Append user's message to the conversation list
-        setConversationList((prevList) => [...prevList, `You: ${userInput}`]);
-
-        // Set loading state to true to show loading indicator and disable input
+        setConversationList((prevList) => [...prevList, { text: `You: ${userInput}`, isUser: true }]);
         setIsLoading(true);
-
-        // Send the message to the backend and get a response
         sendMessageToBackend(userInput);
-
-        // Clear user input
         setUserInput('');
     };
 
     const sendMessageToBackend = async (message: string) => {
-        console.log("Sending message to backend:", message);
         let apiEndpoint = '';
 
-        // Determine which API route to call based on the mode
         switch (mode) {
             case 'qa':
                 apiEndpoint = 'http://127.0.0.1:5000/api/qa';
@@ -147,7 +136,7 @@ const ChatPage: React.FC = () => {
                 apiEndpoint = 'http://127.0.0.1:5000/api/refine_prose';
                 break;
             default:
-                apiEndpoint = 'http://127.0.0.1:5000/api/qa'; // Default route
+                apiEndpoint = 'http://127.0.0.1:5000/api/qa';
         }
 
         try {
@@ -156,23 +145,30 @@ const ChatPage: React.FC = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ message }),  // No mode included here
+                body: JSON.stringify({ message }),
             });
 
             const data = await response.json();
-            const llmResponse = data.reply;
+            const passages = data.passages;
 
-            // Append LLM's response to the conversation list
-            setConversationList((prevList) => [...prevList, `ProustGPT: ${llmResponse}`]);
+            // Add passages to the conversation list
+            setConversationList((prevList) => [
+                ...prevList,
+                ...passages.map((passage: any) => ({
+                    isUser: false,
+                    book: passage.book,
+                    chapter: passage.chapter,
+                    text: passage.text
+                }))
+            ]);
         } catch (error) {
             console.error('Error sending message:', error);
             setConversationList((prevList) => [
                 ...prevList,
-                'ProustGPT: Sorry, there was an error processing your message.',
+                { text: 'ProustGPT: Sorry, there was an error processing your message.', isUser: false },
             ]);
         }
 
-        // Set loading state to false
         setIsLoading(false);
     };
 
@@ -183,18 +179,20 @@ const ChatPage: React.FC = () => {
             </Sidebar>
             <ChatArea>
                 <div>
-                    {/* Display the mode at the top */}
                     <ChatMode>Mode: {modeDisplayString}</ChatMode>
 
-                    {conversationList.map((msg, index) => {
-                        const isUser = msg.startsWith('You:'); // Check if message is from the user
-                        const messageText = isUser ? msg.replace('You: ', '') : msg.replace('ProustGPT: ', ''); // Remove the prefix
-                        return (
-                            <ChatBubble key={index} isUser={isUser}>
-                                {messageText}
+                    {conversationList.map((msg, index) => (
+                        <div key={index}>
+                            <ChatBubble isUser={msg.isUser}>
+                                {msg.text}
                             </ChatBubble>
-                        );
-                    })}
+                            {!msg.isUser && (
+                                <em style={{ fontSize: '0.8rem', marginTop: '5px', display: 'block' }}>
+                                    {msg.book}, {msg.chapter}
+                                </em>
+                            )}
+                        </div>
+                    ))}
 
                     {isLoading && <LoadingIndicator>Loading...</LoadingIndicator>}
                 </div>
@@ -214,5 +212,4 @@ const ChatPage: React.FC = () => {
         </ChatContainer>
     );
 };
-
 export default ChatPage;
