@@ -114,6 +114,12 @@ You can then choose one of the three modes:
 └── README.md               # Project documentation
 ```
 
+## Work in Progress
+
+- [] Need to complete the 'Combray' page (gallery)
+- [] Need to add a fine-tuned model for the qa
+- [] Need to add conversation history feature
+
 ## Future Improvements
 
 - Enhance the **Refine Prose** mode to provide more intuitive feedback based on the prose context.
@@ -122,7 +128,7 @@ You can then choose one of the three modes:
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under Apache 2 License.
 
 ## Acknowledgments
 
