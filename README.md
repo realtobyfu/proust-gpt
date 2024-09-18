@@ -3,7 +3,7 @@
 Initial Screen:
 ![screenshot](screenshot-1.png)
 
-Marcel Proust is an author I enjoy reading. His *In Search of Lost Time* is considered to be one of the greatest novels of the 20th century, but many (including myself) also find it long and difficult to understand, so I decided to make a LLM application that might make it easier. I think it's a very 
+Marcel Proust is an author I enjoy reading. His *In Search of Lost Time* is considered to be one of the greatest novels of the 20th century, but many (including myself) also find it long and difficult to understand, so I decided to make a LLM application that might make it easier. It's a very interesting novel that delves into themes like memory and consciousness.
 
 
 # ProustGPT Chat Application
