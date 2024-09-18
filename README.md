@@ -3,6 +3,8 @@
 Initial Screen:
 ![screenshot](screenshot-1.png)
 
+Marcel Proust is an author I enjoy reading. His *In Search of Lost Time* is considered to be one of the greatest novels of the 20th century, but many (including myself) also find it long and difficult to understand, so I decided to make a LLM application that might make it easier. I think it's a very 
+
 
 # ProustGPT Chat Application
 
@@ -119,6 +121,7 @@ You can then choose one of the three modes:
 - [ ] Need to complete the 'Combray' page (gallery)
 - [ ] Need to add a fine-tuned model for the QA
 - [ ] Need to add conversation history feature
+- [ ] Add the French version
 
 ## Future Improvements
 
