@@ -1,14 +1,14 @@
 import React from 'react';
-import LandingPage from './LandingPage';
+import LandingPageRefined from './LandingPageRefined';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
-import ChatPage from './ChatPage';
+import ChatPageRefined from './ChatPageRefined';
 
 const App: React.FC = () => {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/chat" element={<ChatPage />} />
+                <Route path="/" element={<LandingPageRefined />} />
+                <Route path="/chat" element={<ChatPageRefined />} />
             </Routes>
         </Router>
     );

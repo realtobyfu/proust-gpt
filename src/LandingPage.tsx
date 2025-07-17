@@ -59,7 +59,7 @@ const ButtonContainer = styled.div`
   gap: 20px;
   flex-wrap: wrap;
   margin-bottom: 8rem;
-  max-width: 45rem;   /* Set a maximum width to control wrapping */
+  max-width: 30rem;   /* Set a maximum width to control wrapping */
   padding-left: 2rem;
   //margin-right: 15rem;
 `;
@@ -153,7 +153,6 @@ const LanguageLink = styled.a`
 const LandingPage: React.FC = () => {
 
     const navigate = useNavigate();
-
     const handleButtonClick = (mode: string, prompt: string) => {
         navigate('/chat', { state: { mode, prompt } });
     };
@@ -166,28 +165,28 @@ const LandingPage: React.FC = () => {
             </LanguageSwitcher>
 
             <Header>PROUST GPT</Header>
-            <SubHeader>Explore Proust’s literature using LLM</SubHeader>
-            <Question>How can I help you today?</Question>
+            <SubHeader>Explore Proust’s literature and reflect on your day with LLM</SubHeader>
+            <Question>How can I help you?</Question>
 
             <ButtonContainer>
                 <Button onClick={() => handleButtonClick('refine_prose', '')}>
-                    I would like to ask Proust to refine my prose.
+                    I would like to reflect on my day.
                 </Button>
                 <Button onClick={() => handleButtonClick('explore_lost_time', '')}>
                     I would like to learn more about In Search of Lost Time.
                 </Button>
-                <Button onClick={() => handleButtonClick('qa', '')}>
-                    Just want to ask some questions or have a conversation.
-                </Button>
+                {/*<Button onClick={() => handleButtonClick('qa', '')}>*/}
+                {/*    Just want to ask some questions or have a conversation.*/}
+                {/*</Button>*/}
                 <Button onClick={() => handleButtonClick('explore_lost_time', 'Tell me about a place.')}>
                     Tell me about a place.
                 </Button>
                 <Button onClick={() => handleButtonClick('explore_lost_time', 'Tell me about a memory.')}>
                     Tell me about a memory.
                 </Button>
-                <Button onClick={() => handleButtonClick('explore_lost_time', 'Tell me about a Sunday afternoon.')}>
-                    Tell me about a Sunday afternoon.
-                </Button>
+                {/*<Button onClick={() => handleButtonClick('explore_lost_time', 'Tell me about a Sunday afternoon.')}>*/}
+                {/*    Tell me about a Sunday afternoon.*/}
+                {/*</Button>*/}
             </ButtonContainer>
 
 

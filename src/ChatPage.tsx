@@ -88,14 +88,12 @@ const ChatPage: React.FC = () => {
 
     const getModeDisplayString = (mode: string) => {
         switch (mode) {
-            case 'qa':
-                return 'Q & A';
             case 'explore_lost_time':
                 return 'Explore In Search of Lost Time';
             case 'refine_prose':
-                return 'Refine Prose';
+                return 'Reflect on Your Day';
             default:
-                return 'Q & A';
+                return 'Explore In Search of Lost Time';
         }
     };
 
@@ -126,17 +124,14 @@ const ChatPage: React.FC = () => {
         let apiEndpoint = '';
 
         switch (mode) {
-            case 'qa':
-                apiEndpoint = 'http://127.0.0.1:5000/api/qa';
-                break;
             case 'explore_lost_time':
                 apiEndpoint = 'http://127.0.0.1:5000/api/explore_lost_time';
                 break;
             case 'refine_prose':
-                apiEndpoint = 'http://127.0.0.1:5000/api/refine_prose';
+                apiEndpoint = 'http://127.0.0.1:5000/api/reflect';
                 break;
             default:
-                apiEndpoint = 'http://127.0.0.1:5000/api/qa';
+                apiEndpoint = 'http://127.0.0.1:5000/api/explore_lost_time';
         }
 
         try {
@@ -149,18 +144,26 @@ const ChatPage: React.FC = () => {
             });
 
             const data = await response.json();
-            const passages = data.passages;
-
-            // Add passages to the conversation list
-            setConversationList((prevList) => [
-                ...prevList,
-                ...passages.map((passage: any) => ({
-                    isUser: false,
-                    book: passage.book,
-                    chapter: passage.chapter,
-                    text: passage.text
-                }))
-            ]);
+            
+            if (mode === 'explore_lost_time' && data.passages) {
+                // Handle passages for explore_lost_time mode
+                const passages = data.passages;
+                setConversationList((prevList) => [
+                    ...prevList,
+                    ...passages.map((passage: any) => ({
+                        isUser: false,
+                        book: passage.book,
+                        chapter: passage.chapter,
+                        text: passage.text
+                    }))
+                ]);
+            } else if (mode === 'refine_prose' && data.reply) {
+                // Handle single reply for reflect mode
+                setConversationList((prevList) => [
+                    ...prevList,
+                    { text: `ProustGPT: ${data.reply}`, isUser: false }
+                ]);
+            }
         } catch (error) {
             console.error('Error sending message:', error);
             setConversationList((prevList) => [
