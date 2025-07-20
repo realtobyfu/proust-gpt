@@ -1,0 +1,211 @@
+{
+  "paths": {
+    "first_timer": {
+      "id": "first_timer",
+      "title": "First Timer's Path",
+      "description": "A gentle 30-day introduction to Proust through key themes and memorable passages",
+      "duration": "30 days",
+      "difficulty": "beginner",
+      "structure": "linear",
+      "modules": [
+        {
+          "day": 1,
+          "title": "The Madeleine",
+          "description": "The most famous passage in all of Proust - where memory begins",
+          "search_criteria": {
+            "keywords": ["madeleine", "tea", "memory", "taste"],
+            "volume": 1,
+            "themes": ["memory"]
+          },
+          "context": "This passage introduces Proust's concept of involuntary memory - how a simple taste can unlock an entire world of forgotten experiences.",
+          "questions": [
+            "What memories are triggered by specific tastes or smells in your life?",
+            "How does Proust describe the moment of remembering?"
+          ]
+        },
+        {
+          "day": 2,
+          "title": "Bedtime Drama",
+          "description": "Young Marcel's anxiety about his mother's goodnight kiss",
+          "search_criteria": {
+            "keywords": ["bedtime", "mother", "kiss", "anxiety", "childhood"],
+            "volume": 1,
+            "themes": ["love", "childhood"]
+          },
+          "context": "This scene establishes the narrator's sensitive nature and the profound importance of maternal love in shaping his character.",
+          "questions": [
+            "What childhood rituals were important to you?",
+            "How does Proust capture the intensity of a child's emotions?"
+          ]
+        },
+        {
+          "day": 3,
+          "title": "The Church at Combray",
+          "description": "Architecture as a vessel for time and memory",
+          "search_criteria": {
+            "keywords": ["church", "Combray", "steeple", "architecture"],
+            "volume": 1,
+            "themes": ["time", "memory", "art"]
+          },
+          "context": "Proust uses the church to explore how physical spaces contain layers of historical time.",
+          "connections": ["day_1", "day_2"]
+        }
+      ]
+    },
+    "memory_explorer": {
+      "id": "memory_explorer",
+      "title": "Memory & Time Explorer",
+      "description": "Deep dive into Proust's revolutionary treatment of memory and temporal experience",
+      "duration": "15 days",
+      "difficulty": "intermediate",
+      "structure": "thematic",
+      "prerequisites": ["first_timer"],
+      "modules": [
+        {
+          "id": "voluntary_vs_involuntary",
+          "title": "Two Types of Memory",
+          "themes": ["memory"],
+          "passages": [
+            {
+              "title": "The Madeleine Revisited",
+              "search_criteria": {
+                "keywords": ["voluntary memory", "involuntary memory", "intelligence"],
+                "volume": 1
+              }
+            },
+            {
+              "title": "The Uneven Paving Stones",
+              "search_criteria": {
+                "keywords": ["paving stones", "Venice", "stumble"],
+                "volume": 7
+              }
+            }
+          ],
+          "synthesis": "Compare how voluntary effort fails where involuntary sensation succeeds in recovering the past."
+        }
+      ]
+    },
+    "character_swann": {
+      "id": "character_swann",
+      "title": "Following Swann",
+      "description": "Trace Charles Swann's journey through love, jealousy, and society",
+      "duration": "10 days",
+      "difficulty": "intermediate",
+      "structure": "character-based",
+      "character_focus": "Swann",
+      "modules": [
+        {
+          "id": "swann_introduction",
+          "title": "Meeting Swann",
+          "search_criteria": {
+            "characters": ["Swann"],
+            "volume": 1,
+            "narrative_position": "Early memories in Combray"
+          }
+        },
+        {
+          "id": "swann_in_love",
+          "title": "Swann's Love for Odette",
+          "search_criteria": {
+            "characters": ["Swann", "Odette"],
+            "volume": 1,
+            "themes": ["love", "jealousy"]
+          }
+        }
+      ]
+    },
+    "daily_proust": {
+      "id": "daily_proust",
+      "title": "Daily Proust",
+      "description": "One meaningful passage each day for a year",
+      "duration": "365 days",
+      "difficulty": "all_levels",
+      "structure": "daily",
+      "selection_strategy": "curated_rotation",
+      "categories": [
+        {
+          "name": "Memory Mondays",
+          "theme": "memory",
+          "description": "Start each week exploring different facets of memory"
+        },
+        {
+          "name": "Time Tuesdays",
+          "theme": "time",
+          "description": "Meditations on temporality and duration"
+        },
+        {
+          "name": "Love Wednesdays",
+          "theme": "love",
+          "description": "The many faces of love and desire"
+        },
+        {
+          "name": "Art Thursdays",
+          "theme": "art",
+          "description": "Reflections on painting, music, and literature"
+        },
+        {
+          "name": "Society Fridays",
+          "theme": "society",
+          "description": "The comedy and tragedy of social life"
+        },
+        {
+          "name": "Nature Weekends",
+          "theme": "nature",
+          "description": "The natural world through Proust's eyes"
+        }
+      ]
+    },
+    "thematic_love": {
+      "id": "thematic_love",
+      "title": "Love Through the Volumes",
+      "description": "Explore how Proust portrays love in all its forms",
+      "duration": "Self-paced",
+      "difficulty": "advanced",
+      "structure": "thematic",
+      "theme_focus": "love",
+      "stages": [
+        {
+          "title": "First Love",
+          "description": "Childhood crushes and adolescent yearning",
+          "passages": ["Gilberte in the Champs-Élysées", "The name of Swann"]
+        },
+        {
+          "title": "Obsessive Love",
+          "description": "Swann's tortured passion for Odette",
+          "passages": ["The cattleyas", "The Vinteuil sonata", "Jealousy's investigations"]
+        },
+        {
+          "title": "Mature Love",
+          "description": "The narrator's relationship with Albertine",
+          "passages": ["The kiss at Balbec", "The captive", "After the departure"]
+        }
+      ]
+    }
+  },
+  "progression_rules": {
+    "unlock_criteria": {
+      "memory_explorer": {
+        "required_completion": ["first_timer"],
+        "min_days_active": 7
+      },
+      "character_paths": {
+        "required_completion": ["first_timer", "memory_explorer"],
+        "min_passages_read": 50
+      }
+    },
+    "achievement_milestones": [
+      {
+        "id": "first_week",
+        "name": "Getting Started",
+        "criteria": "Complete 7 consecutive days",
+        "reward": "Unlock character paths"
+      },
+      {
+        "id": "first_volume",
+        "name": "Swann's Way Complete",
+        "criteria": "Read 80% of Volume 1 passages",
+        "reward": "Special synthesis essay"
+      }
+    ]
+  }
+}
