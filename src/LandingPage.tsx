@@ -1,7 +1,7 @@
-import React from 'react';
-import styled, {css} from 'styled-components';
+import React, { useState } from 'react';
+import styled, { css } from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import ProustImage from './assets/proust.jpg'; // Add the Proust image to your assets folder
+import ProustImage from './assets/proust.jpg';
 
 const Container = styled.div`
   font-family: 'Georgia', serif;
@@ -10,29 +10,20 @@ const Container = styled.div`
   min-height: 100vh;
   width: 100%;
   display: flex;
-   flex-direction: column;
-  // align-items: center;
-   justify-content: center;
+  flex-direction: column;
+  justify-content: center;
   padding-left: 5rem;
+  position: relative;
 `;
 
 const Header = styled.h1`
-  margin-bottom: 2rem;       /* Adjust the top margin to move it closer to the top */
-  margin-left: 1rem;      /* Adjust the left margin to move it horizontally */
-
-  width: 3rem;
+  margin-bottom: 2rem;
+  margin-left: 1rem;
   font-family: "Belgrano", serif;
   font-style: normal;
-  //line-height: 5rem;
-
   font-weight: 400;
   font-size: 4.5rem;
-  //margin: 0;
-
-  //border: 1px solid #000000;
   text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-  
-  /* PROUST GPT */
 `;
 
 const SubHeader = styled.p`
@@ -59,9 +50,8 @@ const ButtonContainer = styled.div`
   gap: 20px;
   flex-wrap: wrap;
   margin-bottom: 8rem;
-  max-width: 30rem;   /* Set a maximum width to control wrapping */
+  max-width: 30rem;
   padding-left: 2rem;
-  //margin-right: 15rem;
 `;
 
 const Button = styled.button`
@@ -77,11 +67,13 @@ const Button = styled.button`
   font-size: 1rem;
   width: 200px;
   text-align: center;
+  transition: all 0.2s ease;
 
   &:hover {
-    
     background-color: #f1ede9;
+    transform: translateY(-1px);
   }
+  
   &:focus {
     outline: none;
     border-color: #8b4513;
@@ -90,114 +82,147 @@ const Button = styled.button`
 `;
 
 const ProustSection = styled.div`
-  //display: flex;
-  //align-items: center;
-  //justify-content: center;
   position: absolute;
   right: 4rem;
   top: 20rem;
-
-  gap: 30px;
 `;
 
 const ProustImageContainer = styled.img`
-  
   width: 15rem;
   height: auto;
   border-radius: 5px;
-`;
-
-const FooterLink = styled.a`
-  font-family: 'IBM Plex Sans', serif;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 1.2rem;
-  color: #333;
-  text-decoration: none;
-  margin-bottom: 2rem;
-
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
+  
   &:hover {
-    text-decoration: underline;
+    opacity: 1;
   }
 `;
+
 
 const LanguageSwitcher = styled.div`
   font-family: 'IBM Plex Sans', serif;
   font-style: normal;
   font-weight: 400;
-
-  margin-top: 1rem;
-  margin-right: 3.5rem;
   position: absolute;
   top: 20px;
   right: 20px;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 `;
 
-const LanguageLink = styled.a`
+const LanguageLink = styled.a<{ $inactive?: boolean }>`
   text-decoration: none;
   color: #333;
+  transition: color 0.2s ease;
 
-  ${({ id }) =>
-          id === '1' &&
-          css`
-      margin-left: 1rem;
-      color: rgba(0, 0, 0, 0.2);
-          `}
+  ${({ $inactive }) =>
+    $inactive &&
+    css`
+      color: rgba(0, 0, 0, 0.3);
+    `}
+
+  &:hover {
+    color: #8b4513;
+  }
+`;
+
+const GuidanceSection = styled.div<{ $visible: boolean }>`
+  margin-left: 1rem;
+  margin-top: -0.5rem;
+  margin-bottom: 1.5rem;
+  max-width: 40rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #666;
+  height: ${props => props.$visible ? 'auto' : '0'};
+  opacity: ${props => props.$visible ? '1' : '0'};
+  overflow: hidden;
+  transition: all 0.3s ease;
+`;
+
+const GuidanceToggle = styled.button`
+  background: none;
+  border: none;
+  color: #8b4513;
+  font-family: 'IBM Plex Sans', serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-left: 1rem;
+  margin-bottom: 1rem;
+  padding: 0;
   
   &:hover {
-    text-decoration: underline;
+    color: #6b3410;
   }
 `;
 
 const LandingPage: React.FC = () => {
+  const navigate = useNavigate();
+  const [showGuidance, setShowGuidance] = useState(false);
+  const [currentLang, setCurrentLang] = useState('EN');
 
-    const navigate = useNavigate();
-    const handleButtonClick = (mode: string, prompt: string) => {
-        navigate('/chat', { state: { mode, prompt } });
-    };
+  const handleButtonClick = (mode: string, prompt: string) => {
+    navigate('/chat', { state: { mode, prompt } });
+  };
 
-    return (
-        <Container>
-            <LanguageSwitcher>
-                <LanguageLink>INFO</LanguageLink>
-                <LanguageLink id="1" href="#">FR</LanguageLink> | <LanguageLink id="2" href="#">EN</LanguageLink>
-            </LanguageSwitcher>
+  return (
+    <Container>
+      <LanguageSwitcher>
+        <LanguageLink as="span" onClick={() => navigate('/about')} style={{ cursor: 'pointer' }}>About</LanguageLink>
+        <span style={{ margin: '0 1rem' }}>|</span>
+        <LanguageLink 
+          href="#" 
+          $inactive={currentLang !== 'FR'}
+          onClick={(e) => { e.preventDefault(); setCurrentLang('FR'); }}
+        >
+          FR
+        </LanguageLink>
+        <span style={{ margin: '0 0.5rem' }}>|</span>
+        <LanguageLink 
+          href="#" 
+          $inactive={currentLang !== 'EN'}
+          onClick={(e) => { e.preventDefault(); setCurrentLang('EN'); }}
+        >
+          EN
+        </LanguageLink>
+      </LanguageSwitcher>
 
-            <Header>PROUST GPT</Header>
-            <SubHeader>Explore Proust’s literature and reflect on your day with LLM</SubHeader>
-            <Question>How can I help you?</Question>
+      <Header>PROUST GPT</Header>
+      <SubHeader>Explore Proust's literature using a language model</SubHeader>
+      <Question>How can I help you today?</Question>
 
-            <ButtonContainer>
-                <Button onClick={() => handleButtonClick('refine_prose', '')}>
-                    I would like to reflect on my day.
-                </Button>
-                <Button onClick={() => handleButtonClick('explore_lost_time', '')}>
-                    I would like to learn more about In Search of Lost Time.
-                </Button>
-                {/*<Button onClick={() => handleButtonClick('qa', '')}>*/}
-                {/*    Just want to ask some questions or have a conversation.*/}
-                {/*</Button>*/}
-                <Button onClick={() => handleButtonClick('explore_lost_time', 'Tell me about a place.')}>
-                    Tell me about a place.
-                </Button>
-                <Button onClick={() => handleButtonClick('explore_lost_time', 'Tell me about a memory.')}>
-                    Tell me about a memory.
-                </Button>
-                {/*<Button onClick={() => handleButtonClick('explore_lost_time', 'Tell me about a Sunday afternoon.')}>*/}
-                {/*    Tell me about a Sunday afternoon.*/}
-                {/*</Button>*/}
-            </ButtonContainer>
+      <GuidanceToggle onClick={() => setShowGuidance(!showGuidance)}>
+        {showGuidance ? 'Hide guidance' : 'New to Proust?'}
+      </GuidanceToggle>
+      
+      <GuidanceSection $visible={showGuidance}>
+        Begin with Swann's Way, the first volume. Follow young Marcel's memories 
+        of childhood in Combray. Discover the famous madeleine scene that unlocks 
+        the nature of involuntary memory. Or explore any theme, character, or 
+        passage that interests you.
+      </GuidanceSection>
 
+      <ButtonContainer>
+        <Button onClick={() => handleButtonClick('explore_lost_time', 'I want to begin reading In Search of Lost Time')}>
+          Begin reading Proust
+        </Button>
+        <Button onClick={() => handleButtonClick('explore_lost_time', '')}>
+          Explore passages
+        </Button>
+        <Button onClick={() => handleButtonClick('refine_prose', '')}>
+          Reflect in Proust's style
+        </Button>
+        <Button onClick={() => handleButtonClick('explore_lost_time', 'Tell me about memory in Proust')}>
+          Study a theme
+        </Button>
+      </ButtonContainer>
 
-
-            <ProustSection>
-                <ProustImageContainer src={ProustImage} alt="Marcel Proust" />
-            </ProustSection>
-
-            <FooterLink href="#">Combray</FooterLink>
-        </Container>
-    );
+      <ProustSection>
+        <ProustImageContainer src={ProustImage} alt="Marcel Proust" />
+      </ProustSection>
+    </Container>
+  );
 };
 
 export default LandingPage;
