@@ -13,6 +13,15 @@ dist
 dist-ssr
 *.local
 
+# Backend
+backend/__pycache__/
+backend/.env
+backend/venv/
+
+# Large source/data files (not needed at runtime)
+backend/in_search_of_lost_time.html
+backend/parsed.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

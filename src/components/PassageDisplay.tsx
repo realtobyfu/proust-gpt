@@ -86,6 +86,7 @@ interface PassageProps {
   narrativeContext?: string;
   characters?: string[];
   onBookmark?: () => void;
+  isBookmarked?: boolean;
 }
 
 const PassageDisplay: React.FC<PassageProps> = ({
@@ -94,7 +95,8 @@ const PassageDisplay: React.FC<PassageProps> = ({
   page,
   narrativeContext,
   characters = [],
-  onBookmark
+  onBookmark,
+  isBookmarked = false,
 }) => {
   const [showContext, setShowContext] = useState(false);
 
@@ -115,8 +117,8 @@ const PassageDisplay: React.FC<PassageProps> = ({
           {showContext ? 'Hide context' : 'See context'}
         </ContextLink>
         {onBookmark && (
-          <ContextLink onClick={onBookmark}>
-            Mark this passage
+          <ContextLink onClick={onBookmark} style={isBookmarked ? { color: '#8b4513', fontWeight: 600 } : undefined}>
+            {isBookmarked ? 'Saved' : 'Mark this passage'}
           </ContextLink>
         )}
       </ActionLinks>

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import PassageDisplay from './components/PassageDisplay';
 import { useStreamingQuery, Passage } from './hooks/useStreamingQuery';
+import { useLocalStorage } from './hooks/useLocalStorage';
 
 const ChatContainer = styled.div`
   display: flex;
@@ -13,8 +14,8 @@ const ChatContainer = styled.div`
 
 const Sidebar = styled.div<{ $isOpen: boolean }>`
   width: ${props => props.$isOpen ? '250px' : '0'};
-  background-color: #fff;
-  border-right: ${props => props.$isOpen ? '1px solid #ccc' : 'none'};
+  background-color: #faf8f5;
+  border-right: ${props => props.$isOpen ? '1px solid #e0d8cf' : 'none'};
   padding: ${props => props.$isOpen ? '2rem' : '0'};
   box-sizing: border-box;
   color: #333;
@@ -30,9 +31,9 @@ const ChatArea = styled.div`
 `;
 
 const Header = styled.div`
-  background-color: #fff;
-  border-bottom: 1px solid #ccc;
-  padding: 1rem 2rem;
+  background-color: #faf8f5;
+  border-bottom: 1px solid #e0d8cf;
+  padding: 1.25rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -40,12 +41,15 @@ const Header = styled.div`
 
 const Breadcrumb = styled.div`
   font-family: 'IBM Plex Sans', serif;
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #666;
+  font-weight: 500;
 
   a {
     color: #8b4513;
     text-decoration: none;
+    font-family: 'Belgrano', serif;
+    font-weight: 400;
 
     &:hover {
       text-decoration: underline;
@@ -56,16 +60,16 @@ const Breadcrumb = styled.div`
 const ContextBar = styled.div<{ $visible: boolean }>`
   background-color: rgba(255, 255, 255, 0.8);
   border-bottom: 1px solid #e0e0e0;
-  padding: ${props => props.$visible ? '1rem 2rem' : '0'};
+  padding: ${props => props.$visible ? '0.6rem 2rem' : '0 2rem'};
   font-family: 'IBM Plex Sans', serif;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #666;
-  height: ${props => props.$visible ? 'auto' : '0'};
+  max-height: ${props => props.$visible ? '80px' : '0'};
   overflow: hidden;
   transition: all 0.3s ease;
 `;
 
-const ProgressLine = styled.div`
+const ProgressLine = styled.div<{ $progress: number }>`
   height: 2px;
   background-color: #e0e0e0;
   margin: 0.5rem 0;
@@ -77,8 +81,9 @@ const ProgressLine = styled.div`
     left: 0;
     top: 0;
     height: 100%;
-    width: 15%; // Example progress
+    width: ${props => props.$progress}%;
     background-color: #8b4513;
+    transition: width 0.3s ease;
   }
 `;
 
@@ -91,12 +96,15 @@ const MessagesArea = styled.div`
 `;
 
 const MessageBubble = styled.div<{ $isUser: boolean }>`
-  background-color: rgba(255, 255, 255, 0.6);
-  border-radius: 10px;
+  background-color: ${props => props.$isUser ? '#6b3410' : '#f0ebe4'};
+  border-radius: ${props => props.$isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px'};
+  border: ${props => props.$isUser ? 'none' : '1px solid #e0d8cf'};
+  border-left: ${props => !props.$isUser ? '3px solid #8b4513' : undefined};
+  color: ${props => props.$isUser ? '#fff' : '#3a3a3a'};
   padding: 1rem;
   margin-bottom: 1rem;
   max-width: ${props => props.$isUser ? '60%' : '80%'};
-  align-self: ${props => props.$isUser ? 'flex-start' : 'flex-end'};
+  align-self: ${props => props.$isUser ? 'flex-end' : 'flex-start'};
   font-family: 'Georgia', serif;
   line-height: 1.6;
 `;
@@ -121,8 +129,8 @@ const StreamingCursor = styled.span`
 `;
 
 const InputArea = styled.div`
-  background-color: #fff;
-  border-top: 1px solid #ccc;
+  background-color: #faf8f5;
+  border-top: 1px solid #e0d8cf;
   padding: 1.5rem 2rem;
 `;
 
@@ -137,31 +145,47 @@ const InputWrapper = styled.div`
 const Input = styled.input`
   width: 100%;
   padding: 1rem;
-  border: 1px solid #ccc;
+  padding-right: 3rem;
+  border: 1px solid #d4ccc3;
   border-radius: 20px;
   font-size: 1rem;
   color: #333;
   background-color: #fff;
   font-family: 'Georgia', serif;
 
+  &::placeholder {
+    color: #a89888;
+  }
+
   &:focus {
     outline: none;
     border-color: #8b4513;
+    box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
   }
 `;
 
 const SendButton = styled.button`
   position: absolute;
   right: 10px;
-  background: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   border: none;
-  color: #8b4513;
+  background-color: #8b4513;
   cursor: pointer;
-  font-size: 1rem;
-  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background-color 0.2s ease;
 
   &:hover {
-    color: #6b3410;
+    background-color: #6b3410;
+  }
+
+  &:disabled {
+    background-color: #ccc;
+    cursor: default;
   }
 `;
 
@@ -190,16 +214,18 @@ const LoadingIndicator = styled.div`
 `;
 
 const ToggleButton = styled.button`
-  background: none;
+  background: rgba(139, 69, 19, 0.06);
   border: none;
+  border-radius: 16px;
+  padding: 0.4rem 0.9rem;
   color: #8b4513;
   cursor: pointer;
   font-family: 'IBM Plex Sans', serif;
   font-size: 0.9rem;
-  text-decoration: underline;
+  transition: background 0.2s ease;
 
   &:hover {
-    color: #6b3410;
+    background: rgba(139, 69, 19, 0.12);
   }
 `;
 
@@ -234,14 +260,20 @@ const SidebarItem = styled.li`
 `;
 
 const ErrorMessage = styled.div`
-  background-color: #fff3f3;
-  border: 1px solid #ffcdd2;
-  color: #c62828;
+  background-color: #fdf6f0;
+  border: 1px solid #e0c8b0;
+  color: #8b4513;
   border-radius: 10px;
   padding: 1rem;
   margin-bottom: 1rem;
+  max-width: 80%;
+  align-self: flex-start;
   font-family: 'IBM Plex Sans', serif;
   font-size: 0.9rem;
+
+  &::before {
+    content: '\26A0  ';
+  }
 `;
 
 interface Message {
@@ -249,6 +281,21 @@ interface Message {
   text: string;
   isUser: boolean;
   passages?: Passage[];
+}
+
+interface Bookmark {
+  id: string;
+  text: string;
+  book: string;
+  chapter: string;
+  index?: number;
+  savedAt: string;
+}
+
+interface LastPassagePosition {
+  book: string;
+  chapter: string;
+  index?: number;
 }
 
 const ChatPage: React.FC = () => {
@@ -260,7 +307,8 @@ const ChatPage: React.FC = () => {
   const [userInput, setUserInput] = useState('');
   const [showContext, setShowContext] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [bookmarks, setBookmarks] = useState<string[]>([]);
+  const [bookmarks, setBookmarks] = useLocalStorage<Bookmark[]>('proust-bookmarks', []);
+  const [lastPosition, setLastPosition] = useLocalStorage<LastPassagePosition | null>('proust-last-position', null);
 
   // Use streaming query hook
   const {
@@ -286,7 +334,7 @@ const ChatPage: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, streamingResponse]);
 
-  // When streaming completes, add the response as a message
+  // When streaming completes, add the response as a message and track position
   useEffect(() => {
     if (!isLoading && !isStreaming && streamingResponse) {
       const aiMessage: Message = {
@@ -296,6 +344,17 @@ const ChatPage: React.FC = () => {
         passages: streamingPassages.length > 0 ? streamingPassages : undefined,
       };
       setMessages(prev => [...prev, aiMessage]);
+
+      // Track last passage position
+      if (streamingPassages.length > 0) {
+        const lastPassage = streamingPassages[streamingPassages.length - 1];
+        setLastPosition({
+          book: lastPassage.book || "Unknown",
+          chapter: lastPassage.chapter || "Unknown",
+          index: lastPassage.index,
+        });
+      }
+
       resetStream();
     }
   }, [isLoading, isStreaming, streamingResponse, streamingPassages, resetStream]);
@@ -350,8 +409,26 @@ const ChatPage: React.FC = () => {
     }
   };
 
-  const handleBookmark = (passageText: string) => {
-    setBookmarks(prev => [...prev, passageText]);
+  const handleBookmark = (passage: Passage) => {
+    const existing = bookmarks.find(b => b.text === passage.text);
+    if (existing) {
+      // Remove bookmark (toggle off)
+      setBookmarks(bookmarks.filter(b => b.text !== passage.text));
+    } else {
+      // Add bookmark
+      setBookmarks([...bookmarks, {
+        id: Date.now().toString(),
+        text: passage.text,
+        book: passage.book || "Unknown",
+        chapter: passage.chapter || "Unknown",
+        index: passage.index,
+        savedAt: new Date().toISOString(),
+      }]);
+    }
+  };
+
+  const isBookmarked = (passageText: string) => {
+    return bookmarks.some(b => b.text === passageText);
   };
 
   const characters = [
@@ -382,11 +459,23 @@ const ChatPage: React.FC = () => {
         </SidebarSection>
 
         <SidebarSection>
-          <SidebarTitle>Reading Notes</SidebarTitle>
+          <SidebarTitle>Bookmarks ({bookmarks.length})</SidebarTitle>
           <SidebarList>
-            <SidebarItem>Timeline</SidebarItem>
-            <SidebarItem>Places</SidebarItem>
-            <SidebarItem>Your bookmarks ({bookmarks.length})</SidebarItem>
+            {bookmarks.length === 0 ? (
+              <SidebarItem style={{ color: '#aaa', cursor: 'default' }}>
+                No bookmarks yet
+              </SidebarItem>
+            ) : (
+              bookmarks.map(bm => (
+                <SidebarItem
+                  key={bm.id}
+                  onClick={() => setUserInput(`Tell me more about this passage: "${bm.text.slice(0, 80)}..."`)}
+                  title={bm.text.slice(0, 200)}
+                >
+                  {bm.book} &mdash; {bm.text.slice(0, 40)}...
+                </SidebarItem>
+              ))
+            )}
           </SidebarList>
         </SidebarSection>
       </Sidebar>
@@ -394,13 +483,12 @@ const ChatPage: React.FC = () => {
       <ChatArea>
         <Header>
           <Breadcrumb>
-            <a href="/">Proust GPT</a> &gt; {getModeDisplay()}
+            <Link to="/">Proust GPT</Link> &gt; {getModeDisplay()}
           </Breadcrumb>
-          <div>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <ToggleButton onClick={() => setShowContext(!showContext)}>
               {showContext ? 'Hide' : 'Where am I?'}
             </ToggleButton>
-            <span style={{ margin: '0 1rem' }}>|</span>
             <ToggleButton onClick={() => setSidebarOpen(!sidebarOpen)}>
               {sidebarOpen ? 'Hide' : 'Show'} reading notes
             </ToggleButton>
@@ -408,9 +496,15 @@ const ChatPage: React.FC = () => {
         </Header>
 
         <ContextBar $visible={showContext}>
-          <div>Current location: Volume I: Swann's Way, Part 1: Combray</div>
-          <ProgressLine />
-          <div>Progress: Beginning your journey through Proust</div>
+          {lastPosition ? (
+            <>
+              <div>Current location: {lastPosition.book}, {lastPosition.chapter}</div>
+              <ProgressLine $progress={lastPosition.index != null ? Math.min(100, Number((lastPosition.index / 6997 * 100).toFixed(0))) : 0} />
+              <div>Progress: {lastPosition.index != null ? `${(lastPosition.index / 6997 * 100).toFixed(0)}% through the text` : 'Position unknown'}</div>
+            </>
+          ) : (
+            <div>Begin exploring to track your position</div>
+          )}
         </ContextBar>
 
         <MessagesArea>
@@ -431,7 +525,8 @@ const ChatPage: React.FC = () => {
                       page={passage.index}
                       narrativeContext={`From ${passage.chapter || 'Unknown chapter'}`}
                       characters={['Marcel', 'Mother', 'Grandmother']}
-                      onBookmark={() => handleBookmark(passage.text)}
+                      onBookmark={() => handleBookmark(passage)}
+                      isBookmarked={isBookmarked(passage.text)}
                     />
                   ))}
                 </div>
@@ -481,7 +576,9 @@ const ChatPage: React.FC = () => {
               </StopButton>
             ) : (
               <SendButton onClick={() => handleSendMessage()} disabled={isLoading}>
-                Send
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 19V5M5 12l7-7 7 7" />
+                </svg>
               </SendButton>
             )}
           </InputWrapper>
