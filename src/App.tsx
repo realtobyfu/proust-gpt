@@ -3,6 +3,7 @@ import LandingPage from './LandingPage';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import ChatPage from './ChatPage';
 import AboutPage from './AboutPage';
+import ReadPage from './ReadPage';
 
 const App: React.FC = () => {
     return (
@@ -10,6 +11,7 @@ const App: React.FC = () => {
             <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/chat" element={<ChatPage />} />
+                <Route path="/read" element={<ReadPage />} />
                 <Route path="/about" element={<AboutPage />} />
             </Routes>
         </Router>

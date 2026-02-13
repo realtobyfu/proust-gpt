@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import ProustImage from './assets/proust.jpg';
 
 const Container = styled.div`
@@ -9,11 +9,13 @@ const Container = styled.div`
   background-color: #f7f4f0;
   min-height: 100vh;
   width: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding-left: 5rem;
   position: relative;
+  overflow-x: hidden;
 `;
 
 const Header = styled.h1`
@@ -102,38 +104,39 @@ const ProustImageContainer = styled.img`
 `;
 
 
-const LanguageSwitcher = styled.div`
-  font-family: 'IBM Plex Sans', serif;
-  font-style: normal;
+const AboutLink = styled(Link)`
+  font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 400;
   position: absolute;
-  top: 20px;
-  right: 20px;
-  font-size: 1.1rem;
-`;
-
-const LanguageLink = styled.a`
-  text-decoration: underline;
+  top: 1.5rem;
+  right: 2rem;
+  font-size: 1rem;
   color: #8b4513;
-  transition: text-decoration 0.2s ease;
+  text-decoration: none;
+  z-index: 10;
 
   &:hover {
-    text-decoration: none;
+    text-decoration: underline;
   }
 `;
 
 const GuidanceSection = styled.div<{ $visible: boolean }>`
-  margin-left: 1rem;
-  margin-top: -0.5rem;
-  margin-bottom: 1.5rem;
-  max-width: 40rem;
-  font-size: 0.95rem;
+  position: fixed;
+  bottom: 5rem;
+  left: 2rem;
+  max-width: 24rem;
+  font-size: 0.9rem;
   line-height: 1.6;
   color: #666;
+  background: #f7f4f0;
+  padding: ${props => props.$visible ? '1rem' : '0'};
+  border-radius: 8px;
+  box-shadow: ${props => props.$visible ? '0 2px 8px rgba(0,0,0,0.1)' : 'none'};
   height: ${props => props.$visible ? 'auto' : '0'};
   opacity: ${props => props.$visible ? '1' : '0'};
   overflow: hidden;
   transition: all 0.3s ease;
+  z-index: 100;
 `;
 
 const GuidanceToggle = styled.button`
@@ -144,36 +147,77 @@ const GuidanceToggle = styled.button`
   font-size: 0.9rem;
   cursor: pointer;
   text-decoration: underline;
-  margin-left: 1rem;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  padding: 0;
+  position: fixed;
+  bottom: 3rem;
+  left: 2rem;
+  padding: 0.5rem 0;
   outline: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  z-index: 100;
+
+  &:focus, &:focus-visible {
+    outline: none;
+  }
 
   &:hover {
     color: #6b3410;
   }
 `;
 
+const FloatingChatButton = styled.button`
+  position: fixed;
+  bottom: 3rem;
+  right: 2rem;
+  width: 56px;
+  height: 56px;
+  background-color: #8b4513;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.3);
+  transition: all 0.2s ease;
+  z-index: 100;
+
+  &:hover {
+    background-color: #6b3410;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(139, 69, 19, 0.4);
+  }
+`;
+
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [showGuidance, setShowGuidance] = useState(false);
+  const [hasHistory, setHasHistory] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('proust-sessions-index');
+      const sessions = raw ? JSON.parse(raw) : [];
+      setHasHistory(sessions.some((s: any) => s.messageCount > 0));
+    } catch { /* ignore */ }
+  }, []);
+
   const handleButtonClick = (mode: string, prompt: string) => {
     navigate('/chat', { state: { mode, prompt } });
   };
 
   return (
     <Container>
-      <LanguageSwitcher>
-        <LanguageLink as="span" onClick={() => navigate('/about')} style={{ cursor: 'pointer' }}>About</LanguageLink>
-      </LanguageSwitcher>
+      <AboutLink to="/about">About</AboutLink>
 
       <Header>PROUST GPT</Header>
       <SubHeader>Explore Proust's literature using a language model</SubHeader>
       <Question>How can I help you today?</Question>
 
       <ButtonContainer>
-        <Button onClick={() => handleButtonClick('explore_lost_time', 'I want to begin reading In Search of Lost Time')}>
+        <Button onClick={() => navigate('/read')}>
           Begin reading Proust
         </Button>
         <Button onClick={() => handleButtonClick('explore_lost_time', '')}>
@@ -188,7 +232,7 @@ const LandingPage: React.FC = () => {
       </ButtonContainer>
 
       <GuidanceToggle onClick={() => setShowGuidance(!showGuidance)}>
-        {showGuidance ? 'Hide guidance' : 'New to Proust?'}
+        {showGuidance ? 'Hide' : 'New to Proust?'}
       </GuidanceToggle>
 
       <GuidanceSection $visible={showGuidance}>
@@ -201,6 +245,16 @@ const LandingPage: React.FC = () => {
       <ProustSection>
         <ProustImageContainer src={ProustImage} alt="Marcel Proust" />
       </ProustSection>
+
+      {hasHistory && (
+        <FloatingChatButton onClick={() => navigate('/chat')}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+               strokeLinejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </FloatingChatButton>
+      )}
     </Container>
   );
 };

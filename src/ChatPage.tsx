@@ -1,9 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import PassageDisplay from './components/PassageDisplay';
+import PassageLightbox from './components/PassageLightbox';
+import MarkdownMessage from './components/MarkdownMessage';
 import { useStreamingQuery, Passage } from './hooks/useStreamingQuery';
 import { useLocalStorage } from './hooks/useLocalStorage';
+import { useChatSessions, Message } from './hooks/useChatSessions';
 
 const ChatContainer = styled.div`
   display: flex;
@@ -39,22 +42,31 @@ const Header = styled.div`
   align-items: center;
 `;
 
-const Breadcrumb = styled.div`
-  font-family: 'IBM Plex Sans', serif;
-  font-size: 1rem;
+const BackButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(139, 69, 19, 0.05);
+  border: 1px solid #d4ccc3;
+  border-radius: 20px;
+  padding: 0.4rem 1rem;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.85rem;
+  color: #8b4513;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: rgba(139, 69, 19, 0.1);
+    border-color: #8b4513;
+  }
+`;
+
+const ModeLabel = styled.span`
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.95rem;
   color: #666;
   font-weight: 500;
-
-  a {
-    color: #8b4513;
-    text-decoration: none;
-    font-family: 'Belgrano', serif;
-    font-weight: 400;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
 `;
 
 const ContextBar = styled.div<{ $visible: boolean }>`
@@ -109,9 +121,7 @@ const MessageBubble = styled.div<{ $isUser: boolean }>`
   line-height: 1.6;
 `;
 
-const StreamingBubble = styled(MessageBubble)`
-  white-space: pre-wrap;
-`;
+const StreamingBubble = styled(MessageBubble)``;
 
 const blink = keyframes`
   0%, 50% { opacity: 1; }
@@ -213,6 +223,23 @@ const LoadingIndicator = styled.div`
   margin: 1rem 0;
 `;
 
+const HamburgerButton = styled.button`
+  background: none;
+  border: none;
+  color: #8b4513;
+  cursor: pointer;
+  padding: 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #6b3410;
+  }
+`;
+
 const ToggleButton = styled.button`
   background: rgba(139, 69, 19, 0.06);
   border: none;
@@ -276,12 +303,93 @@ const ErrorMessage = styled.div`
   }
 `;
 
-interface Message {
-  id: string;
-  text: string;
-  isUser: boolean;
-  passages?: Passage[];
-}
+const NewChatButton = styled.button`
+  width: 100%;
+  padding: 0.45rem 0;
+  background: rgba(139, 69, 19, 0.08);
+  border: 1px dashed #c4a882;
+  border-radius: 8px;
+  color: #8b4513;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: rgba(139, 69, 19, 0.15);
+  }
+`;
+
+const SessionItem = styled.div<{ $active: boolean }>`
+  padding: 0.5rem 0.6rem;
+  border-radius: 6px;
+  cursor: pointer;
+  background: ${props => props.$active ? 'rgba(139, 69, 19, 0.1)' : 'transparent'};
+  border-left: ${props => props.$active ? '3px solid #8b4513' : '3px solid transparent'};
+  margin-bottom: 0.25rem;
+  position: relative;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: rgba(139, 69, 19, 0.06);
+  }
+
+  &:hover .delete-btn {
+    opacity: 1;
+  }
+`;
+
+const SessionTitle = styled.div`
+  font-family: 'IBM Plex Sans', serif;
+  font-size: 0.82rem;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 1.2rem;
+`;
+
+const SessionMeta = styled.div`
+  font-family: 'IBM Plex Sans', serif;
+  font-size: 0.7rem;
+  color: #999;
+  margin-top: 0.15rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+`;
+
+const SessionModeTag = styled.span<{ $mode: string }>`
+  font-size: 0.65rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: 3px;
+  background: ${props => props.$mode === 'refine_prose' ? 'rgba(90, 120, 160, 0.12)' : 'rgba(139, 69, 19, 0.08)'};
+  color: ${props => props.$mode === 'refine_prose' ? '#5a78a0' : '#8b4513'};
+`;
+
+const DeleteButton = styled.button`
+  position: absolute;
+  top: 0.45rem;
+  right: 0.3rem;
+  background: none;
+  border: none;
+  color: #c4a882;
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0.1rem 0.25rem;
+  border-radius: 3px;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+
+  &:hover {
+    color: #a03030;
+    background: rgba(160, 48, 48, 0.08);
+  }
+`;
 
 interface Bookmark {
   id: string;
@@ -300,15 +408,34 @@ interface LastPassagePosition {
 
 const ChatPage: React.FC = () => {
   const location = useLocation();
-  const { mode, prompt } = location.state || { mode: 'explore_lost_time', prompt: '' };
+  const navigate = useNavigate();
+  const { mode: locationMode, prompt } = location.state || { mode: 'explore_lost_time', prompt: '' };
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [userInput, setUserInput] = useState('');
   const [showContext, setShowContext] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeMode, setActiveMode] = useState<string>(locationMode || 'explore_lost_time');
   const [bookmarks, setBookmarks] = useLocalStorage<Bookmark[]>('proust-bookmarks', []);
   const [lastPosition, setLastPosition] = useLocalStorage<LastPassagePosition | null>('proust-last-position', null);
+
+  // Lightbox state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxPassages, setLightboxPassages] = useState<Passage[]>([]);
+  const [lightboxInitialIndex, setLightboxInitialIndex] = useState(0);
+
+  // Session management
+  const {
+    sessions,
+    createSession,
+    saveSession,
+    loadSession,
+    deleteSession,
+    getMostRecentSession,
+  } = useChatSessions();
+
+  const currentSessionIdRef = useRef<string | null>(null);
 
   // Use streaming query hook
   const {
@@ -322,10 +449,29 @@ const ChatPage: React.FC = () => {
     reset: resetStream,
   } = useStreamingQuery({ fallbackToNonStreaming: true });
 
-  // Process initial prompt
+  // Session-aware initialization
   useEffect(() => {
     if (prompt) {
+      // New conversation from landing page with a prompt
+      const session = createSession(locationMode || 'explore_lost_time');
+      currentSessionIdRef.current = session.id;
+      setActiveMode(locationMode || 'explore_lost_time');
+      // Clear location state so refresh doesn't re-trigger
+      navigate(location.pathname, { replace: true, state: {} });
       handleSendMessage(prompt);
+    } else {
+      // No prompt — try to restore last session
+      const recent = getMostRecentSession();
+      if (recent && recent.messages.length > 0) {
+        currentSessionIdRef.current = recent.id;
+        setMessages(recent.messages);
+        setActiveMode(recent.mode);
+        loadSession(recent.id);
+      } else {
+        // Start fresh
+        const session = createSession(locationMode || 'explore_lost_time');
+        currentSessionIdRef.current = session.id;
+      }
     }
   }, []);
 
@@ -333,6 +479,60 @@ const ChatPage: React.FC = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, streamingResponse]);
+
+  // Auto-save messages to session
+  useEffect(() => {
+    if (currentSessionIdRef.current && messages.length > 0) {
+      saveSession(currentSessionIdRef.current, messages, activeMode);
+    }
+  }, [messages, activeMode, saveSession]);
+
+  // Session handlers
+  const handleSelectSession = useCallback((id: string) => {
+    if (id === currentSessionIdRef.current) return;
+    // Save current session first
+    if (currentSessionIdRef.current && messages.length > 0) {
+      saveSession(currentSessionIdRef.current, messages, activeMode);
+    }
+    const session = loadSession(id);
+    if (session) {
+      currentSessionIdRef.current = session.id;
+      setMessages(session.messages);
+      setActiveMode(session.mode);
+      resetStream();
+    }
+  }, [messages, activeMode, saveSession, loadSession, resetStream]);
+
+  const handleNewConversation = useCallback(() => {
+    // Save current session
+    if (currentSessionIdRef.current && messages.length > 0) {
+      saveSession(currentSessionIdRef.current, messages, activeMode);
+    }
+    const session = createSession(activeMode);
+    currentSessionIdRef.current = session.id;
+    setMessages([]);
+    resetStream();
+  }, [messages, activeMode, saveSession, createSession, resetStream]);
+
+  const handleDeleteSession = useCallback((e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    deleteSession(id);
+    if (id === currentSessionIdRef.current) {
+      // Deleted current session — load most recent or create new
+      const recent = getMostRecentSession();
+      if (recent && recent.messages.length > 0) {
+        currentSessionIdRef.current = recent.id;
+        setMessages(recent.messages);
+        setActiveMode(recent.mode);
+        loadSession(recent.id);
+      } else {
+        const session = createSession(activeMode);
+        currentSessionIdRef.current = session.id;
+        setMessages([]);
+      }
+      resetStream();
+    }
+  }, [deleteSession, getMostRecentSession, loadSession, createSession, activeMode, resetStream]);
 
   // When streaming completes, add the response as a message and track position
   useEffect(() => {
@@ -360,7 +560,7 @@ const ChatPage: React.FC = () => {
   }, [isLoading, isStreaming, streamingResponse, streamingPassages, resetStream]);
 
   const getModeDisplay = () => {
-    switch (mode) {
+    switch (activeMode) {
       case 'explore_lost_time':
         return 'Exploring In Search of Lost Time';
       case 'refine_prose':
@@ -383,7 +583,7 @@ const ChatPage: React.FC = () => {
     setUserInput('');
 
     // Determine query mode
-    const queryMode = mode === 'refine_prose' ? 'reflect' : 'explore';
+    const queryMode = activeMode === 'refine_prose' ? 'reflect' : 'explore';
 
     // Start streaming query
     await streamQuery(message, queryMode);
@@ -445,6 +645,41 @@ const ChatPage: React.FC = () => {
     <ChatContainer>
       <Sidebar $isOpen={sidebarOpen}>
         <SidebarSection>
+          <NewChatButton onClick={handleNewConversation} title="New conversation">
+            +
+          </NewChatButton>
+          <SidebarTitle>Conversations</SidebarTitle>
+          {sessions.length === 0 ? (
+            <SidebarItem style={{ color: '#aaa', cursor: 'default' }}>
+              No conversations yet
+            </SidebarItem>
+          ) : (
+            sessions.map(s => (
+              <SessionItem
+                key={s.id}
+                $active={s.id === currentSessionIdRef.current}
+                onClick={() => handleSelectSession(s.id)}
+              >
+                <SessionTitle>{s.title}</SessionTitle>
+                <SessionMeta>
+                  <SessionModeTag $mode={s.mode}>
+                    {s.mode === 'refine_prose' ? 'Reflect' : 'Explore'}
+                  </SessionModeTag>
+                  {new Date(s.updatedAt).toLocaleDateString()}
+                </SessionMeta>
+                <DeleteButton
+                  className="delete-btn"
+                  onClick={(e) => handleDeleteSession(e, s.id)}
+                  title="Delete conversation"
+                >
+                  &times;
+                </DeleteButton>
+              </SessionItem>
+            ))
+          )}
+        </SidebarSection>
+
+        <SidebarSection>
           <SidebarTitle>Characters</SidebarTitle>
           <SidebarList>
             {characters.map(char => (
@@ -482,16 +717,24 @@ const ChatPage: React.FC = () => {
 
       <ChatArea>
         <Header>
-          <Breadcrumb>
-            <Link to="/">Proust GPT</Link> &gt; {getModeDisplay()}
-          </Breadcrumb>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <HamburgerButton onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Toggle sidebar">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="3" y1="18" x2="21" y2="18"/>
+              </svg>
+            </HamburgerButton>
+            <BackButton onClick={() => navigate('/')}>&larr; Back</BackButton>
+            <ModeLabel>{getModeDisplay()}</ModeLabel>
+          </div>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <ToggleButton onClick={() => setShowContext(!showContext)}>
               {showContext ? 'Hide' : 'Where am I?'}
             </ToggleButton>
-            <ToggleButton onClick={() => setSidebarOpen(!sidebarOpen)}>
-              {sidebarOpen ? 'Hide' : 'Show'} reading notes
-            </ToggleButton>
+            <Link to="/about" style={{ color: '#8b4513', fontFamily: "'IBM Plex Sans', serif", fontSize: '0.9rem', textDecoration: 'underline' }}>
+              About
+            </Link>
           </div>
         </Header>
 
@@ -499,8 +742,8 @@ const ChatPage: React.FC = () => {
           {lastPosition ? (
             <>
               <div>Current location: {lastPosition.book}, {lastPosition.chapter}</div>
-              <ProgressLine $progress={lastPosition.index != null ? Math.min(100, Number((lastPosition.index / 6997 * 100).toFixed(0))) : 0} />
-              <div>Progress: {lastPosition.index != null ? `${(lastPosition.index / 6997 * 100).toFixed(0)}% through the text` : 'Position unknown'}</div>
+              <ProgressLine $progress={lastPosition.index != null ? Math.min(100, Number((lastPosition.index / 12764 * 100).toFixed(0))) : 0} />
+              <div>Progress: {lastPosition.index != null ? `${Math.min(100, Number((lastPosition.index / 12764 * 100).toFixed(0)))}% through the text` : 'Position unknown'}</div>
             </>
           ) : (
             <div>Begin exploring to track your position</div>
@@ -513,7 +756,7 @@ const ChatPage: React.FC = () => {
               <div key={message.id}>
                 {message.text && (
                   <MessageBubble $isUser={false}>
-                    {message.text}
+                    <MarkdownMessage content={message.text} />
                   </MessageBubble>
                 )}
                 <div style={{ alignSelf: 'flex-end', maxWidth: '80%' }}>
@@ -527,13 +770,19 @@ const ChatPage: React.FC = () => {
                       characters={['Marcel', 'Mother', 'Grandmother']}
                       onBookmark={() => handleBookmark(passage)}
                       isBookmarked={isBookmarked(passage.text)}
+                      truncated
+                      onClick={() => {
+                        setLightboxPassages(message.passages!);
+                        setLightboxInitialIndex(idx);
+                        setLightboxOpen(true);
+                      }}
                     />
                   ))}
                 </div>
               </div>
             ) : (
               <MessageBubble key={message.id} $isUser={message.isUser}>
-                {message.text}
+                {message.isUser ? message.text : <MarkdownMessage content={message.text} />}
               </MessageBubble>
             )
           ))}
@@ -541,7 +790,7 @@ const ChatPage: React.FC = () => {
           {/* Show streaming response */}
           {isStreaming && streamingResponse && (
             <StreamingBubble $isUser={false}>
-              {streamingResponse}
+              <MarkdownMessage content={streamingResponse} />
               <StreamingCursor />
             </StreamingBubble>
           )}
@@ -584,6 +833,14 @@ const ChatPage: React.FC = () => {
           </InputWrapper>
         </InputArea>
       </ChatArea>
+      <PassageLightbox
+        passages={lightboxPassages}
+        initialIndex={lightboxInitialIndex}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        onBookmark={handleBookmark}
+        isBookmarked={isBookmarked}
+      />
     </ChatContainer>
   );
 };
