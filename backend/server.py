@@ -11,12 +11,13 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Optional
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from config import config
+from corpus import get_table_of_contents, get_chapter_passages
 from retrieval import (
     query_rag,
     query_reflect,
@@ -133,7 +134,7 @@ async def health_check():
     health = {
         "status": "healthy",
         "pinecone": pinecone_status,
-        "llm_configured": bool(config.LLM_MODEL_PATH),
+        "llm_configured": bool(config.GROQ_API_KEY),
         "config_valid": config.is_valid(),
         "missing_config": config.validate(),
     }
@@ -254,6 +255,31 @@ async def reflect_on_day(body: QueryRequest):
         return {"reply": reply}
     except Exception as e:
         return {"reply": f"I apologize, but I encountered an error: {str(e)}"}
+
+
+# =============================================================================
+# Read Proust Endpoints (no API keys needed)
+# =============================================================================
+
+
+@app.get("/api/read/toc")
+async def read_toc():
+    """Return the full table of contents for browsing."""
+    return get_table_of_contents()
+
+
+@app.get("/api/read/chapter")
+async def read_chapter(
+    volume: int = Query(..., description="Volume number (1-7)"),
+    chapter: str = Query(..., description="Chapter name"),
+    offset: int = Query(0, ge=0, description="Passage offset"),
+    limit: int = Query(20, ge=1, le=100, description="Number of passages"),
+):
+    """Return paginated passages for a chapter."""
+    result = get_chapter_passages(volume, chapter, offset, limit)
+    if result is None:
+        return {"error": "Chapter not found", "passages": []}
+    return result
 
 
 # =============================================================================
