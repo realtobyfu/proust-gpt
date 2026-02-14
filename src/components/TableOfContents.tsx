@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 import { useReadingProgress } from '../hooks/useReadingProgress';
 
 const Container = styled.div`
@@ -115,6 +116,7 @@ interface Volume {
   total_passages: number;
   chapters: {
     name: string;
+    display_name?: string;
     passage_count: number;
     first_index: number;
     last_index: number;
@@ -127,6 +129,7 @@ interface TableOfContentsProps {
 }
 
 const TableOfContents: React.FC<TableOfContentsProps> = ({ volumes, onSelectChapter }) => {
+  const { t } = useTranslation();
   const [openVolumes, setOpenVolumes] = useState<Set<number>>(() => new Set([1]));
   const { getChapterProgress, readPassages } = useReadingProgress();
 
@@ -151,7 +154,7 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ volumes, onSelectChap
           <VolumeCard key={vol.volume}>
             <VolumeHeader onClick={() => toggleVolume(vol.volume)}>
               <Arrow $open={isOpen}>&#9654;</Arrow>
-              <VolumeNumber>Vol. {vol.volume}</VolumeNumber>
+              <VolumeNumber>{t('common.vol')} {vol.volume}</VolumeNumber>
               <VolumeTitle>{vol.volume_name}</VolumeTitle>
             </VolumeHeader>
 
@@ -165,7 +168,7 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ volumes, onSelectChap
                     key={ch.name}
                     onClick={() => onSelectChapter(vol.volume, ch.name)}
                   >
-                    <ChapterName>{ch.name}</ChapterName>
+                    <ChapterName>{ch.display_name || ch.name}</ChapterName>
                     <ChapterMeta>
                       {progress > 0 && (
                         <>

@@ -1,6 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation, Trans } from 'react-i18next';
+import LanguageSwitcher from './components/LanguageSwitcher';
+import { useLanguage } from './contexts/LanguageContext';
 
 const Container = styled.div`
   font-family: 'Georgia', serif;
@@ -18,6 +21,9 @@ const TopBar = styled.div`
   width: 100%;
   padding: 1.25rem 2rem;
   box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `;
 
 const BackButton = styled.button`
@@ -81,10 +87,6 @@ const Text = styled.p`
   }
 `;
 
-const Emphasis = styled.em`
-  color: #8b4513;
-  font-style: italic;
-`;
 
 const Footer = styled.div`
   margin-top: 1rem;
@@ -104,71 +106,98 @@ const FooterLink = styled.a`
   }
 `;
 
+const TranslationBlock = styled.div`
+  text-align: center;
+  line-height: 2;
+`;
+
+const TranslationTitle = styled.div`
+  font-family: 'Belgrano', serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  color: #8b4513;
+  margin-bottom: 0.25rem;
+`;
+
+const TranslationSubtitle = styled.div`
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.85rem;
+  color: #999;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.75rem;
+`;
+
+const TranslationDetail = styled.div`
+  font-family: 'Georgia', serif;
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.8;
+`;
+
 const AboutPage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const { language } = useLanguage();
 
   return (
     <Container>
       <TopBar>
         <BackButton onClick={() => navigate('/')}>&larr;</BackButton>
+        <LanguageSwitcher />
       </TopBar>
 
       <Content>
-        <Title>About ProustGPT</Title>
+        <Title>{t('about.title')}</Title>
 
         <Section>
-          <SectionTitle>The Project</SectionTitle>
+          <SectionTitle>{t('about.theProject')}</SectionTitle>
           <Text>
-            ProustGPT is an AI-powered tool for exploring Marcel Proust's{' '}
-            <Emphasis>In Search of Lost Time</Emphasis> through conversation. It
-            combines intelligent passage retrieval with reflective dialogue,
-            inviting you to engage with one of the greatest works of literature
-            in a new way.
+            <Trans i18nKey="about.projectDesc1" components={{ em: <em /> }} />
           </Text>
           <Text>
-            Whether you are a first-time reader seeking guidance or a devoted
-            Proustian revisiting familiar passages, ProustGPT meets you where
-            you are and helps you discover connections, themes, and moments you
-            may have missed.
+            {t('about.projectDesc2')}
           </Text>
         </Section>
 
         <Section>
-          <SectionTitle>Marcel Proust</SectionTitle>
+          <SectionTitle>{t('about.marcelProust')}</SectionTitle>
           <Text>
-            Marcel Proust (1871–1922) spent much of his life writing{' '}
-            <Emphasis>In Search of Lost Time</Emphasis>, a novel published in
-            seven volumes spanning roughly 3,000 pages. It is widely regarded as
-            one of the most significant works of modern literature.
+            <Trans i18nKey="about.proustDesc1" components={{ em: <em /> }} />
           </Text>
           <Text>
-            The novel traces the narrator's journey through memory, time, art,
-            and love — from childhood days in the village of Combray to the
-            salons of Parisian high society. Its most famous passage, the
-            madeleine dipped in tea, captures the power of involuntary memory to
-            collapse the distance between past and present.
+            {t('about.proustDesc2')}
           </Text>
         </Section>
 
         <Section>
-          <SectionTitle>How It Works</SectionTitle>
+          <SectionTitle>{t('about.howItWorks')}</SectionTitle>
           <Text>
-            <strong>Explore Lost Time</strong> — Ask a question or name a theme,
-            and ProustGPT searches through the full text to find relevant
-            passages. It uses retrieval-augmented generation (RAG) to ground
-            every response in Proust's own words.
+            <Trans i18nKey="about.exploreLostTime" components={{ strong: <strong /> }} />
           </Text>
           <Text>
-            <strong>Reflect on My Day</strong> — Describe a moment from your
-            life, and ProustGPT responds in the introspective, layered style of
-            Proust himself, drawing connections between your experience and the
-            themes of the novel.
+            <Trans i18nKey="about.reflectOnMyDay" components={{ strong: <strong /> }} />
           </Text>
         </Section>
+
+        {language === 'en' && (
+          <Section>
+            <SectionTitle>{t('about.translationTitle')}</SectionTitle>
+            <TranslationBlock>
+              <TranslationTitle>{t('about.translationWork')}</TranslationTitle>
+              <TranslationSubtitle>{t('about.translationVolumes')}</TranslationSubtitle>
+              <TranslationDetail>
+                {t('about.translationOriginal')}<br />
+                {t('about.translationMoncrieff')}<br />
+                {t('about.translationSchiff')}<br />
+                {t('about.translationPublisher')}
+              </TranslationDetail>
+            </TranslationBlock>
+          </Section>
+        )}
 
         <Footer>
           <FooterLink onClick={() => navigate('/')}>
-            &larr; Back to Home
+            &larr; {t('about.backToHome')}
           </FooterLink>
         </Footer>
       </Content>

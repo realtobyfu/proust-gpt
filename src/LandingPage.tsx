@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import styled from 'styled-components';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation, Trans } from 'react-i18next';
 import ProustImage from './assets/proust.jpg';
+import LanguageSwitcher from './components/LanguageSwitcher';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -17,21 +19,21 @@ function shuffleArray<T>(arr: T[]): T[] {
 // ── Data ──────────────────────────────────────────────────────────────────────
 
 const EXPLORE_PROMPTS = [
-  { text: 'The madeleine scene', prompt: 'What is the madeleine scene really about?' },
-  { text: 'Swann and Odette', prompt: "How does Swann's love for Odette change over time?" },
-  { text: 'The role of memory', prompt: 'How does Proust explore the role of memory?' },
-  { text: 'The two ways', prompt: "What are the two 'ways' at Combray?" },
-  { text: 'Jealousy in Proust', prompt: 'How does Proust portray jealousy?' },
-  { text: 'Time and aging', prompt: 'How does Proust explore the passage of time and aging?' },
-  { text: 'Art and beauty', prompt: 'What role does art play in the novel?' },
-  { text: 'Sleep and dreams', prompt: 'How does Proust describe sleep and dreams?' },
+  { textKey: 'landing.explorePrompts.madeleine', prompt: 'What is the madeleine scene really about?' },
+  { textKey: 'landing.explorePrompts.swannOdette', prompt: "How does Swann's love for Odette change over time?" },
+  { textKey: 'landing.explorePrompts.memory', prompt: 'How does Proust explore the role of memory?' },
+  { textKey: 'landing.explorePrompts.twoWays', prompt: "What are the two 'ways' at Combray?" },
+  { textKey: 'landing.explorePrompts.jealousy', prompt: 'How does Proust portray jealousy?' },
+  { textKey: 'landing.explorePrompts.timeAging', prompt: 'How does Proust explore the passage of time and aging?' },
+  { textKey: 'landing.explorePrompts.artBeauty', prompt: 'What role does art play in the novel?' },
+  { textKey: 'landing.explorePrompts.sleepDreams', prompt: 'How does Proust describe sleep and dreams?' },
 ];
 
 const REFLECT_PROMPTS = [
-  { text: 'A taste that brought back a place', prompt: 'A taste that brought back a forgotten place' },
-  { text: 'Someone I love has changed', prompt: 'I noticed someone I love has changed' },
-  { text: 'A place I can never return to', prompt: 'There is a place I can never return to' },
-  { text: 'A moment I wish I could relive', prompt: 'There is a moment I wish I could relive' },
+  { textKey: 'landing.reflectPrompts.taste', prompt: 'A taste that brought back a forgotten place' },
+  { textKey: 'landing.reflectPrompts.changed', prompt: 'I noticed someone I love has changed' },
+  { textKey: 'landing.reflectPrompts.place', prompt: 'There is a place I can never return to' },
+  { textKey: 'landing.reflectPrompts.moment', prompt: 'There is a moment I wish I could relive' },
 ];
 
 // ── Styled Components ─────────────────────────────────────────────────────────
@@ -62,7 +64,7 @@ const Container = styled.div`
   }
 `;
 
-const Header = styled.h1`
+const HeaderTitle = styled.h1`
   margin-bottom: 2rem;
   margin-left: 1rem;
   font-family: "Belgrano", serif;
@@ -303,7 +305,7 @@ const NavLink = styled(Link)`
   font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 400;
   font-size: 1rem;
-  color: #8b4513;
+  color: #333;
   text-decoration: none;
 
   &:hover {
@@ -411,6 +413,7 @@ const FloatingChatButton = styled.button`
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [inputValue, setInputValue] = useState('');
   const [showGuidance, setShowGuidance] = useState(false);
   const [hasHistory, setHasHistory] = useState(false);
@@ -451,24 +454,25 @@ const LandingPage: React.FC = () => {
   return (
     <Container>
       <TopNavLinks>
-        <NavLink to="/read">Read</NavLink>
-        <NavLink to="/about">About</NavLink>
+        <LanguageSwitcher />
+        <NavLink to="/read">{t('common.read')}</NavLink>
+        <NavLink to="/about">{t('common.about')}</NavLink>
       </TopNavLinks>
 
-      <Header>PROUST GPT</Header>
-      <SubHeader>Explore Proust's literature with AI</SubHeader>
-      <Question>What would you like to explore?</Question>
+      <HeaderTitle>{t('common.proustGpt')}</HeaderTitle>
+      <SubHeader>{t('landing.subtitle')}</SubHeader>
+      <Question>{t('landing.question')}</Question>
 
       <SearchForm onSubmit={handleSearchSubmit}>
         <SearchInputPill>
           <SearchInput
             ref={inputRef}
             type="text"
-            placeholder="Ask about a theme, character, or passage..."
+            placeholder={t('landing.placeholder')}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
           />
-          <SearchSendButton type="submit" aria-label="Search">
+          <SearchSendButton type="submit" aria-label={t('common.search')}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 19V5M5 12l7-7 7 7" />
             </svg>
@@ -479,43 +483,44 @@ const LandingPage: React.FC = () => {
       <ButtonContainer>
         {exploreChips.map((chip) => (
           <Button
-            key={chip.text}
+            key={chip.textKey}
             $mode="explore"
-            onClick={() => handleChipClick('explore_lost_time', chip.prompt)}
+            onClick={() => handleChipClick('explore_lost_time', t(chip.textKey))}
           >
-            {chip.text}
+            {t(chip.textKey)}
           </Button>
         ))}
       </ButtonContainer>
 
       <ModeDivider>
-        <ModeDividerText>or reflect on your own experience</ModeDividerText>
+        <ModeDividerText>{t('landing.divider')}</ModeDividerText>
       </ModeDivider>
 
       <ButtonContainer $noWrap>
         {reflectChips.map((chip) => (
           <Button
-            key={chip.text}
+            key={chip.textKey}
             $mode="reflect"
-            onClick={() => handleChipClick('refine_prose', chip.prompt)}
+            onClick={() => handleChipClick('refine_prose', t(chip.textKey))}
           >
-            {chip.text}
+            {t(chip.textKey)}
           </Button>
         ))}
       </ButtonContainer>
 
       <GuidanceToggle onClick={() => setShowGuidance(!showGuidance)}>
-        {showGuidance ? 'Hide' : 'New to Proust?'}
+        {showGuidance ? t('common.hide') : t('landing.newToProust')}
       </GuidanceToggle>
 
       <GuidanceSection $visible={showGuidance}>
-        Begin with <em>Swann's Way</em>, the first volume. Follow young Marcel's memories
-        of childhood in Combray. Discover the famous{' '}
-        <a onClick={() => handleGuidanceExplore('What is the madeleine scene really about?')}>
-          madeleine scene
-        </a>{' '}
-        that unlocks the nature of involuntary memory. Or explore any theme, character, or
-        passage that interests you.
+        <Trans
+          i18nKey="landing.guidance"
+          components={{
+            em: <em />,
+            // eslint-disable-next-line jsx-a11y/anchor-is-valid
+            1: <a style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => handleGuidanceExplore('What is the madeleine scene really about?')} />,
+          }}
+        />
       </GuidanceSection>
 
       <ProustSection>
@@ -527,7 +532,7 @@ const LandingPage: React.FC = () => {
             <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
             <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
           </svg>
-          Begin reading
+          {t('common.beginReading')}
         </ReadLink>
       </ProustSection>
 

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 
 interface Bookmark {
   id: string;
@@ -110,6 +111,7 @@ const EmptyMessage = styled.div`
 `;
 
 const BookmarkDropdown: React.FC<BookmarkDropdownProps> = ({ bookmarks, onNavigate }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -136,9 +138,9 @@ const BookmarkDropdown: React.FC<BookmarkDropdownProps> = ({ bookmarks, onNaviga
       </TriggerButton>
       {open && (
         <Dropdown>
-          <DropdownHeader>Saved Passages</DropdownHeader>
+          <DropdownHeader>{t('bookmarks.savedPassages')}</DropdownHeader>
           {sorted.length === 0 ? (
-            <EmptyMessage>No saved passages yet</EmptyMessage>
+            <EmptyMessage>{t('bookmarks.noSavedPassages')}</EmptyMessage>
           ) : (
             sorted.map(bm => (
               <Item
@@ -150,7 +152,7 @@ const BookmarkDropdown: React.FC<BookmarkDropdownProps> = ({ bookmarks, onNaviga
                     setOpen(false);
                   }
                 }}
-                title={bm.index == null ? 'Position unknown' : bm.text.slice(0, 200)}
+                title={bm.index == null ? t('bookmarks.positionUnknown') : bm.text.slice(0, 200)}
               >
                 <ItemSource>{bm.book} &mdash; {bm.chapter}</ItemSource>
                 <ItemText>{bm.text}</ItemText>

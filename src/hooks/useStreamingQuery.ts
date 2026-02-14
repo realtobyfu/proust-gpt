@@ -35,7 +35,7 @@ export interface StreamingQueryResult {
   isLoading: boolean;
   isStreaming: boolean;
   error: string | null;
-  query: (question: string, mode: 'explore' | 'reflect') => Promise<void>;
+  query: (question: string, mode: 'explore' | 'reflect', lang?: string) => Promise<void>;
   abort: () => void;
   reset: () => void;
 }
@@ -92,7 +92,8 @@ export function useStreamingQuery(options: {
 
   const queryNonStreaming = useCallback(async (
     question: string,
-    mode: 'explore' | 'reflect'
+    mode: 'explore' | 'reflect',
+    lang: string = 'en'
   ): Promise<void> => {
     const endpoint = mode === 'reflect'
       ? `${API_BASE_URL}/api/reflect`
@@ -101,7 +102,7 @@ export function useStreamingQuery(options: {
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: question, message: question }),
+      body: JSON.stringify({ query: question, message: question, lang }),
     });
 
     const data = await response.json();
@@ -116,7 +117,8 @@ export function useStreamingQuery(options: {
 
   const queryStreaming = useCallback(async (
     question: string,
-    mode: 'explore' | 'reflect'
+    mode: 'explore' | 'reflect',
+    lang: string = 'en'
   ): Promise<void> => {
     // Create abort controller for this request
     abortControllerRef.current = new AbortController();
@@ -128,7 +130,7 @@ export function useStreamingQuery(options: {
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: question, message: question }),
+      body: JSON.stringify({ query: question, message: question, lang }),
       signal: abortControllerRef.current.signal,
     });
 
@@ -212,7 +214,8 @@ export function useStreamingQuery(options: {
 
   const query = useCallback(async (
     question: string,
-    mode: 'explore' | 'reflect'
+    mode: 'explore' | 'reflect',
+    lang: string = 'en'
   ): Promise<void> => {
     // Reset state
     setResponse('');
@@ -225,7 +228,7 @@ export function useStreamingQuery(options: {
 
     try {
       // Try streaming first
-      await queryStreaming(question, mode);
+      await queryStreaming(question, mode, lang);
     } catch (streamError) {
       // Check if aborted
       if (streamError instanceof Error && streamError.name === 'AbortError') {
@@ -239,7 +242,7 @@ export function useStreamingQuery(options: {
         try {
           setResponse('');
           setPassages([]);
-          await queryNonStreaming(question, mode);
+          await queryNonStreaming(question, mode, lang);
         } catch (fallbackError) {
           setError(fallbackError instanceof Error ? fallbackError.message : 'Unknown error');
         }

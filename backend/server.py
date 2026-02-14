@@ -19,7 +19,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from config import config
-from corpus import get_table_of_contents, get_chapter_passages, locate_passage
+from corpus import get_table_of_contents, get_chapter_passages, get_passage_text, locate_passage
 from retrieval import (
     query_rag,
     query_reflect,
@@ -38,6 +38,7 @@ from retrieval import (
 class QueryRequest(BaseModel):
     query: Optional[str] = None
     message: Optional[str] = None
+    lang: Optional[str] = "en"
 
 
 class PassageItem(BaseModel):
@@ -169,7 +170,7 @@ async def explore_lost_time_stream(body: QueryRequest):
         )
 
     return StreamingResponse(
-        async_sse_generator(stream_rag_response, query),
+        async_sse_generator(stream_rag_response, query, body.lang or "en"),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
@@ -196,7 +197,7 @@ async def reflect_stream(body: QueryRequest):
         )
 
     return StreamingResponse(
-        async_sse_generator(stream_reflect_response, message),
+        async_sse_generator(stream_reflect_response, message, body.lang or "en"),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
@@ -219,7 +220,7 @@ async def explore_lost_time(body: QueryRequest):
         return {"passages": []}
 
     try:
-        result = await asyncio.to_thread(query_rag, query)
+        result = await asyncio.to_thread(query_rag, query, body.lang or "en")
         return {
             "passages": result["passages"],
             "reply": result.get("reply", ""),
@@ -251,7 +252,7 @@ async def reflect_on_day(body: QueryRequest):
         return {"reply": "No message received."}
 
     try:
-        reply = await asyncio.to_thread(query_reflect, message)
+        reply = await asyncio.to_thread(query_reflect, message, body.lang or "en")
         return {"reply": reply}
     except Exception as e:
         return {"reply": f"I apologize, but I encountered an error: {str(e)}"}
@@ -263,9 +264,11 @@ async def reflect_on_day(body: QueryRequest):
 
 
 @app.get("/api/read/toc")
-async def read_toc():
+async def read_toc(
+    lang: str = Query("en", description="Language for names: en or fr"),
+):
     """Return the full table of contents for browsing."""
-    return get_table_of_contents()
+    return get_table_of_contents(lang=lang)
 
 
 @app.get("/api/read/locate")
@@ -285,11 +288,24 @@ async def read_chapter(
     chapter: str = Query(..., description="Chapter name"),
     offset: int = Query(0, ge=0, description="Passage offset"),
     limit: int = Query(20, ge=1, le=100, description="Number of passages"),
+    lang: str = Query("en", description="Text language: en, fr, or both"),
 ):
     """Return paginated passages for a chapter."""
-    result = get_chapter_passages(volume, chapter, offset, limit)
+    result = get_chapter_passages(volume, chapter, offset, limit, lang=lang)
     if result is None:
         return {"error": "Chapter not found", "passages": []}
+    return result
+
+
+@app.get("/api/read/passage_text")
+async def read_passage_text(
+    index: int = Query(..., description="Passage index"),
+    lang: str = Query("en", description="Text language: en, fr, or both"),
+):
+    """Return text for a single passage, optionally in French."""
+    result = get_passage_text(index, lang=lang)
+    if result is None:
+        return {"error": "Passage not found"}
     return result
 
 

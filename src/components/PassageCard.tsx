@@ -1,6 +1,10 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import styled, { css, keyframes } from 'styled-components';
+import { useTranslation } from 'react-i18next';
 import { Passage } from '../hooks/useStreamingQuery';
+import { frenchName } from '../utils/frenchNames';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 interface PassageCardProps {
   passages: Passage[];
@@ -215,6 +219,43 @@ const AnimatedContent = styled.div<{ $dir: 'left' | 'right' | null }>`
   ${props => props.$dir === 'right' && css`animation: ${slideRight} 250ms ease;`}
 `;
 
+const LangPill = styled.div`
+  display: inline-flex;
+  align-items: center;
+  background: rgba(139, 69, 19, 0.04);
+  border: 1px solid #d4ccc3;
+  border-radius: 10px;
+  overflow: hidden;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.65rem;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+`;
+
+const LangOption = styled.button<{ $active: boolean }>`
+  background: ${props => props.$active ? 'rgba(139, 69, 19, 0.12)' : 'transparent'};
+  color: ${props => props.$active ? '#8b4513' : '#999'};
+  border: none;
+  padding: 0.15rem 0.35rem;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: ${props => props.$active ? 600 : 400};
+  transition: all 0.15s ease;
+
+  &:hover {
+    color: #8b4513;
+  }
+`;
+
+const UnavailableNote = styled.div`
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.78rem;
+  color: #999;
+  font-style: italic;
+  margin-top: 0.4rem;
+`;
+
 const PassageCard: React.FC<PassageCardProps> = ({
   passages,
   onBookmark,
@@ -223,14 +264,51 @@ const PassageCard: React.FC<PassageCardProps> = ({
   onSelectPassage,
   isDesktop = false,
 }) => {
+  const { t, i18n } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [slideDir, setSlideDir] = useState<'left' | 'right' | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [measuredHeight, setMeasuredHeight] = useState<string>('5.6em');
+  const [cardLang, setCardLang] = useState<'en' | 'fr'>('en');
+  const [frenchTexts, setFrenchTexts] = useState<Record<number, string | null>>({});
+  const [fetchingFr, setFetchingFr] = useState(false);
 
   const passage = passages[currentIndex];
   const hasMultiple = passages.length > 1;
+
+  // Fetch French text on demand for a passage
+  const fetchFrenchText = useCallback(async (passageIndex: number) => {
+    if (frenchTexts[passageIndex] !== undefined) return; // already fetched
+    setFetchingFr(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/read/passage_text?index=${passageIndex}&lang=fr`);
+      const data = await res.json();
+      setFrenchTexts(prev => ({
+        ...prev,
+        [passageIndex]: data.text_unavailable ? null : (data.text || null),
+      }));
+    } catch {
+      setFrenchTexts(prev => ({ ...prev, [passageIndex]: null }));
+    } finally {
+      setFetchingFr(false);
+    }
+  }, [frenchTexts]);
+
+  // When toggling to French, fetch text if needed
+  const handleLangToggle = useCallback((lang: 'en' | 'fr', e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCardLang(lang);
+    if (lang === 'fr' && passage.index != null) {
+      fetchFrenchText(passage.index);
+    }
+  }, [passage, fetchFrenchText]);
+
+  // Determine display text
+  const displayText = cardLang === 'fr' && passage.index != null && frenchTexts[passage.index]
+    ? frenchTexts[passage.index]!
+    : passage.text;
+  const showFrUnavailable = cardLang === 'fr' && passage.index != null && frenchTexts[passage.index] === null;
 
   // Measure content for smooth expand
   useEffect(() => {
@@ -285,9 +363,10 @@ const PassageCard: React.FC<PassageCardProps> = ({
     }
   }, [currentIndex, goTo]);
 
+  const isFr = i18n.language === 'fr';
   const sourceLabel = [
-    passage.book || 'In Search of Lost Time',
-    passage.chapter,
+    isFr ? frenchName(passage.book || '') || 'À la recherche du temps perdu' : passage.book || 'In Search of Lost Time',
+    isFr && passage.chapter ? frenchName(passage.chapter) : passage.chapter,
   ].filter(Boolean).join(' — ');
 
   return (
@@ -296,21 +375,31 @@ const PassageCard: React.FC<PassageCardProps> = ({
         <BookmarkIcon
           $active={isBookmarked(passage.text)}
           onClick={handleBookmarkClick}
-          aria-label={isBookmarked(passage.text) ? 'Remove bookmark' : 'Bookmark passage'}
+          aria-label={isBookmarked(passage.text) ? t('passage.bookmarkRemove') : t('passage.bookmarkAdd')}
         >
           {isBookmarked(passage.text) ? '★' : '☆'}
         </BookmarkIcon>
 
         <AnimatedContent $dir={slideDir}>
           <SourceChip>{sourceLabel}</SourceChip>
+          {passage.index != null && (
+            <LangPill>
+              <LangOption $active={cardLang === 'en'} onClick={(e) => handleLangToggle('en', e)}>EN</LangOption>
+              <LangOption $active={cardLang === 'fr'} onClick={(e) => handleLangToggle('fr', e)}>FR</LangOption>
+            </LangPill>
+          )}
 
           <TextPreview
             ref={contentRef}
             $expanded={expanded}
             $maxHeight={expanded ? measuredHeight : '5.6em'}
           >
-            {passage.text}
+            {fetchingFr && cardLang === 'fr' ? t('common.loading') : displayText}
           </TextPreview>
+
+          {showFrUnavailable && (
+            <UnavailableNote>{t('passage.frenchUnavailable')}</UnavailableNote>
+          )}
 
           {passage.relevance_summary && (
             <RelevanceSummary>{passage.relevance_summary}</RelevanceSummary>
@@ -320,11 +409,11 @@ const PassageCard: React.FC<PassageCardProps> = ({
         {expanded && (
           <ActionRow>
             <CollapseButton onClick={handleCollapse}>
-              Collapse
+              {t('common.collapse')}
             </CollapseButton>
             {onReadInContext && passage.index != null && (
               <ActionLink onClick={(e) => { e.stopPropagation(); onReadInContext(passage); }}>
-                Read in context
+                {t('passage.readInContext')}
               </ActionLink>
             )}
           </ActionRow>

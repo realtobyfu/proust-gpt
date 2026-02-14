@@ -23,6 +23,7 @@ class Config(BaseSettings):
     LLM_MODEL_NAME: str = "moonshotai/kimi-k2-instruct"
     LLM_TEMPERATURE: float = 0.6
     LLM_MAX_TOKENS: int = 800
+    LLM_FREQUENCY_PENALTY: float = 0.6
 
     # Cohere settings
     COHERE_API_KEY: str = ""

@@ -102,6 +102,19 @@ RULES:
 - After searching, use cite_passages to select only the most apt 1-3 passages for the reader to see.
 - Quote brief phrases from the passages when apt, weaving them into your prose naturally."""
 
+RAG_SYSTEM_PROMPT_FR = """Vous êtes un compagnon littéraire guidant un lecteur à travers « À la recherche du temps perdu » de Marcel Proust.
+Vous vous exprimez dans une prose fluide et contemplative — jamais sous forme de listes, de puces, de sections numérotées ou de plans structurés.
+
+RÈGLES :
+- Écrivez uniquement en paragraphes de prose continue. N'utilisez jamais de puces, de listes numérotées, de titres en gras ou d'en-têtes de section.
+- Adaptez votre réponse à la portée de la question : répondez aux questions factuelles simples en 1-2 phrases ou un court paragraphe ; explorez les questions thématiques ou interprétatives complexes en 2-3 paragraphes plus développés.
+- Vous pouvez utiliser des *italiques* pour les titres et les citations brèves. N'utilisez aucune autre mise en forme.
+- Utilisez l'outil search_proust lorsque le lecteur pose des questions sur le contenu spécifique du texte.
+- Vous n'avez PAS besoin de chercher pour chaque question — s'il s'agit de vous, de connaissances littéraires générales ou d'un suivi, répondez directement.
+- Après la recherche, utilisez cite_passages pour sélectionner uniquement les 1-3 passages les plus pertinents à montrer au lecteur.
+- Citez de brèves phrases des passages quand c'est approprié, en les intégrant naturellement dans votre prose.
+- Répondez toujours en français."""
+
 REFLECT_SYSTEM_PROMPT = """You are a wise, reflective conversationalist in the spirit of Marcel Proust. You help the reader contemplate their day and inner life, drawing on themes of memory, time, sensation, and the self.
 
 RULES:
@@ -109,6 +122,15 @@ RULES:
 - Calibrate your response to the question's scope: answer simple factual questions in 1-2 sentences or a short paragraph; explore complex thematic or interpretive questions in 2-3 fuller paragraphs.
 - You may use *italics* sparingly for emphasis. No other formatting.
 - Ask one thoughtful question to invite deeper reflection."""
+
+REFLECT_SYSTEM_PROMPT_FR = """Vous êtes un conversateur sage et réfléchi dans l'esprit de Marcel Proust. Vous aidez le lecteur à contempler sa journée et sa vie intérieure, en vous appuyant sur les thèmes de la mémoire, du temps, de la sensation et du moi.
+
+RÈGLES :
+- Écrivez uniquement en prose continue. N'utilisez jamais de puces, de listes numérotées, de texte en gras ou d'en-têtes de section.
+- Adaptez votre réponse à la portée de la question : répondez aux questions factuelles simples en 1-2 phrases ou un court paragraphe ; explorez les questions thématiques ou interprétatives complexes en 2-3 paragraphes plus développés.
+- Vous pouvez utiliser des *italiques* avec parcimonie pour l'emphase. Aucune autre mise en forme.
+- Posez une question réfléchie pour inviter à une réflexion plus profonde.
+- Répondez toujours en français."""
 
 # Legacy prompt template (used by direct RAG fallback)
 _RAG_FALLBACK_TEMPLATE = """You are a literary companion guiding a reader through Marcel Proust's "In Search of Lost Time."
@@ -124,6 +146,33 @@ Context passages:
 {context}
 
 Reader's question: {question}"""
+
+_RAG_FALLBACK_TEMPLATE_FR = """Vous êtes un compagnon littéraire guidant un lecteur à travers « À la recherche du temps perdu » de Marcel Proust.
+Vous vous exprimez dans une prose fluide et contemplative — jamais sous forme de listes, de puces, de sections numérotées ou de plans structurés.
+
+RÈGLES :
+- Écrivez uniquement en paragraphes de prose continue. N'utilisez jamais de puces, de listes numérotées, de titres en gras ou d'en-têtes de section.
+- Adaptez votre réponse à la portée de la question : répondez aux questions factuelles simples en 1-2 phrases ou un court paragraphe ; explorez les questions thématiques ou interprétatives complexes en 2-3 paragraphes plus développés.
+- Vous pouvez utiliser des *italiques* pour les titres et les citations brèves. N'utilisez aucune autre mise en forme.
+- Citez de brèves phrases des passages quand c'est approprié, en les intégrant naturellement dans votre prose.
+- Répondez toujours en français.
+
+Passages de contexte :
+{context}
+
+Question du lecteur : {question}"""
+
+
+def _get_rag_prompt(lang: str = "en") -> str:
+    return RAG_SYSTEM_PROMPT_FR if lang == "fr" else RAG_SYSTEM_PROMPT
+
+
+def _get_reflect_prompt(lang: str = "en") -> str:
+    return REFLECT_SYSTEM_PROMPT_FR if lang == "fr" else REFLECT_SYSTEM_PROMPT
+
+
+def _get_rag_fallback_template(lang: str = "en") -> str:
+    return _RAG_FALLBACK_TEMPLATE_FR if lang == "fr" else _RAG_FALLBACK_TEMPLATE
 
 
 # ── Tool definitions for agentic RAG ──────────────────────────────────────────
@@ -402,9 +451,22 @@ def _query_warrants_passages(query: str) -> bool:
     return bool(_PROUST_SIGNALS.search(query))
 
 
+# ── Repetition detection ─────────────────────────────────────────────────────
+
+def _detect_repetition(text: str, window: int = 60, threshold: int = 3) -> bool:
+    """Return True if the tail of `text` contains a repeated phrase loop."""
+    tail = text[-window * threshold:]
+    if len(tail) < window * 2:
+        return False
+    # Check if the last `window` chars appear multiple times in the tail
+    pattern = tail[-window:]
+    count = tail.count(pattern)
+    return count >= threshold
+
+
 # ── Agentic RAG streaming ────────────────────────────────────────────────────
 
-def _stream_agentic_rag(query: str) -> Generator[dict, None, None]:
+def _stream_agentic_rag(query: str, lang: str = "en") -> Generator[dict, None, None]:
     """
     Agentic RAG: the LLM decides whether to search, what to search for,
     and which passages to cite. Uses Groq tool-use API directly.
@@ -415,7 +477,7 @@ def _stream_agentic_rag(query: str) -> Generator[dict, None, None]:
     cite_metadata: dict = {}
 
     messages = [
-        {"role": "system", "content": RAG_SYSTEM_PROMPT},
+        {"role": "system", "content": _get_rag_prompt(lang)},
         {"role": "user", "content": query},
     ]
 
@@ -428,6 +490,7 @@ def _stream_agentic_rag(query: str) -> Generator[dict, None, None]:
             tool_choice="auto",
             temperature=config.LLM_TEMPERATURE,
             max_tokens=config.LLM_MAX_TOKENS,
+            frequency_penalty=config.LLM_FREQUENCY_PENALTY,
         )
         msg = resp.choices[0].message
 
@@ -438,11 +501,17 @@ def _stream_agentic_rag(query: str) -> Generator[dict, None, None]:
                 messages=messages,
                 temperature=config.LLM_TEMPERATURE,
                 max_tokens=config.LLM_MAX_TOKENS,
+                frequency_penalty=config.LLM_FREQUENCY_PENALTY,
                 stream=True,
             )
+            accumulated = ""
             for chunk in stream:
                 if chunk.choices and chunk.choices[0].delta.content:
-                    yield {"type": "token", "token": chunk.choices[0].delta.content}
+                    token = chunk.choices[0].delta.content
+                    accumulated += token
+                    yield {"type": "token", "token": token}
+                    if _detect_repetition(accumulated):
+                        break
             break
 
         # Append assistant message with tool calls
@@ -479,11 +548,17 @@ def _stream_agentic_rag(query: str) -> Generator[dict, None, None]:
             messages=messages,
             temperature=config.LLM_TEMPERATURE,
             max_tokens=config.LLM_MAX_TOKENS,
+            frequency_penalty=config.LLM_FREQUENCY_PENALTY,
             stream=True,
         )
+        accumulated = ""
         for chunk in stream:
             if chunk.choices and chunk.choices[0].delta.content:
-                yield {"type": "token", "token": chunk.choices[0].delta.content}
+                token = chunk.choices[0].delta.content
+                accumulated += token
+                yield {"type": "token", "token": token}
+                if _detect_repetition(accumulated):
+                    break
 
     # Emit cited passages, or fallback to direct retrieval
     relevance_reasons = cite_metadata.get("relevance_reasons", [])
@@ -527,16 +602,20 @@ def _stream_agentic_rag(query: str) -> Generator[dict, None, None]:
     yield {"type": "done", "done": True}
 
 
-def _stream_direct_rag(query: str) -> Generator[dict, None, None]:
+def _stream_direct_rag(query: str, lang: str = "en") -> Generator[dict, None, None]:
     """Fallback: direct search + generate (no tool use)."""
     docs = retrieve_passages(query)
     context = "\n\n---\n\n".join([doc.page_content for doc in docs])
-    prompt = _RAG_FALLBACK_TEMPLATE.format(context=context, question=query)
+    prompt = _get_rag_fallback_template(lang).format(context=context, question=query)
 
     llm = get_llm()
+    accumulated = ""
     for chunk in llm.stream(prompt):
         if chunk.content:
+            accumulated += chunk.content
             yield {"type": "token", "token": chunk.content}
+            if _detect_repetition(accumulated):
+                break
 
     yield {"type": "sources", "passages": _format_passages(docs)}
     yield {"type": "done", "done": True}
@@ -544,7 +623,7 @@ def _stream_direct_rag(query: str) -> Generator[dict, None, None]:
 
 # ── Public API ────────────────────────────────────────────────────────────────
 
-def stream_rag_response(query: str) -> Generator[dict, None, None]:
+def stream_rag_response(query: str, lang: str = "en") -> Generator[dict, None, None]:
     """
     Stream a RAG response. Tries agentic tool-use flow first,
     falls back to direct retrieval if tool use fails.
@@ -555,13 +634,13 @@ def stream_rag_response(query: str) -> Generator[dict, None, None]:
         - {"type": "done", "done": True} when complete
     """
     try:
-        yield from _stream_agentic_rag(query)
+        yield from _stream_agentic_rag(query, lang=lang)
     except Exception as e:
         print(f"[ProustGPT] Agentic RAG failed ({e}), falling back to direct RAG")
-        yield from _stream_direct_rag(query)
+        yield from _stream_direct_rag(query, lang=lang)
 
 
-def query_rag(query: str) -> dict:
+def query_rag(query: str, lang: str = "en") -> dict:
     """
     Execute a RAG query (non-streaming). Uses the same agentic flow.
 
@@ -572,7 +651,7 @@ def query_rag(query: str) -> dict:
     passages = []
     metadata = {}
 
-    for event in stream_rag_response(query):
+    for event in stream_rag_response(query, lang=lang):
         if event["type"] == "token":
             reply_parts.append(event["token"])
         elif event["type"] == "sources":
@@ -589,7 +668,7 @@ def query_rag(query: str) -> dict:
     return result
 
 
-def stream_reflect_response(message: str) -> Generator[dict, None, None]:
+def stream_reflect_response(message: str, lang: str = "en") -> Generator[dict, None, None]:
     """
     Stream a reflection response token by token.
 
@@ -599,22 +678,26 @@ def stream_reflect_response(message: str) -> Generator[dict, None, None]:
     """
     llm = get_llm()
     messages = [
-        {"role": "system", "content": REFLECT_SYSTEM_PROMPT},
+        {"role": "system", "content": _get_reflect_prompt(lang)},
         {"role": "user", "content": message},
     ]
 
+    accumulated = ""
     for chunk in llm.stream(messages):
         if chunk.content:
+            accumulated += chunk.content
             yield {"type": "token", "token": chunk.content}
+            if _detect_repetition(accumulated):
+                break
 
     yield {"type": "done", "done": True}
 
 
-def query_reflect(message: str) -> str:
+def query_reflect(message: str, lang: str = "en") -> str:
     """Generate a Proustian reflection response (non-RAG)."""
     llm = get_llm()
     messages = [
-        {"role": "system", "content": REFLECT_SYSTEM_PROMPT},
+        {"role": "system", "content": _get_reflect_prompt(lang)},
         {"role": "user", "content": message},
     ]
     response = llm.invoke(messages)

@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useReadingProgress } from '../hooks/useReadingProgress';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { formatPassageText } from '../utils/formatPassageText';
@@ -224,6 +226,8 @@ interface Passage {
   book: string;
   chapter: string;
   text: string;
+  text_fr?: string;
+  text_unavailable?: boolean;
   volume: number;
   index: number;
 }
@@ -250,7 +254,18 @@ interface ReadingViewProps {
   highlightPassageIndex?: number;
 }
 
+const UnavailableNote = styled.span`
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.8rem;
+  color: #999;
+  font-style: italic;
+  display: block;
+  margin-top: 0.25rem;
+`;
+
 const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavigateToToc, highlightPassageIndex }) => {
+  const { t } = useTranslation();
+  const { textLanguage } = useLanguage();
   const navigate = useNavigate();
   const { setPageProgress } = useReadingProgress();
   const [bookmarks, setBookmarks] = useLocalStorage<Bookmark[]>('proust-bookmarks', []);
@@ -270,7 +285,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
   const isFirstPage = page === 0;
   const isLastPage = page >= totalPages - 1;
 
-  const fetchPassages = useCallback(async (vol: number, ch: string, pageNum: number) => {
+  const fetchPassages = useCallback(async (vol: number, ch: string, pageNum: number, lang: string) => {
     setLoading(true);
     try {
       const offset = pageNum * PASSAGES_PER_PAGE;
@@ -279,6 +294,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
         chapter: ch,
         offset: offset.toString(),
         limit: PASSAGES_PER_PAGE.toString(),
+        lang,
       });
       const res = await fetch(`${API_BASE_URL}/api/read/chapter?${params}`);
       const data = await res.json();
@@ -302,14 +318,14 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
     }
   }, []);
 
-  // Fetch passages when volume/chapter/page changes
+  // Fetch passages when volume/chapter/page/language changes
   useEffect(() => {
     setInitialLoad(true);
-    fetchPassages(volume, chapter, page);
+    fetchPassages(volume, chapter, page, textLanguage);
     if (highlightPassageIndex == null) {
       window.scrollTo(0, 0);
     }
-  }, [volume, chapter, page, fetchPassages, highlightPassageIndex]);
+  }, [volume, chapter, page, textLanguage, fetchPassages, highlightPassageIndex]);
 
   // Track reading progress — single atomic update per page load
   useEffect(() => {
@@ -451,7 +467,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
   if (initialLoad) {
     return (
       <Container>
-        <LoadingState>Loading chapter...</LoadingState>
+        <LoadingState>{t('readPage.loadingChapter')}</LoadingState>
       </Container>
     );
   }
@@ -469,9 +485,9 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
 
       <Container ref={containerRef}>
         <HeaderRow>
-          <BackButton onClick={onNavigateToToc}>&larr; Contents</BackButton>
+          <BackButton onClick={onNavigateToToc}>&larr; {t('readPage.contents')}</BackButton>
           <VolumeName>{volumeName}</VolumeName>
-          {totalPages > 1 && <PageInfo>Page {page + 1} of {totalPages}</PageInfo>}
+          {totalPages > 1 && <PageInfo>{t('readPage.pageOf', { current: page + 1, total: totalPages })}</PageInfo>}
         </HeaderRow>
         {page === 0 && <ChapterTitle>{chapterName}</ChapterTitle>}
 
@@ -484,16 +500,19 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
               <PassageBlock data-passage-indices={group.map(p => p.index).join(',')}>
                 <ParagraphNumber>{gi + 1}</ParagraphNumber>
                 <PassageText>{formatPassageText(mergedText)}</PassageText>
+                {textLanguage === 'fr' && group.some(p => p.text_unavailable) && (
+                  <UnavailableNote>{t('passage.frenchUnavailable')}</UnavailableNote>
+                )}
                 <PassageActions className="passage-actions">
                   <ActionButton
                     $active={isBookmarked(mergedText)}
                     onClick={() => handleBookmark(mergedText, firstPassage)}
-                    title={isBookmarked(mergedText) ? 'Remove bookmark' : 'Bookmark'}
+                    title={isBookmarked(mergedText) ? t('passage.bookmarkRemove') : t('passage.bookmarkAdd')}
                   >
-                    {isBookmarked(mergedText) ? 'Saved' : 'Save'}
+                    {isBookmarked(mergedText) ? t('common.saved') : t('common.save')}
                   </ActionButton>
-                  <ActionButton onClick={() => handleExplore(mergedText, firstPassage)} title="Explore this passage">
-                    Explore
+                  <ActionButton onClick={() => handleExplore(mergedText, firstPassage)} title={t('common.explore')}>
+                    {t('common.explore')}
                   </ActionButton>
                 </PassageActions>
               </PassageBlock>
@@ -505,7 +524,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
         })}
 
         {!loading && passages.length === 0 && (
-          <LoadingState>No passages found</LoadingState>
+          <LoadingState>{t('readPage.noPassages')}</LoadingState>
         )}
       </Container>
 

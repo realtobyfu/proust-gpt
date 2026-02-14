@@ -1,7 +1,11 @@
-import React, { useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import styled, { keyframes } from 'styled-components';
+import { useTranslation } from 'react-i18next';
 import { Passage } from '../hooks/useStreamingQuery';
 import { formatPassageText } from '../utils/formatPassageText';
+import { frenchName } from '../utils/frenchNames';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 interface ReaderPanelProps {
   passage: Passage | null;
@@ -204,6 +208,41 @@ const Dot = styled.button<{ $active: boolean }>`
   ${props => props.$active && `transform: scale(1.3);`}
 `;
 
+const LangPill = styled.div`
+  display: inline-flex;
+  align-items: center;
+  background: rgba(139, 69, 19, 0.04);
+  border: 1px solid #d4ccc3;
+  border-radius: 10px;
+  overflow: hidden;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.65rem;
+`;
+
+const LangOption = styled.button<{ $active: boolean }>`
+  background: ${props => props.$active ? 'rgba(139, 69, 19, 0.12)' : 'transparent'};
+  color: ${props => props.$active ? '#8b4513' : '#999'};
+  border: none;
+  padding: 0.15rem 0.35rem;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: ${props => props.$active ? 600 : 400};
+  transition: all 0.15s ease;
+
+  &:hover {
+    color: #8b4513;
+  }
+`;
+
+const UnavailableNote = styled.div`
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.78rem;
+  color: #999;
+  font-style: italic;
+  margin-bottom: 1rem;
+`;
+
 const ReaderPanel: React.FC<ReaderPanelProps> = ({
   passage,
   allPassages,
@@ -213,8 +252,37 @@ const ReaderPanel: React.FC<ReaderPanelProps> = ({
   onReadInContext,
   onSelectPassage,
 }) => {
+  const { t, i18n } = useTranslation();
+  const [panelLang, setPanelLang] = useState<'en' | 'fr'>('en');
+  const [frenchTexts, setFrenchTexts] = useState<Record<number, string | null>>({});
+  const [fetchingFr, setFetchingFr] = useState(false);
+
   const currentIndex = passage ? allPassages.findIndex(p => p.text === passage.text) : -1;
   const hasMultiple = allPassages.length > 1;
+
+  const fetchFrenchText = useCallback(async (passageIndex: number) => {
+    if (frenchTexts[passageIndex] !== undefined) return;
+    setFetchingFr(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/read/passage_text?index=${passageIndex}&lang=fr`);
+      const data = await res.json();
+      setFrenchTexts(prev => ({
+        ...prev,
+        [passageIndex]: data.text_unavailable ? null : (data.text || null),
+      }));
+    } catch {
+      setFrenchTexts(prev => ({ ...prev, [passageIndex]: null }));
+    } finally {
+      setFetchingFr(false);
+    }
+  }, [frenchTexts]);
+
+  const handleLangToggle = useCallback((lang: 'en' | 'fr') => {
+    setPanelLang(lang);
+    if (lang === 'fr' && passage?.index != null) {
+      fetchFrenchText(passage.index);
+    }
+  }, [passage, fetchFrenchText]);
 
   const goTo = useCallback((index: number) => {
     if (index >= 0 && index < allPassages.length) {
@@ -224,22 +292,42 @@ const ReaderPanel: React.FC<ReaderPanelProps> = ({
 
   if (!passage) return null;
 
+  const displayText = panelLang === 'fr' && passage.index != null && frenchTexts[passage.index]
+    ? frenchTexts[passage.index]!
+    : passage.text;
+  const showFrUnavailable = panelLang === 'fr' && passage.index != null && frenchTexts[passage.index] === null;
+
+  const isFr = i18n.language === 'fr';
   const sourceLabel = [
-    passage.book || 'In Search of Lost Time',
-    passage.chapter,
+    isFr ? frenchName(passage.book || '') || 'À la recherche du temps perdu' : passage.book || 'In Search of Lost Time',
+    isFr && passage.chapter ? frenchName(passage.chapter) : passage.chapter,
   ].filter(Boolean).join(' — ');
 
   return (
     <PanelContainer>
       <PanelHeader>
         <SourceChip>{sourceLabel}</SourceChip>
-        <CloseButton onClick={onClose} aria-label="Close reader panel">
-          &times;
-        </CloseButton>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {passage.index != null && (
+            <LangPill>
+              <LangOption $active={panelLang === 'en'} onClick={() => handleLangToggle('en')}>EN</LangOption>
+              <LangOption $active={panelLang === 'fr'} onClick={() => handleLangToggle('fr')}>FR</LangOption>
+            </LangPill>
+          )}
+          <CloseButton onClick={onClose} aria-label="Close reader panel">
+            &times;
+          </CloseButton>
+        </div>
       </PanelHeader>
 
       <PanelBody>
-        <PassageText>{formatPassageText(passage.text)}</PassageText>
+        <PassageText>
+          {fetchingFr && panelLang === 'fr' ? t('common.loading') : formatPassageText(displayText)}
+        </PassageText>
+
+        {showFrUnavailable && (
+          <UnavailableNote>{t('passage.frenchUnavailable')}</UnavailableNote>
+        )}
 
         {passage.relevance_summary && (
           <RelevanceSummary>{passage.relevance_summary}</RelevanceSummary>
@@ -250,11 +338,11 @@ const ReaderPanel: React.FC<ReaderPanelProps> = ({
             $active={isBookmarked(passage.text)}
             onClick={() => onBookmark(passage)}
           >
-            {isBookmarked(passage.text) ? 'Saved' : 'Save passage'}
+            {isBookmarked(passage.text) ? t('common.saved') : t('passage.savePassage')}
           </BookmarkButton>
           {onReadInContext && passage.index != null && (
             <ReadInContextButton onClick={() => onReadInContext(passage)}>
-              Read in context
+              {t('passage.readInContext')}
             </ReadInContextButton>
           )}
         </ActionRow>

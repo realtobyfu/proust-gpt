@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import styled, { keyframes } from 'styled-components';
 import PassageCard from './components/PassageCard';
 import ReaderPanel from './components/ReaderPanel';
 import MarkdownMessage from './components/MarkdownMessage';
+import LanguageSwitcher from './components/LanguageSwitcher';
+import { useLanguage } from './contexts/LanguageContext';
 import { useStreamingQuery, Passage } from './hooks/useStreamingQuery';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useChatSessions, Message } from './hooks/useChatSessions';
@@ -128,36 +131,6 @@ const ModeLabel = styled.span`
   font-size: 0.95rem;
   color: #666;
   font-weight: 500;
-`;
-
-const ContextBar = styled.div<{ $visible: boolean }>`
-  background-color: rgba(255, 255, 255, 0.8);
-  border-bottom: 1px solid #e0e0e0;
-  padding: ${props => props.$visible ? '0.6rem 2rem' : '0 2rem'};
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.85rem;
-  color: #666;
-  max-height: ${props => props.$visible ? '80px' : '0'};
-  overflow: hidden;
-  transition: all 0.3s ease;
-`;
-
-const ProgressLine = styled.div<{ $progress: number }>`
-  height: 2px;
-  background-color: #e0e0e0;
-  margin: 0.5rem 0;
-  position: relative;
-
-  &::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: ${props => props.$progress}%;
-    background-color: #8b4513;
-    transition: width 0.3s ease;
-  }
 `;
 
 const MessagesArea = styled.div`
@@ -372,21 +345,6 @@ const HamburgerButton = styled.button`
   }
 `;
 
-const ToggleButton = styled.button`
-  background: rgba(139, 69, 19, 0.06);
-  border: none;
-  border-radius: 16px;
-  padding: 0.4rem 0.9rem;
-  color: #8b4513;
-  cursor: pointer;
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.9rem;
-  transition: background 0.2s ease;
-
-  &:hover {
-    background: rgba(139, 69, 19, 0.12);
-  }
-`;
 
 const SidebarSection = styled.div`
   margin-bottom: 2rem;
@@ -625,6 +583,8 @@ interface LastPassagePosition {
 // ── Component ────────────────────────────────────────────────────────────────
 
 const ChatPage: React.FC = () => {
+  const { t } = useTranslation();
+  const { language } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const { mode: locationMode, prompt } = location.state || { mode: 'explore_lost_time', prompt: '' };
@@ -633,11 +593,10 @@ const ChatPage: React.FC = () => {
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [userInput, setUserInput] = useState('');
-  const [showContext, setShowContext] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeMode, setActiveMode] = useState<string>(locationMode || 'explore_lost_time');
   const [bookmarks, setBookmarks] = useLocalStorage<Bookmark[]>('proust-bookmarks', []);
-  const [lastPosition, setLastPosition] = useLocalStorage<LastPassagePosition | null>('proust-last-position', null);
+  const [, setLastPosition] = useLocalStorage<LastPassagePosition | null>('proust-last-position', null);
 
   // Shuffled suggestion prompts
   const exploreSuggestions = useMemo(() => shuffleArray(EXPLORE_PROMPTS).slice(0, 3), []);
@@ -663,6 +622,7 @@ const ChatPage: React.FC = () => {
   } = useChatSessions();
 
   const currentSessionIdRef = useRef<string | null>(null);
+  const hasInitializedRef = useRef(false);
 
   // Use streaming query hook
   const {
@@ -678,19 +638,37 @@ const ChatPage: React.FC = () => {
     reset: resetStream,
   } = useStreamingQuery({ fallbackToNonStreaming: true });
 
-  // Session-aware initialization
+  // Session-aware initialization (guarded to prevent duplicate session creation)
   useEffect(() => {
+    if (hasInitializedRef.current) return;
+    hasInitializedRef.current = true;
+
     if (prompt) {
-      const session = createSession(locationMode || 'explore_lost_time');
+      const mode = locationMode || 'explore_lost_time';
+      // Reuse the most recent empty session instead of creating a duplicate
+      const recent = getMostRecentSession();
+      let session;
+      if (recent && recent.messages.length === 0) {
+        session = recent;
+      } else {
+        session = createSession(mode);
+      }
       currentSessionIdRef.current = session.id;
-      setActiveMode(locationMode || 'explore_lost_time');
+      setActiveMode(mode);
       navigate(location.pathname, { replace: true, state: {} });
       handleSendMessage(prompt);
     } else {
       const mode = locationMode || 'explore_lost_time';
-      const session = createSession(mode);
-      currentSessionIdRef.current = session.id;
-      setActiveMode(mode);
+      // Reuse the most recent empty session instead of always creating a new one
+      const recent = getMostRecentSession();
+      if (recent && recent.messages.length === 0) {
+        currentSessionIdRef.current = recent.id;
+        setActiveMode(recent.mode);
+      } else {
+        const session = createSession(mode);
+        currentSessionIdRef.current = session.id;
+        setActiveMode(mode);
+      }
     }
   }, []);
 
@@ -822,11 +800,11 @@ const ChatPage: React.FC = () => {
   const getModeDisplay = () => {
     switch (activeMode) {
       case 'explore_lost_time':
-        return 'Exploring In Search of Lost Time';
+        return t('chat.exploringMode');
       case 'refine_prose':
-        return 'Reflecting in Proust\'s Style';
+        return t('chat.reflectingMode');
       default:
-        return 'Reading Proust';
+        return t('chat.readingMode');
     }
   };
 
@@ -844,7 +822,7 @@ const ChatPage: React.FC = () => {
     setSelectedPassage(null);
 
     const queryMode = activeMode === 'refine_prose' ? 'reflect' : 'explore';
-    await streamQuery(message, queryMode);
+    await streamQuery(message, queryMode, language);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -927,13 +905,13 @@ const ChatPage: React.FC = () => {
     <ChatContainer>
       <Sidebar $isOpen={sidebarOpen}>
         <SidebarSection>
-          <NewChatButton onClick={handleNewConversation} title="New conversation">
+          <NewChatButton onClick={handleNewConversation} title={t('chat.newConversation')}>
             +
           </NewChatButton>
-          <SidebarTitle>Conversations</SidebarTitle>
+          <SidebarTitle>{t('chat.conversations')}</SidebarTitle>
           {sessions.length === 0 ? (
             <SidebarItem style={{ color: '#aaa', cursor: 'default' }}>
-              No conversations yet
+              {t('chat.noConversations')}
             </SidebarItem>
           ) : (
             sessions.map(s => (
@@ -945,14 +923,14 @@ const ChatPage: React.FC = () => {
                 <SessionTitle>{s.title}</SessionTitle>
                 <SessionMeta>
                   <SessionModeTag $mode={s.mode}>
-                    {s.mode === 'refine_prose' ? 'Reflect' : 'Explore'}
+                    {s.mode === 'refine_prose' ? t('chat.modeReflect') : t('chat.modeExplore')}
                   </SessionModeTag>
                   {new Date(s.updatedAt).toLocaleDateString()}
                 </SessionMeta>
                 <DeleteButton
                   className="delete-btn"
                   onClick={(e) => handleDeleteSession(e, s.id)}
-                  title="Delete conversation"
+                  title={t('chat.deleteConversation')}
                 >
                   &times;
                 </DeleteButton>
@@ -962,12 +940,12 @@ const ChatPage: React.FC = () => {
         </SidebarSection>
 
         <SidebarSection>
-          <SidebarTitle>Characters</SidebarTitle>
+          <SidebarTitle>{t('chat.characters')}</SidebarTitle>
           <SidebarList>
             {characters.map(char => (
               <SidebarItem
                 key={char}
-                onClick={() => setUserInput(`Tell me about ${char}`)}
+                onClick={() => setUserInput(t('chat.tellMeAbout', { character: char }))}
               >
                 {char}
               </SidebarItem>
@@ -976,11 +954,11 @@ const ChatPage: React.FC = () => {
         </SidebarSection>
 
         <SidebarSection>
-          <SidebarTitle>Bookmarks ({bookmarks.length})</SidebarTitle>
+          <SidebarTitle>{t('chat.bookmarks', { count: bookmarks.length })}</SidebarTitle>
           <SidebarList>
             {bookmarks.length === 0 ? (
               <SidebarItem style={{ color: '#aaa', cursor: 'default' }}>
-                No bookmarks yet
+                {t('chat.noBookmarks')}
               </SidebarItem>
             ) : (
               bookmarks.map(bm => (
@@ -1012,34 +990,20 @@ const ChatPage: React.FC = () => {
               <ModeLabel>{getModeDisplay()}</ModeLabel>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              <ToggleButton onClick={() => setShowContext(!showContext)}>
-                {showContext ? 'Hide' : 'Where am I?'}
-              </ToggleButton>
               <Link to="/about" style={{ color: '#8b4513', fontFamily: "'IBM Plex Sans', sans-serif", fontSize: '0.9rem', textDecoration: 'underline' }}>
-                About
+                {t('common.about')}
               </Link>
+              <LanguageSwitcher />
             </div>
           </Header>
-
-          <ContextBar $visible={showContext}>
-            {lastPosition ? (
-              <>
-                <div>Current location: {lastPosition.book}, {lastPosition.chapter}</div>
-                <ProgressLine $progress={lastPosition.index != null ? Math.min(100, Number((lastPosition.index / 12764 * 100).toFixed(0))) : 0} />
-                <div>Progress: {lastPosition.index != null ? `${Math.min(100, Number((lastPosition.index / 12764 * 100).toFixed(0)))}% through the text` : 'Position unknown'}</div>
-              </>
-            ) : (
-              <div>Begin exploring to track your position</div>
-            )}
-          </ContextBar>
 
           <MessagesArea>
             {messages.length === 0 && !isLoading && !isStreaming && (
               <EmptyState>
                 <EmptyStateTitle>
                   {activeMode === 'refine_prose'
-                    ? 'What moment would you like to reflect on?'
-                    : 'What would you like to explore?'}
+                    ? t('chat.emptyReflect')
+                    : t('chat.emptyExplore')}
                 </EmptyStateTitle>
                 <SuggestionChips>
                   {(activeMode === 'refine_prose' ? reflectSuggestions : exploreSuggestions).map((text, i) => (
@@ -1065,7 +1029,7 @@ const ChatPage: React.FC = () => {
                   )}
 
                   <ResultsHeader>
-                    {message.passages.length} passage{message.passages.length !== 1 ? 's' : ''} found
+                    {t('chat.passagesFound', { count: message.passages.length })}
                   </ResultsHeader>
 
                   <div style={{ alignSelf: 'flex-start', maxWidth: '80%' }}>
@@ -1095,7 +1059,7 @@ const ChatPage: React.FC = () => {
 
             {error && (
               <ErrorMessage>
-                Error: {error}
+                {t('common.error')}: {error}
               </ErrorMessage>
             )}
 
@@ -1104,7 +1068,7 @@ const ChatPage: React.FC = () => {
                 <LoadingDot $delay="0s" />
                 <LoadingDot $delay="0.2s" />
                 <LoadingDot $delay="0.4s" />
-                {streamingStatus || "Searching through Proust's work..."}
+                {streamingStatus || t('chat.searching')}
               </LoadingIndicator>
             )}
 
@@ -1114,15 +1078,15 @@ const ChatPage: React.FC = () => {
           <FloatingInputArea>
             <InputLabel>
               {activeMode === 'refine_prose'
-                ? 'Share a moment or feeling'
-                : 'Ask a question or search across all volumes'}
+                ? t('chat.inputLabelReflect')
+                : t('chat.inputLabelExplore')}
             </InputLabel>
             <InputPill>
               <Input
                 type="text"
                 placeholder={activeMode === 'refine_prose'
-                  ? "Describe a moment \u2014 I'll help you see it through Proust's eyes"
-                  : 'What are you curious about in Proust?'}
+                  ? t('chat.placeholderReflect')
+                  : t('chat.placeholderExplore')}
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -1130,7 +1094,7 @@ const ChatPage: React.FC = () => {
               />
               {isStreaming ? (
                 <StopButton onClick={handleStopGenerating}>
-                  Stop
+                  {t('common.stop')}
                 </StopButton>
               ) : (
                 <SendButton onClick={() => handleSendMessage()} disabled={isLoading}>

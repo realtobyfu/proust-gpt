@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 import TableOfContents from './components/TableOfContents';
 import ReadingView from './components/ReadingView';
 import BookmarkDropdown from './components/BookmarkDropdown';
+import LanguageSwitcher from './components/LanguageSwitcher';
+import { useLanguage } from './contexts/LanguageContext';
 import { useReadingProgress } from './hooks/useReadingProgress';
 import { useLocalStorage } from './hooks/useLocalStorage';
 
@@ -170,6 +173,7 @@ interface Volume {
   total_passages: number;
   chapters: {
     name: string;
+    display_name?: string;
     passage_count: number;
     first_index: number;
     last_index: number;
@@ -177,6 +181,8 @@ interface Volume {
 }
 
 const ReadPage: React.FC = () => {
+  const { t } = useTranslation();
+  const { language } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [volumes, setVolumes] = useState<Volume[]>([]);
   const [loading, setLoading] = useState(true);
@@ -191,9 +197,9 @@ const ReadPage: React.FC = () => {
   const highlightPassageIndex = passageIndexParam != null ? parseInt(passageIndexParam, 10) : undefined;
   const isChapterView = currentVolume && currentChapter;
 
-  // Fetch TOC
+  // Fetch TOC (re-fetch when language changes to get translated names)
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/read/toc`)
+    fetch(`${API_BASE_URL}/api/read/toc?lang=${language}`)
       .then(res => res.json())
       .then(data => {
         setVolumes(data);
@@ -203,7 +209,7 @@ const ReadPage: React.FC = () => {
         console.error('Failed to fetch TOC:', err);
         setLoading(false);
       });
-  }, []);
+  }, [language]);
 
   // Listen for popstate events (from ReadingView chapter navigation)
   useEffect(() => {
@@ -270,10 +276,10 @@ const ReadPage: React.FC = () => {
           <Breadcrumb>
             <Link to="/">Proust GPT</Link>
             <BreadcrumbSep>&gt;</BreadcrumbSep>
-            Read
+            {t('common.read')}
           </Breadcrumb>
         </Header>
-        <LoadingContainer>Loading table of contents...</LoadingContainer>
+        <LoadingContainer>{t('readPage.loadingToc')}</LoadingContainer>
       </PageContainer>
     );
   }
@@ -286,14 +292,14 @@ const ReadPage: React.FC = () => {
           <BreadcrumbSep>&gt;</BreadcrumbSep>
           {isChapterView ? (
             <>
-              <ChapterLink onClick={handleBackToToc}>Read</ChapterLink>
+              <ChapterLink onClick={handleBackToToc}>{t('common.read')}</ChapterLink>
               <BreadcrumbSep>&gt;</BreadcrumbSep>
               {getVolumeName()}
               <BreadcrumbSep>&gt;</BreadcrumbSep>
               {currentChapter}
             </>
           ) : (
-            'Read'
+            t('common.read')
           )}
         </Breadcrumb>
         <HeaderLinks>
@@ -301,8 +307,9 @@ const ReadPage: React.FC = () => {
             bookmarks={bookmarks}
             onNavigate={handleNavigateToBookmark}
           />
-          <Link to="/chat">Chat</Link>
-          <Link to="/about">About</Link>
+          <LanguageSwitcher />
+          <Link to="/chat">{t('common.chat')}</Link>
+          <Link to="/about">{t('common.about')}</Link>
         </HeaderLinks>
       </Header>
 
@@ -317,10 +324,9 @@ const ReadPage: React.FC = () => {
       ) : (
         <>
           <TocHeader>
-            <Title>In Search of Lost Time</Title>
+            <Title>{t('readPage.title')}</Title>
             <Subtitle>
-              Seven volumes, {volumes.reduce((sum, v) => sum + v.total_passages, 0).toLocaleString()} passages.
-              Browse the complete text of Marcel Proust's masterwork.
+              {t('readPage.subtitle', { count: volumes.reduce((sum, v) => sum + v.total_passages, 0) })}
             </Subtitle>
           </TocHeader>
 
@@ -329,7 +335,7 @@ const ReadPage: React.FC = () => {
               <ContinueBanner onClick={handleContinueReading}>
                 <ContinueIcon>&#9654;</ContinueIcon>
                 <ContinueTextGroup>
-                  <ContinueTitle>Continue reading</ContinueTitle>
+                  <ContinueTitle>{t('readPage.continueReading')}</ContinueTitle>
                   <ContinueDetail>
                     {volumes.find(v => v.volume === lastPosition.volume)?.volume_name || `Volume ${lastPosition.volume}`}
                     {' \u2014 '}

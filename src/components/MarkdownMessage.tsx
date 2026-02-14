@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 import styled from 'styled-components';
 
 const MarkdownWrapper = styled.div`
@@ -21,7 +22,7 @@ const MarkdownWrapper = styled.div`
   }
 
   strong {
-    font-weight: inherit;
+    font-weight: 600;
   }
 
   /* Degrade headings to plain text */
@@ -83,7 +84,7 @@ interface MarkdownMessageProps {
 const MarkdownMessage: React.FC<MarkdownMessageProps> = React.memo(({ content }) => {
   return (
     <MarkdownWrapper>
-      <ReactMarkdown>{content}</ReactMarkdown>
+      <ReactMarkdown rehypePlugins={[rehypeRaw]}>{content}</ReactMarkdown>
     </MarkdownWrapper>
   );
 });
