@@ -47,7 +47,7 @@ const BackButton = styled.button`
   align-items: center;
   gap: 0.3rem;
   background: rgba(139, 69, 19, 0.05);
-  border: 1px solid #d4ccc3;
+  //border: 1px solid #d4ccc3;
   border-radius: 20px;
   padding: 0.4rem 1rem;
   font-family: 'IBM Plex Sans', sans-serif;
@@ -391,6 +391,47 @@ const DeleteButton = styled.button`
   }
 `;
 
+const EmptyState = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+`;
+
+const EmptyStateTitle = styled.h2`
+  font-family: 'Belgrano', serif;
+  font-weight: 400;
+  font-size: 1.3rem;
+  color: #8b4513;
+  margin: 0;
+`;
+
+const SuggestionChips = styled.div`
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+`;
+
+const SuggestionChip = styled.button`
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.85rem;
+  color: #6b3410;
+  background: rgba(139, 69, 19, 0.06);
+  border: 1px solid #d4ccc3;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: rgba(139, 69, 19, 0.12);
+    border-color: #8b4513;
+  }
+`;
+
 interface Bookmark {
   id: string;
   text: string;
@@ -460,18 +501,11 @@ const ChatPage: React.FC = () => {
       navigate(location.pathname, { replace: true, state: {} });
       handleSendMessage(prompt);
     } else {
-      // No prompt — try to restore last session
-      const recent = getMostRecentSession();
-      if (recent && recent.messages.length > 0) {
-        currentSessionIdRef.current = recent.id;
-        setMessages(recent.messages);
-        setActiveMode(recent.mode);
-        loadSession(recent.id);
-      } else {
-        // Start fresh
-        const session = createSession(locationMode || 'explore_lost_time');
-        currentSessionIdRef.current = session.id;
-      }
+      // No prompt — always start a new empty session
+      const mode = locationMode || 'explore_lost_time';
+      const session = createSession(mode);
+      currentSessionIdRef.current = session.id;
+      setActiveMode(mode);
     }
   }, []);
 
@@ -631,6 +665,27 @@ const ChatPage: React.FC = () => {
     return bookmarks.some(b => b.text === passageText);
   };
 
+  const handleReadInContext = useCallback(async (passage: Passage) => {
+    if (passage.index == null) return;
+    try {
+      const res = await fetch(`http://127.0.0.1:5000/api/read/locate?index=${passage.index}`);
+      const data = await res.json();
+      if (data.error) {
+        console.error('Failed to locate passage:', data.error);
+        return;
+      }
+      const params = new URLSearchParams({
+        volume: data.volume.toString(),
+        chapter: data.chapter,
+        page: data.page.toString(),
+        passageIndex: data.passageIndex.toString(),
+      });
+      navigate(`/read?${params}`);
+    } catch (err) {
+      console.error('Failed to locate passage:', err);
+    }
+  }, [navigate]);
+
   const characters = [
     'Marcel (Narrator)',
     'Swann',
@@ -725,7 +780,7 @@ const ChatPage: React.FC = () => {
                 <line x1="3" y1="18" x2="21" y2="18"/>
               </svg>
             </HamburgerButton>
-            <BackButton onClick={() => navigate('/')}>&larr; Back</BackButton>
+            <BackButton onClick={() => navigate('/')}>&larr;</BackButton>
             <ModeLabel>{getModeDisplay()}</ModeLabel>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
@@ -751,6 +806,43 @@ const ChatPage: React.FC = () => {
         </ContextBar>
 
         <MessagesArea>
+          {messages.length === 0 && !isLoading && !isStreaming && (
+            <EmptyState>
+              <EmptyStateTitle>
+                {activeMode === 'refine_prose'
+                  ? 'What moment would you like to reflect on?'
+                  : 'What would you like to explore?'}
+              </EmptyStateTitle>
+              <SuggestionChips>
+                {activeMode === 'refine_prose' ? (
+                  <>
+                    <SuggestionChip onClick={() => handleSendMessage('I had a quiet morning with coffee and sunlight')}>
+                      A quiet morning
+                    </SuggestionChip>
+                    <SuggestionChip onClick={() => handleSendMessage('I ran into an old friend I hadn\'t seen in years')}>
+                      An unexpected encounter
+                    </SuggestionChip>
+                    <SuggestionChip onClick={() => handleSendMessage('A familiar smell brought back a childhood memory')}>
+                      A sudden memory
+                    </SuggestionChip>
+                  </>
+                ) : (
+                  <>
+                    <SuggestionChip onClick={() => handleSendMessage('The madeleine scene')}>
+                      The madeleine scene
+                    </SuggestionChip>
+                    <SuggestionChip onClick={() => handleSendMessage('Swann\'s jealousy over Odette')}>
+                      Swann's jealousy
+                    </SuggestionChip>
+                    <SuggestionChip onClick={() => handleSendMessage('Time and memory in Proust')}>
+                      Time and memory
+                    </SuggestionChip>
+                  </>
+                )}
+              </SuggestionChips>
+            </EmptyState>
+          )}
+
           {messages.map(message => (
             message.passages && message.passages.length > 0 ? (
               <div key={message.id}>
@@ -813,7 +905,7 @@ const ChatPage: React.FC = () => {
           <InputWrapper>
             <Input
               type="text"
-              placeholder="Ask about Proust..."
+              placeholder={activeMode === 'refine_prose' ? 'Share a moment from your day...' : 'Ask about a passage, character, or theme...'}
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
               onKeyPress={handleKeyPress}
@@ -840,6 +932,7 @@ const ChatPage: React.FC = () => {
         onClose={() => setLightboxOpen(false)}
         onBookmark={handleBookmark}
         isBookmarked={isBookmarked}
+        onReadInContext={handleReadInContext}
       />
     </ChatContainer>
   );

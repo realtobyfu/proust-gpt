@@ -20,3 +20,7 @@ numpy
 # NLP
 spacy
 nltk
+
+# Testing
+pytest
+httpx

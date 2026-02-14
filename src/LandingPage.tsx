@@ -88,6 +88,9 @@ const ProustSection = styled.div`
   position: absolute;
   right: 8rem;
   top: 20rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 const ProustImageContainer = styled.img`
@@ -165,6 +168,21 @@ const GuidanceToggle = styled.button`
   }
 `;
 
+const ReadLink = styled(Link)`
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.95rem;
+  color: #8b4513;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 const FloatingChatButton = styled.button`
   position: fixed;
   bottom: 3rem;
@@ -217,9 +235,6 @@ const LandingPage: React.FC = () => {
       <Question>How can I help you today?</Question>
 
       <ButtonContainer>
-        <Button onClick={() => navigate('/read')}>
-          Begin reading Proust
-        </Button>
         <Button onClick={() => handleButtonClick('explore_lost_time', '')}>
           Explore passages
         </Button>
@@ -244,10 +259,19 @@ const LandingPage: React.FC = () => {
 
       <ProustSection>
         <ProustImageContainer src={ProustImage} alt="Marcel Proust" />
+        <ReadLink to="/read">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+               strokeLinejoin="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+          </svg>
+          Begin reading
+        </ReadLink>
       </ProustSection>
 
       {hasHistory && (
-        <FloatingChatButton onClick={() => navigate('/chat')}>
+        <FloatingChatButton onClick={() => navigate('/chat', { state: { mode: 'explore_lost_time', prompt: '' } })}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" strokeWidth="2" strokeLinecap="round"
                strokeLinejoin="round">

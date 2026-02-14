@@ -7,17 +7,19 @@ Provides both streaming (SSE) and non-streaming endpoints for:
 """
 import asyncio
 import json
+import os
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Optional
 
 import uvicorn
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from config import config
-from corpus import get_table_of_contents, get_chapter_passages
+from corpus import get_table_of_contents, get_chapter_passages, locate_passage
 from retrieval import (
     query_rag,
     query_reflect,
@@ -83,10 +85,7 @@ app = FastAPI(title="ProustGPT", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=[o.strip() for o in config.CORS_ORIGINS.split(",") if o.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -268,6 +267,17 @@ async def read_toc():
     return get_table_of_contents()
 
 
+@app.get("/api/read/locate")
+async def read_locate(
+    index: int = Query(..., description="Passage index to locate"),
+):
+    """Resolve a passage index to its reading page location."""
+    result = locate_passage(index)
+    if result is None:
+        return {"error": "Passage not found"}
+    return result
+
+
 @app.get("/api/read/chapter")
 async def read_chapter(
     volume: int = Query(..., description="Volume number (1-7)"),
@@ -283,9 +293,22 @@ async def read_chapter(
 
 
 # =============================================================================
+# Static file serving (production: Docker serves frontend + backend together)
+# =============================================================================
+
+if config.SERVE_STATIC and os.path.isdir(config.STATIC_DIR):
+    app.mount("/assets", StaticFiles(directory=os.path.join(config.STATIC_DIR, "assets")), name="static-assets")
+
+    @app.get("/{full_path:path}")
+    async def spa_catch_all(request: Request, full_path: str):
+        """Serve index.html for all non-API routes (SPA catch-all)."""
+        return FileResponse(os.path.join(config.STATIC_DIR, "index.html"))
+
+
+# =============================================================================
 # Main
 # =============================================================================
 
 
 if __name__ == "__main__":
-    uvicorn.run("server:app", host="127.0.0.1", port=5000, reload=config.DEBUG)
+    uvicorn.run("server:app", host="0.0.0.0", port=config.PORT, reload=config.DEBUG)
