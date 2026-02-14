@@ -1,7 +1,40 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import styled from 'styled-components';
 import { useNavigate, Link } from 'react-router-dom';
 import ProustImage from './assets/proust.jpg';
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function shuffleArray<T>(arr: T[]): T[] {
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+// ── Data ──────────────────────────────────────────────────────────────────────
+
+const EXPLORE_PROMPTS = [
+  { text: 'The madeleine scene', prompt: 'What is the madeleine scene really about?' },
+  { text: 'Swann and Odette', prompt: "How does Swann's love for Odette change over time?" },
+  { text: 'The role of memory', prompt: 'How does Proust explore the role of memory?' },
+  { text: 'The two ways', prompt: "What are the two 'ways' at Combray?" },
+  { text: 'Jealousy in Proust', prompt: 'How does Proust portray jealousy?' },
+  { text: 'Time and aging', prompt: 'How does Proust explore the passage of time and aging?' },
+  { text: 'Art and beauty', prompt: 'What role does art play in the novel?' },
+  { text: 'Sleep and dreams', prompt: 'How does Proust describe sleep and dreams?' },
+];
+
+const REFLECT_PROMPTS = [
+  { text: 'A taste that brought back a place', prompt: 'A taste that brought back a forgotten place' },
+  { text: 'Someone I love has changed', prompt: 'I noticed someone I love has changed' },
+  { text: 'A place I can never return to', prompt: 'There is a place I can never return to' },
+  { text: 'A moment I wish I could relive', prompt: 'There is a moment I wish I could relive' },
+];
+
+// ── Styled Components ─────────────────────────────────────────────────────────
 
 const Container = styled.div`
   font-family: 'Georgia', serif;
@@ -16,6 +49,17 @@ const Container = styled.div`
   padding-left: 5rem;
   position: relative;
   overflow-x: hidden;
+
+  @media (max-width: 1024px) {
+    padding-left: 3rem;
+  }
+
+  @media (max-width: 768px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    padding-top: 4rem;
+    justify-content: flex-start;
+  }
 `;
 
 const Header = styled.h1`
@@ -26,6 +70,15 @@ const Header = styled.h1`
   font-weight: 400;
   font-size: 4.5rem;
   text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+
+  @media (max-width: 1024px) {
+    font-size: 3.5rem;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 2.8rem;
+    margin-left: 0;
+  }
 `;
 
 const SubHeader = styled.p`
@@ -33,6 +86,11 @@ const SubHeader = styled.p`
   font-size: 1.2rem;
   color: #555;
   margin-bottom: 20px;
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+    font-size: 1.05rem;
+  }
 `;
 
 const Question = styled.p`
@@ -43,45 +101,157 @@ const Question = styled.p`
   font-size: 1.1rem;
   color: #2a2a2a;
   margin-bottom: 10px;
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+  }
 `;
 
-const ButtonContainer = styled.div`
-  margin-top: 1rem;
+const SearchForm = styled.form`
+  margin-left: 1rem;
+  margin-top: 0.75rem;
+  margin-bottom: 1.5rem;
+  max-width: 28rem;
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+    max-width: 100%;
+  }
+`;
+
+const SearchInputPill = styled.div`
   display: flex;
-  justify-content: flex-start;
-  gap: 20px;
-  flex-wrap: wrap;
-  margin-bottom: 0.5rem;
-  max-width: 30rem;
-  padding-left: 2rem;
+  align-items: center;
+  position: relative;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid #d4ccc3;
+  border-radius: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:focus-within {
+    border-color: #8b4513;
+    box-shadow: 0 4px 20px rgba(139, 69, 19, 0.1);
+  }
 `;
 
-const Button = styled.button`
-  font-family: 'IBM Plex Sans', serif;
-  font-style: normal;
-  font-weight: 400;
-  color: #3a3028;
-  background: rgba(58, 48, 40, 0.04);
-  border: 1px solid #3a3028;
-  border-radius: 10px;
-  padding: 15px;
-  cursor: pointer;
-  font-size: 1rem;
-  width: 200px;
-  text-align: center;
-  transition: all 0.2s ease;
+const SearchInput = styled.input`
+  width: 100%;
+  padding: 0.8rem 3.2rem 0.8rem 1.1rem;
+  border: none;
+  border-radius: 24px;
+  font-size: 0.95rem;
+  color: #333;
+  background: transparent;
+  font-family: 'Georgia', serif;
 
-  &:hover {
-    background-color: #f1ede9;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(58, 48, 40, 0.15);
+  &::placeholder {
+    color: #a89888;
+    font-style: italic;
   }
 
   &:focus {
     outline: none;
-    border-color: #564a40;
-    box-shadow: 0 0 0 3px rgba(58, 48, 40, 0.2);
   }
+`;
+
+const SearchSendButton = styled.button`
+  position: absolute;
+  right: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background-color: #8b4513;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #6b3410;
+  }
+`;
+
+const ButtonContainer = styled.div<{ $noWrap?: boolean }>`
+  display: flex;
+  justify-content: flex-start;
+  gap: 12px;
+  flex-wrap: ${props => props.$noWrap ? 'nowrap' : 'wrap'};
+  margin-bottom: 0.5rem;
+  max-width: 36rem;
+  padding-left: 1rem;
+
+  @media (max-width: 768px) {
+    padding-left: 0;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+`;
+
+const Button = styled.button<{ $mode?: 'explore' | 'reflect' }>`
+  font-family: 'IBM Plex Sans', serif;
+  font-style: normal;
+  font-weight: 400;
+  color: ${props => props.$mode === 'reflect' ? '#4a5a4a' : '#3a3028'};
+  background: ${props => props.$mode === 'reflect' ? 'rgba(90, 107, 90, 0.06)' : 'rgba(58, 48, 40, 0.04)'};
+  border: 1px solid ${props => props.$mode === 'reflect' ? '#8a9b8a' : '#3a3028'};
+  border-radius: 10px;
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  text-align: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: ${props => props.$mode === 'reflect' ? 'rgba(90, 107, 90, 0.14)' : '#f1ede9'};
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px ${props => props.$mode === 'reflect' ? 'rgba(90, 107, 90, 0.15)' : 'rgba(58, 48, 40, 0.15)'};
+  }
+
+  &:focus {
+    outline: none;
+    border-color: ${props => props.$mode === 'reflect' ? '#5a6b5a' : '#564a40'};
+    box-shadow: 0 0 0 3px ${props => props.$mode === 'reflect' ? 'rgba(90, 107, 90, 0.2)' : 'rgba(58, 48, 40, 0.2)'};
+  }
+
+  @media (max-width: 768px) {
+    flex: 1 1 calc(50% - 6px);
+    min-width: 0;
+  }
+`;
+
+const ModeDivider = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 28rem;
+  padding-left: 1rem;
+  margin: 0.75rem 0;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #d4ccc3;
+  }
+
+  @media (max-width: 768px) {
+    padding-left: 0;
+    max-width: 100%;
+  }
+`;
+
+const ModeDividerText = styled.span`
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.8rem;
+  color: #999;
+  white-space: nowrap;
 `;
 
 const ProustSection = styled.div`
@@ -91,6 +261,15 @@ const ProustSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  @media (max-width: 1024px) {
+    right: 3rem;
+    top: 18rem;
+  }
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const ProustImageContainer = styled.img`
@@ -101,22 +280,31 @@ const ProustImageContainer = styled.img`
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   transition: opacity 0.3s ease;
 
+  @media (max-width: 1024px) {
+    width: 12rem;
+  }
+
   &:hover {
     opacity: 1;
   }
 `;
 
-
-const AboutLink = styled(Link)`
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 400;
+const TopNavLinks = styled.div`
   position: absolute;
   top: 1.5rem;
   right: 2rem;
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  z-index: 10;
+`;
+
+const NavLink = styled(Link)`
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 400;
   font-size: 1rem;
   color: #8b4513;
   text-decoration: none;
-  z-index: 10;
 
   &:hover {
     text-decoration: underline;
@@ -140,6 +328,16 @@ const GuidanceSection = styled.div<{ $visible: boolean }>`
   overflow: hidden;
   transition: all 0.3s ease;
   z-index: 100;
+
+  a {
+    color: #8b4513;
+    text-decoration: underline;
+    cursor: pointer;
+
+    &:hover {
+      color: #6b3410;
+    }
+  }
 `;
 
 const GuidanceToggle = styled.button`
@@ -176,10 +374,15 @@ const ReadLink = styled(Link)`
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  margin-top: 0.75rem;
+  margin-top: 1.25rem;
+  margin-left: 1rem;
 
   &:hover {
     text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    margin-left: 0;
   }
 `;
 
@@ -209,34 +412,17 @@ const FloatingChatButton = styled.button`
   }
 `;
 
-const LANDING_PROMPTS = [
-  { mode: 'explore_lost_time', text: 'The madeleine scene', prompt: 'What is the madeleine scene really about?' },
-  { mode: 'explore_lost_time', text: 'Swann and Odette', prompt: "How does Swann's love for Odette change over time?" },
-  { mode: 'explore_lost_time', text: 'Falling asleep', prompt: 'Show me passages about falling asleep' },
-  { mode: 'explore_lost_time', text: 'The role of memory', prompt: 'How does Proust explore the role of memory?' },
-  { mode: 'explore_lost_time', text: 'The grandmother', prompt: "What is the narrator's relationship with his grandmother?" },
-  { mode: 'explore_lost_time', text: 'The hawthorn flowers', prompt: 'Tell me about the hawthorn flowers in Combray' },
-  { mode: 'explore_lost_time', text: 'The two ways', prompt: "What are the two 'ways' at Combray?" },
-  { mode: 'explore_lost_time', text: 'The magic lantern', prompt: 'What is the magic lantern scene about?' },
-  { mode: 'refine_prose', text: 'A taste that brought back a place', prompt: 'A taste that brought back a forgotten place' },
-  { mode: 'refine_prose', text: 'Someone I love has changed', prompt: 'I noticed someone I love has changed' },
-  { mode: 'refine_prose', text: 'A childhood place revisited', prompt: 'I went back somewhere from my childhood' },
-  { mode: 'refine_prose', text: 'Beauty in the ordinary', prompt: 'I noticed something beautiful in an ordinary moment' },
-];
-
-function shuffleArray<T>(arr: T[]): T[] {
-  const shuffled = [...arr];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-}
+// ── Component ─────────────────────────────────────────────────────────────────
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const [inputValue, setInputValue] = useState('');
   const [showGuidance, setShowGuidance] = useState(false);
   const [hasHistory, setHasHistory] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const exploreChips = useMemo(() => shuffleArray(EXPLORE_PROMPTS).slice(0, 3), []);
+  const reflectChips = useMemo(() => shuffleArray(REFLECT_PROMPTS).slice(0, 2), []);
 
   useEffect(() => {
     try {
@@ -246,50 +432,109 @@ const LandingPage: React.FC = () => {
     } catch { /* ignore */ }
   }, []);
 
-  const suggestions = useMemo(() => shuffleArray(LANDING_PROMPTS).slice(0, 3), []);
+  // autoFocus only on desktop
+  useEffect(() => {
+    if (window.innerWidth >= 1025 && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
 
-  const handleButtonClick = (mode: string, prompt: string) => {
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputValue.trim()) return;
+    navigate('/chat', { state: { mode: 'explore_lost_time', prompt: inputValue.trim() } });
+  };
+
+  const handleChipClick = (mode: string, prompt: string) => {
     navigate('/chat', { state: { mode, prompt } });
+  };
+
+  const handleGuidanceExplore = (prompt: string) => {
+    navigate('/chat', { state: { mode: 'explore_lost_time', prompt } });
   };
 
   return (
     <Container>
-      <AboutLink to="/about">About</AboutLink>
+      <TopNavLinks>
+        <NavLink to="/read">Read</NavLink>
+        <NavLink to="/about">About</NavLink>
+      </TopNavLinks>
 
       <Header>PROUST GPT</Header>
-      <SubHeader>Explore Proust's literature using a language model</SubHeader>
-      <Question>How can I help you today?</Question>
+      <SubHeader>Explore Proust's literature with AI</SubHeader>
+      <Question>What would you like to explore?</Question>
+
+      <SearchForm onSubmit={handleSearchSubmit}>
+        <SearchInputPill>
+          <SearchInput
+            ref={inputRef}
+            type="text"
+            placeholder="Ask about a theme, character, or passage..."
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+          />
+          <SearchSendButton type="submit" aria-label="Search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 19V5M5 12l7-7 7 7" />
+            </svg>
+          </SearchSendButton>
+        </SearchInputPill>
+      </SearchForm>
 
       <ButtonContainer>
-        {suggestions.map((s, i) => (
-          <Button key={i} onClick={() => handleButtonClick(s.mode, s.prompt)}>
-            {s.text}
+        {exploreChips.map((chip) => (
+          <Button
+            key={chip.text}
+            $mode="explore"
+            onClick={() => handleChipClick('explore_lost_time', chip.prompt)}
+          >
+            {chip.text}
           </Button>
         ))}
       </ButtonContainer>
+
+      <ModeDivider>
+        <ModeDividerText>or reflect on your own experience</ModeDividerText>
+      </ModeDivider>
+
+      <ButtonContainer $noWrap>
+        {reflectChips.map((chip) => (
+          <Button
+            key={chip.text}
+            $mode="reflect"
+            onClick={() => handleChipClick('refine_prose', chip.prompt)}
+          >
+            {chip.text}
+          </Button>
+        ))}
+      </ButtonContainer>
+
+      <ReadLink to="/read">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+             strokeLinejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
+        Begin reading
+      </ReadLink>
 
       <GuidanceToggle onClick={() => setShowGuidance(!showGuidance)}>
         {showGuidance ? 'Hide' : 'New to Proust?'}
       </GuidanceToggle>
 
       <GuidanceSection $visible={showGuidance}>
-        Begin with Swann's Way, the first volume. Follow young Marcel's memories
-        of childhood in Combray. Discover the famous madeleine scene that unlocks
-        the nature of involuntary memory. Or explore any theme, character, or
+        Begin with <em>Swann's Way</em>, the first volume. Follow young Marcel's memories
+        of childhood in Combray. Discover the famous{' '}
+        <a onClick={() => handleGuidanceExplore('What is the madeleine scene really about?')}>
+          madeleine scene
+        </a>{' '}
+        that unlocks the nature of involuntary memory. Or explore any theme, character, or
         passage that interests you.
       </GuidanceSection>
 
       <ProustSection>
         <ProustImageContainer src={ProustImage} alt="Marcel Proust" />
-        <ReadLink to="/read">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-               strokeLinejoin="round">
-            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-          </svg>
-          Begin reading
-        </ReadLink>
       </ProustSection>
 
       {hasHistory && (

@@ -11,6 +11,7 @@ export const theme = {
     messageBg: 'rgba(255, 255, 255, 0.6)',
     userMessageBg: 'rgba(139, 69, 19, 0.1)',
     proustMessageBg: 'rgba(255, 255, 255, 0.8)',
+    reflectAccent: '#5a6b5a',
   },
   fonts: {
     primary: "'Georgia', serif",

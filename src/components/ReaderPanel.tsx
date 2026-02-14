@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { Passage } from '../hooks/useStreamingQuery';
+import { formatPassageText } from '../utils/formatPassageText';
 
 interface ReaderPanelProps {
   passage: Passage | null;
@@ -238,7 +239,7 @@ const ReaderPanel: React.FC<ReaderPanelProps> = ({
       </PanelHeader>
 
       <PanelBody>
-        <PassageText>{passage.text}</PassageText>
+        <PassageText>{formatPassageText(passage.text)}</PassageText>
 
         {passage.relevance_summary && (
           <RelevanceSummary>{passage.relevance_summary}</RelevanceSummary>
@@ -249,7 +250,7 @@ const ReaderPanel: React.FC<ReaderPanelProps> = ({
             $active={isBookmarked(passage.text)}
             onClick={() => onBookmark(passage)}
           >
-            {isBookmarked(passage.text) ? '★ Saved' : '☆ Save passage'}
+            {isBookmarked(passage.text) ? 'Saved' : 'Save passage'}
           </BookmarkButton>
           {onReadInContext && passage.index != null && (
             <ReadInContextButton onClick={() => onReadInContext(passage)}>

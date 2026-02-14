@@ -128,7 +128,11 @@ interface TableOfContentsProps {
 
 const TableOfContents: React.FC<TableOfContentsProps> = ({ volumes, onSelectChapter }) => {
   const [openVolumes, setOpenVolumes] = useState<Set<number>>(() => new Set([1]));
-  const { getChapterProgress } = useReadingProgress();
+  const { getChapterProgress, readPassages } = useReadingProgress();
+
+  const getChapterReadCount = (firstIndex: number, lastIndex: number) => {
+    return readPassages.filter(i => i >= firstIndex && i <= lastIndex).length;
+  };
 
   const toggleVolume = (vol: number) => {
     setOpenVolumes(prev => {
@@ -154,6 +158,8 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ volumes, onSelectChap
             <ChapterList $open={isOpen}>
               {vol.chapters.map(ch => {
                 const progress = getChapterProgress(ch.first_index, ch.last_index);
+                const readCount = getChapterReadCount(ch.first_index, ch.last_index);
+                const totalCount = ch.last_index - ch.first_index + 1;
                 return (
                   <ChapterRow
                     key={ch.name}
@@ -162,9 +168,12 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ volumes, onSelectChap
                     <ChapterName>{ch.name}</ChapterName>
                     <ChapterMeta>
                       {progress > 0 && (
-                        <ProgressBar>
-                          <ProgressFill $percent={progress} />
-                        </ProgressBar>
+                        <>
+                          <ProgressBar>
+                            <ProgressFill $percent={progress} />
+                          </ProgressBar>
+                          <span>{readCount} / {totalCount}</span>
+                        </>
                       )}
                     </ChapterMeta>
                   </ChapterRow>

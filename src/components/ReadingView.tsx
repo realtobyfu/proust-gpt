@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { useReadingProgress } from '../hooks/useReadingProgress';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { formatPassageText } from '../utils/formatPassageText';
 
 const API_BASE_URL = 'http://127.0.0.1:5000';
 const PASSAGES_PER_PAGE = 20;
@@ -18,7 +19,7 @@ const ChapterTitle = styled.h2`
   font-family: 'Belgrano', serif;
   font-size: 1.6rem;
   color: #333;
-  margin: 1.5rem 0 0.5rem;
+  margin: 1rem 0 0.5rem;
   font-weight: 400;
 `;
 
@@ -26,7 +27,6 @@ const VolumeName = styled.div`
   font-family: 'IBM Plex Sans', sans-serif;
   font-size: 0.85rem;
   color: #8b4513;
-  margin-bottom: 0.25rem;
 `;
 
 const ProgressBarContainer = styled.div`
@@ -35,6 +35,15 @@ const ProgressBarContainer = styled.div`
   z-index: 10;
   background: #f7f4f0;
   padding: 0;
+`;
+
+const ProgressLabel = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.2rem 1rem 0.15rem;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.7rem;
+  color: #aaa;
 `;
 
 const ProgressTrack = styled.div`
@@ -130,7 +139,7 @@ const ActionButton = styled.button<{ $active?: boolean }>`
 
 const HeaderRow = styled.div`
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   position: relative;
 `;
@@ -141,36 +150,33 @@ const PageInfo = styled.span`
   color: #999;
 `;
 
-const SideArrow = styled.button<{ $side: 'left' | 'right' }>`
+const SideArrow = styled.button<{ $side: 'left' | 'right'; $visible: boolean }>`
   position: fixed;
-  top: 50%;
-  ${props => props.$side === 'left' ? 'left: 1rem' : 'right: 1rem'};
-  transform: translateY(-50%);
-  background: rgba(250, 248, 245, 0.9);
-  border: 1px solid #e0d8cf;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  bottom: 3rem;
+  ${props => props.$side === 'left' ? 'left: calc(50% - 540px)' : 'right: calc(50% - 540px)'};
+  background: none;
+  border: none;
+  padding: 0.5rem;
   color: #8b4513;
   cursor: pointer;
-  font-size: 1.1rem;
+  font-size: 2.2rem;
   line-height: 1;
   z-index: 15;
-  transition: background 0.15s, border-color 0.15s;
+  opacity: ${props => props.$visible ? 1 : 0};
+  pointer-events: ${props => props.$visible ? 'auto' : 'none'};
+  transition: color 0.15s, opacity 0.3s ease;
 
   &:hover {
-    background: rgba(139, 69, 19, 0.08);
-    border-color: #8b4513;
+    color: #6b3410;
   }
 
   &:disabled {
     color: #d4ccc3;
-    border-color: #eee;
     cursor: default;
-    &:hover { background: rgba(250, 248, 245, 0.9); }
+  }
+
+  @media (max-width: 1100px) {
+    ${props => props.$side === 'left' ? 'left: 1rem' : 'right: 1rem'};
   }
 
   @media (max-width: 900px) {
@@ -179,6 +185,10 @@ const SideArrow = styled.button<{ $side: 'left' | 'right' }>`
 `;
 
 const BackButton = styled.button`
+  position: absolute;
+  right: calc(100% + 1rem);
+  top: 50%;
+  transform: translateY(-50%);
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
@@ -194,6 +204,11 @@ const BackButton = styled.button`
 
   &:hover {
     color: #8b4513;
+  }
+
+  @media (max-width: 1024px) {
+    position: static;
+    transform: none;
   }
 `;
 
@@ -248,6 +263,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
   const [nextChapter, setNextChapter] = useState<ChapterNav | null>(null);
   const [loading, setLoading] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [atBottom, setAtBottom] = useState(false);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const totalPages = Math.max(1, Math.ceil(totalInChapter / PASSAGES_PER_PAGE));
@@ -338,6 +354,18 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
       }, 100);
     }
   }, [highlightPassageIndex, passages]);
+
+  // Show navigation arrows only when scrolled near the bottom
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollBottom = window.innerHeight + window.scrollY;
+      const threshold = document.documentElement.scrollHeight - 150;
+      setAtBottom(scrollBottom >= threshold);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Merge consecutive chunks that belong to the same paragraph
   const mergedPassages = useMemo(() => {
@@ -434,14 +462,17 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
         <ProgressTrack>
           <ProgressFill $percent={progressPercent()} />
         </ProgressTrack>
+        {totalPages > 1 && (
+          <ProgressLabel>{page + 1} / {totalPages}</ProgressLabel>
+        )}
       </ProgressBarContainer>
 
       <Container ref={containerRef}>
         <HeaderRow>
           <BackButton onClick={onNavigateToToc}>&larr; Contents</BackButton>
+          <VolumeName>{volumeName}</VolumeName>
           {totalPages > 1 && <PageInfo>Page {page + 1} of {totalPages}</PageInfo>}
         </HeaderRow>
-        <VolumeName>{volumeName}</VolumeName>
         {page === 0 && <ChapterTitle>{chapterName}</ChapterTitle>}
 
         {mergedPassages.map((group, gi) => {
@@ -452,7 +483,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
             <React.Fragment key={`group-${firstPassage.index}`}>
               <PassageBlock data-passage-indices={group.map(p => p.index).join(',')}>
                 <ParagraphNumber>{gi + 1}</ParagraphNumber>
-                <PassageText>{mergedText}</PassageText>
+                <PassageText>{formatPassageText(mergedText)}</PassageText>
                 <PassageActions className="passage-actions">
                   <ActionButton
                     $active={isBookmarked(mergedText)}
@@ -480,24 +511,24 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
 
       {isFirstPage ? (
         prevChapter && (
-          <SideArrow $side="left" onClick={() => handleChapterNav(prevChapter)} aria-label="Previous chapter">
+          <SideArrow $side="left" $visible={atBottom} onClick={() => handleChapterNav(prevChapter)} aria-label="Previous chapter">
             &#8249;
           </SideArrow>
         )
       ) : (
-        <SideArrow $side="left" onClick={() => handlePageNav(page - 1)} aria-label="Previous page">
+        <SideArrow $side="left" $visible={atBottom} onClick={() => handlePageNav(page - 1)} aria-label="Previous page">
           &#8249;
         </SideArrow>
       )}
 
       {isLastPage ? (
         nextChapter && (
-          <SideArrow $side="right" onClick={() => handleChapterNav(nextChapter)} aria-label="Next chapter">
+          <SideArrow $side="right" $visible={atBottom} onClick={() => handleChapterNav(nextChapter)} aria-label="Next chapter">
             &#8250;
           </SideArrow>
         )
       ) : (
-        <SideArrow $side="right" onClick={() => handlePageNav(page + 1)} aria-label="Next page">
+        <SideArrow $side="right" $visible={atBottom} onClick={() => handlePageNav(page + 1)} aria-label="Next page">
           &#8250;
         </SideArrow>
       )}
