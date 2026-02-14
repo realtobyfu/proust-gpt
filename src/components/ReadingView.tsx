@@ -5,7 +5,7 @@ import { useReadingProgress } from '../hooks/useReadingProgress';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { formatPassageText } from '../utils/formatPassageText';
 
-const API_BASE_URL = 'http://127.0.0.1:5000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 const PASSAGES_PER_PAGE = 20;
 
 const Container = styled.div`

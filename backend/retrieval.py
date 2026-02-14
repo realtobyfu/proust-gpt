@@ -432,9 +432,17 @@ def _stream_agentic_rag(query: str) -> Generator[dict, None, None]:
         msg = resp.choices[0].message
 
         if not msg.tool_calls:
-            # Model responded with text
-            if msg.content:
-                yield {"type": "token", "token": msg.content}
+            # Re-request with streaming for token-by-token output
+            stream = client.chat.completions.create(
+                model=config.LLM_MODEL_NAME,
+                messages=messages,
+                temperature=config.LLM_TEMPERATURE,
+                max_tokens=config.LLM_MAX_TOKENS,
+                stream=True,
+            )
+            for chunk in stream:
+                if chunk.choices and chunk.choices[0].delta.content:
+                    yield {"type": "token", "token": chunk.choices[0].delta.content}
             break
 
         # Append assistant message with tool calls
@@ -452,6 +460,9 @@ def _stream_agentic_rag(query: str) -> Generator[dict, None, None]:
                 for tc in msg.tool_calls
             ],
         })
+
+        # Notify frontend that retrieval is in progress
+        yield {"type": "status", "status": "Searching passages..."}
 
         # Execute each tool call
         for tc in msg.tool_calls:

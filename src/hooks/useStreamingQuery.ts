@@ -16,12 +16,13 @@ export interface QueryMetadata {
 }
 
 interface StreamEvent {
-  type: 'token' | 'sources' | 'metadata' | 'done' | 'error';
+  type: 'token' | 'sources' | 'metadata' | 'status' | 'done' | 'error';
   token?: string;
   passages?: Passage[];
   synthesis?: string;
   passage_count?: number;
   query_echo?: string;
+  status?: string;
   done?: boolean;
   error?: string;
 }
@@ -30,6 +31,7 @@ export interface StreamingQueryResult {
   response: string;
   passages: Passage[];
   metadata: QueryMetadata | null;
+  status: string | null;
   isLoading: boolean;
   isStreaming: boolean;
   error: string | null;
@@ -57,6 +59,7 @@ export function useStreamingQuery(options: {
   const [response, setResponse] = useState('');
   const [passages, setPassages] = useState<Passage[]>([]);
   const [metadata, setMetadata] = useState<QueryMetadata | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,6 +71,7 @@ export function useStreamingQuery(options: {
     setResponse('');
     setPassages([]);
     setMetadata(null);
+    setStatus(null);
     setError(null);
     setIsLoading(false);
     setIsStreaming(false);
@@ -164,7 +168,14 @@ export function useStreamingQuery(options: {
             switch (event.type) {
               case 'token':
                 if (event.token) {
+                  setStatus(null);
                   setResponse(prev => prev + event.token);
+                }
+                break;
+
+              case 'status':
+                if (event.status) {
+                  setStatus(event.status);
                 }
                 break;
 
@@ -207,6 +218,7 @@ export function useStreamingQuery(options: {
     setResponse('');
     setPassages([]);
     setMetadata(null);
+    setStatus(null);
     setError(null);
     setIsLoading(true);
     setIsStreaming(false);
@@ -245,6 +257,7 @@ export function useStreamingQuery(options: {
     response,
     passages,
     metadata,
+    status,
     isLoading,
     isStreaming,
     error,

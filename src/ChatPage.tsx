@@ -328,12 +328,31 @@ const StopButton = styled.button`
   }
 `;
 
+const pulse = keyframes`
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+`;
+
 const LoadingIndicator = styled.div`
   font-family: 'IBM Plex Sans', sans-serif;
   font-size: 0.9rem;
   color: #8b4513;
   text-align: center;
   margin: 1rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+`;
+
+const LoadingDot = styled.span<{ $delay: string }>`
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #8b4513;
+  animation: ${pulse} 1.4s ease-in-out infinite;
+  animation-delay: ${props => props.$delay};
 `;
 
 const HamburgerButton = styled.button`
@@ -650,6 +669,7 @@ const ChatPage: React.FC = () => {
     response: streamingResponse,
     passages: streamingPassages,
     metadata: streamingMetadata,
+    status: streamingStatus,
     isLoading,
     isStreaming,
     error,
@@ -869,7 +889,8 @@ const ChatPage: React.FC = () => {
   const handleReadInContext = useCallback(async (passage: Passage) => {
     if (passage.index == null) return;
     try {
-      const res = await fetch(`http://127.0.0.1:5000/api/read/locate?index=${passage.index}`);
+      const apiBase = import.meta.env.VITE_API_BASE_URL || '';
+      const res = await fetch(`${apiBase}/api/read/locate?index=${passage.index}`);
       const data = await res.json();
       if (data.error) {
         console.error('Failed to locate passage:', data.error);
@@ -1079,7 +1100,12 @@ const ChatPage: React.FC = () => {
             )}
 
             {isLoading && !isStreaming && (
-              <LoadingIndicator>Searching through Proust's work...</LoadingIndicator>
+              <LoadingIndicator>
+                <LoadingDot $delay="0s" />
+                <LoadingDot $delay="0.2s" />
+                <LoadingDot $delay="0.4s" />
+                {streamingStatus || "Searching through Proust's work..."}
+              </LoadingIndicator>
             )}
 
             <div ref={messagesEndRef} />
