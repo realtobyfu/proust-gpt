@@ -1,12 +1,31 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
-import PassageDisplay from './components/PassageDisplay';
-import PassageLightbox from './components/PassageLightbox';
+import PassageCard from './components/PassageCard';
+import ReaderPanel from './components/ReaderPanel';
 import MarkdownMessage from './components/MarkdownMessage';
 import { useStreamingQuery, Passage } from './hooks/useStreamingQuery';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useChatSessions, Message } from './hooks/useChatSessions';
+
+// ── Responsive hook ──────────────────────────────────────────────────────────
+
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 1025px)').matches
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1025px)');
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  return isDesktop;
+}
+
+// ── Styled Components ────────────────────────────────────────────────────────
 
 const ChatContainer = styled.div`
   display: flex;
@@ -22,15 +41,34 @@ const Sidebar = styled.div<{ $isOpen: boolean }>`
   padding: ${props => props.$isOpen ? '2rem' : '0'};
   box-sizing: border-box;
   color: #333;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: ${props => props.$isOpen ? 'auto' : 'hidden'};
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
   transition: all 0.3s ease;
 `;
 
-const ChatArea = styled.div`
+const ChatContent = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  color: #333;
+  min-width: 0;
+
+  @media (min-width: 1025px) {
+    flex-direction: row;
+  }
+`;
+
+const ConversationPane = styled.div<{ $readerOpen: boolean }>`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  transition: flex 0.3s ease;
+
+  @media (min-width: 1025px) {
+    flex: ${props => props.$readerOpen ? '0 0 55%' : '1'};
+  }
 `;
 
 const Header = styled.div`
@@ -47,7 +85,7 @@ const BackButton = styled.button`
   align-items: center;
   gap: 0.3rem;
   background: rgba(139, 69, 19, 0.05);
-  //border: 1px solid #d4ccc3;
+  border: none;
   border-radius: 20px;
   padding: 0.4rem 1rem;
   font-family: 'IBM Plex Sans', sans-serif;
@@ -58,7 +96,6 @@ const BackButton = styled.button`
 
   &:hover {
     background: rgba(139, 69, 19, 0.1);
-    border-color: #8b4513;
   }
 `;
 
@@ -73,7 +110,7 @@ const ContextBar = styled.div<{ $visible: boolean }>`
   background-color: rgba(255, 255, 255, 0.8);
   border-bottom: 1px solid #e0e0e0;
   padding: ${props => props.$visible ? '0.6rem 2rem' : '0 2rem'};
-  font-family: 'IBM Plex Sans', serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   font-size: 0.85rem;
   color: #666;
   max-height: ${props => props.$visible ? '80px' : '0'};
@@ -138,29 +175,72 @@ const StreamingCursor = styled.span`
   animation: ${blink} 1s infinite;
 `;
 
-const InputArea = styled.div`
-  background-color: #faf8f5;
-  border-top: 1px solid #e0d8cf;
-  padding: 1.5rem 2rem;
+const SynthesisBanner = styled.div`
+  border-left: 3px solid #c4a882;
+  background: rgba(196, 168, 130, 0.08);
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  font-family: 'Georgia', serif;
+  font-style: italic;
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.5;
+  border-radius: 0 6px 6px 0;
+  max-width: 80%;
+  align-self: flex-start;
 `;
 
-const InputWrapper = styled.div`
+const ResultsHeader = styled.div`
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.82rem;
+  color: #999;
+  margin-bottom: 0.5rem;
+  max-width: 80%;
+  align-self: flex-start;
+`;
+
+const FloatingInputArea = styled.div`
+  padding: 1rem 2rem 1.5rem;
+  position: relative;
+`;
+
+const InputLabel = styled.div`
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.75rem;
+  color: #a89888;
+  margin-bottom: 0.4rem;
+  padding-left: 1rem;
+`;
+
+const InputPill = styled.div`
   display: flex;
   align-items: center;
   position: relative;
   max-width: 800px;
   margin: 0 auto;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid #d4ccc3;
+  border-radius: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:focus-within {
+    border-color: #8b4513;
+    box-shadow: 0 4px 20px rgba(139, 69, 19, 0.1);
+  }
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: 1rem;
+  padding: 0.9rem 1.2rem;
   padding-right: 3rem;
-  border: 1px solid #d4ccc3;
-  border-radius: 20px;
+  border: none;
+  border-radius: 24px;
   font-size: 1rem;
   color: #333;
-  background-color: #fff;
+  background: transparent;
   font-family: 'Georgia', serif;
 
   &::placeholder {
@@ -169,16 +249,14 @@ const Input = styled.input`
 
   &:focus {
     outline: none;
-    border-color: #8b4513;
-    box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
   }
 `;
 
 const SendButton = styled.button`
   position: absolute;
-  right: 10px;
-  width: 32px;
-  height: 32px;
+  right: 8px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   border: none;
   background-color: #8b4513;
@@ -205,10 +283,10 @@ const StopButton = styled.button`
   border: none;
   border-radius: 20px;
   padding: 0.5rem 1rem;
-  font-family: 'IBM Plex Sans', serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   font-size: 0.9rem;
   cursor: pointer;
-  margin-left: 0.5rem;
+  margin-right: 0.5rem;
 
   &:hover {
     background-color: #6b3410;
@@ -216,7 +294,7 @@ const StopButton = styled.button`
 `;
 
 const LoadingIndicator = styled.div`
-  font-family: 'IBM Plex Sans', serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   font-size: 0.9rem;
   color: #8b4513;
   text-align: center;
@@ -247,7 +325,7 @@ const ToggleButton = styled.button`
   padding: 0.4rem 0.9rem;
   color: #8b4513;
   cursor: pointer;
-  font-family: 'IBM Plex Sans', serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   font-size: 0.9rem;
   transition: background 0.2s ease;
 
@@ -261,7 +339,7 @@ const SidebarSection = styled.div`
 `;
 
 const SidebarTitle = styled.h3`
-  font-family: 'IBM Plex Sans', serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   font-size: 1rem;
   margin-bottom: 0.5rem;
   color: #333;
@@ -274,7 +352,7 @@ const SidebarList = styled.ul`
 `;
 
 const SidebarItem = styled.li`
-  font-family: 'IBM Plex Sans', serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   font-size: 0.9rem;
   padding: 0.25rem 0;
   color: #666;
@@ -295,7 +373,7 @@ const ErrorMessage = styled.div`
   margin-bottom: 1rem;
   max-width: 80%;
   align-self: flex-start;
-  font-family: 'IBM Plex Sans', serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   font-size: 0.9rem;
 
   &::before {
@@ -343,7 +421,7 @@ const SessionItem = styled.div<{ $active: boolean }>`
 `;
 
 const SessionTitle = styled.div`
-  font-family: 'IBM Plex Sans', serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   font-size: 0.82rem;
   color: #333;
   white-space: nowrap;
@@ -353,7 +431,7 @@ const SessionTitle = styled.div`
 `;
 
 const SessionMeta = styled.div`
-  font-family: 'IBM Plex Sans', serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   font-size: 0.7rem;
   color: #999;
   margin-top: 0.15rem;
@@ -404,7 +482,7 @@ const EmptyStateTitle = styled.h2`
   font-family: 'Belgrano', serif;
   font-weight: 400;
   font-size: 1.3rem;
-  color: #8b4513;
+  color: #2a2a2a;
   margin: 0;
 `;
 
@@ -418,8 +496,8 @@ const SuggestionChips = styled.div`
 const SuggestionChip = styled.button`
   font-family: 'IBM Plex Sans', sans-serif;
   font-size: 0.85rem;
-  color: #6b3410;
-  background: rgba(139, 69, 19, 0.06);
+  color: #3a3028;
+  background: rgba(58, 48, 40, 0.04);
   border: 1px solid #d4ccc3;
   border-radius: 20px;
   padding: 0.5rem 1rem;
@@ -427,10 +505,53 @@ const SuggestionChip = styled.button`
   transition: all 0.15s ease;
 
   &:hover {
-    background: rgba(139, 69, 19, 0.12);
-    border-color: #8b4513;
+    background: rgba(58, 48, 40, 0.1);
+    border-color: #564a40;
   }
 `;
+
+// ── Prompt pools ─────────────────────────────────────────────────────────────
+
+const EXPLORE_PROMPTS = [
+  'What is the madeleine scene really about?',
+  "How does Swann's love for Odette change over time?",
+  'Show me passages about falling asleep',
+  'How does Proust explore the role of memory?',
+  "What is the narrator's relationship with his grandmother?",
+  'Tell me about the hawthorn flowers in Combray',
+  "What are the two 'ways' at Combray?",
+  'What is the magic lantern scene about?',
+  'Describe the Guermantes salon',
+  'Who is Baron de Charlus?',
+  'How does Proust treat the passage of time?',
+  'What role does reading play in the novel?',
+];
+
+const REFLECT_PROMPTS = [
+  'A taste that brought back a forgotten place',
+  'I noticed someone I love has changed',
+  'I went back somewhere from my childhood',
+  'The smell of someone who is gone',
+  'Time passing in a single moment',
+  'I noticed something beautiful in an ordinary moment',
+  'A sound that took me to another time',
+  'The feeling of waiting for something',
+  'A familiar place that felt unfamiliar',
+  'How much I have changed without noticing',
+  'An unexpected moment of happiness',
+  'The weight of past selves I carry',
+];
+
+function shuffleArray<T>(arr: T[]): T[] {
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+// ── Interfaces ───────────────────────────────────────────────────────────────
 
 interface Bookmark {
   id: string;
@@ -447,11 +568,14 @@ interface LastPassagePosition {
   index?: number;
 }
 
+// ── Component ────────────────────────────────────────────────────────────────
+
 const ChatPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { mode: locationMode, prompt } = location.state || { mode: 'explore_lost_time', prompt: '' };
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isDesktop = useIsDesktop();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [userInput, setUserInput] = useState('');
@@ -461,10 +585,13 @@ const ChatPage: React.FC = () => {
   const [bookmarks, setBookmarks] = useLocalStorage<Bookmark[]>('proust-bookmarks', []);
   const [lastPosition, setLastPosition] = useLocalStorage<LastPassagePosition | null>('proust-last-position', null);
 
-  // Lightbox state
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxPassages, setLightboxPassages] = useState<Passage[]>([]);
-  const [lightboxInitialIndex, setLightboxInitialIndex] = useState(0);
+  // Shuffled suggestion prompts
+  const exploreSuggestions = useMemo(() => shuffleArray(EXPLORE_PROMPTS).slice(0, 3), []);
+  const reflectSuggestions = useMemo(() => shuffleArray(REFLECT_PROMPTS).slice(0, 3), []);
+
+  // Reader panel state (desktop only)
+  const [selectedPassage, setSelectedPassage] = useState<Passage | null>(null);
+  const [selectedPassageGroup, setSelectedPassageGroup] = useState<Passage[]>([]);
 
   // Session management
   const {
@@ -482,6 +609,7 @@ const ChatPage: React.FC = () => {
   const {
     response: streamingResponse,
     passages: streamingPassages,
+    metadata: streamingMetadata,
     isLoading,
     isStreaming,
     error,
@@ -493,15 +621,12 @@ const ChatPage: React.FC = () => {
   // Session-aware initialization
   useEffect(() => {
     if (prompt) {
-      // New conversation from landing page with a prompt
       const session = createSession(locationMode || 'explore_lost_time');
       currentSessionIdRef.current = session.id;
       setActiveMode(locationMode || 'explore_lost_time');
-      // Clear location state so refresh doesn't re-trigger
       navigate(location.pathname, { replace: true, state: {} });
       handleSendMessage(prompt);
     } else {
-      // No prompt — always start a new empty session
       const mode = locationMode || 'explore_lost_time';
       const session = createSession(mode);
       currentSessionIdRef.current = session.id;
@@ -524,7 +649,6 @@ const ChatPage: React.FC = () => {
   // Session handlers
   const handleSelectSession = useCallback((id: string) => {
     if (id === currentSessionIdRef.current) return;
-    // Save current session first
     if (currentSessionIdRef.current && messages.length > 0) {
       saveSession(currentSessionIdRef.current, messages, activeMode);
     }
@@ -534,11 +658,11 @@ const ChatPage: React.FC = () => {
       setMessages(session.messages);
       setActiveMode(session.mode);
       resetStream();
+      setSelectedPassage(null);
     }
   }, [messages, activeMode, saveSession, loadSession, resetStream]);
 
   const handleNewConversation = useCallback(() => {
-    // Save current session
     if (currentSessionIdRef.current && messages.length > 0) {
       saveSession(currentSessionIdRef.current, messages, activeMode);
     }
@@ -546,13 +670,13 @@ const ChatPage: React.FC = () => {
     currentSessionIdRef.current = session.id;
     setMessages([]);
     resetStream();
+    setSelectedPassage(null);
   }, [messages, activeMode, saveSession, createSession, resetStream]);
 
   const handleDeleteSession = useCallback((e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     deleteSession(id);
     if (id === currentSessionIdRef.current) {
-      // Deleted current session — load most recent or create new
       const recent = getMostRecentSession();
       if (recent && recent.messages.length > 0) {
         currentSessionIdRef.current = recent.id;
@@ -565,6 +689,7 @@ const ChatPage: React.FC = () => {
         setMessages([]);
       }
       resetStream();
+      setSelectedPassage(null);
     }
   }, [deleteSession, getMostRecentSession, loadSession, createSession, activeMode, resetStream]);
 
@@ -576,10 +701,10 @@ const ChatPage: React.FC = () => {
         text: streamingResponse,
         isUser: false,
         passages: streamingPassages.length > 0 ? streamingPassages : undefined,
+        metadata: streamingMetadata || undefined,
       };
       setMessages(prev => [...prev, aiMessage]);
 
-      // Track last passage position
       if (streamingPassages.length > 0) {
         const lastPassage = streamingPassages[streamingPassages.length - 1];
         setLastPosition({
@@ -591,7 +716,7 @@ const ChatPage: React.FC = () => {
 
       resetStream();
     }
-  }, [isLoading, isStreaming, streamingResponse, streamingPassages, resetStream]);
+  }, [isLoading, isStreaming, streamingResponse, streamingPassages, streamingMetadata, resetStream]);
 
   const getModeDisplay = () => {
     switch (activeMode) {
@@ -615,11 +740,9 @@ const ChatPage: React.FC = () => {
 
     setMessages(prev => [...prev, newMessage]);
     setUserInput('');
+    setSelectedPassage(null);
 
-    // Determine query mode
     const queryMode = activeMode === 'refine_prose' ? 'reflect' : 'explore';
-
-    // Start streaming query
     await streamQuery(message, queryMode);
   };
 
@@ -631,7 +754,6 @@ const ChatPage: React.FC = () => {
 
   const handleStopGenerating = () => {
     abort();
-    // Add partial response as message if there's content
     if (streamingResponse) {
       const partialMessage: Message = {
         id: Date.now().toString(),
@@ -646,10 +768,8 @@ const ChatPage: React.FC = () => {
   const handleBookmark = (passage: Passage) => {
     const existing = bookmarks.find(b => b.text === passage.text);
     if (existing) {
-      // Remove bookmark (toggle off)
       setBookmarks(bookmarks.filter(b => b.text !== passage.text));
     } else {
-      // Add bookmark
       setBookmarks([...bookmarks, {
         id: Date.now().toString(),
         text: passage.text,
@@ -686,6 +806,11 @@ const ChatPage: React.FC = () => {
     }
   }, [navigate]);
 
+  const handleSelectPassageForReader = useCallback((passage: Passage, allPassages: Passage[]) => {
+    setSelectedPassage(passage);
+    setSelectedPassageGroup(allPassages);
+  }, []);
+
   const characters = [
     'Marcel (Narrator)',
     'Swann',
@@ -695,6 +820,8 @@ const ChatPage: React.FC = () => {
     'Baron de Charlus',
     'Mme de Guermantes'
   ];
+
+  const readerOpen = isDesktop && selectedPassage !== null;
 
   return (
     <ChatContainer>
@@ -770,170 +897,159 @@ const ChatPage: React.FC = () => {
         </SidebarSection>
       </Sidebar>
 
-      <ChatArea>
-        <Header>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <HamburgerButton onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Toggle sidebar">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="3" y1="6" x2="21" y2="6"/>
-                <line x1="3" y1="12" x2="21" y2="12"/>
-                <line x1="3" y1="18" x2="21" y2="18"/>
-              </svg>
-            </HamburgerButton>
-            <BackButton onClick={() => navigate('/')}>&larr;</BackButton>
-            <ModeLabel>{getModeDisplay()}</ModeLabel>
-          </div>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <ToggleButton onClick={() => setShowContext(!showContext)}>
-              {showContext ? 'Hide' : 'Where am I?'}
-            </ToggleButton>
-            <Link to="/about" style={{ color: '#8b4513', fontFamily: "'IBM Plex Sans', serif", fontSize: '0.9rem', textDecoration: 'underline' }}>
-              About
-            </Link>
-          </div>
-        </Header>
-
-        <ContextBar $visible={showContext}>
-          {lastPosition ? (
-            <>
-              <div>Current location: {lastPosition.book}, {lastPosition.chapter}</div>
-              <ProgressLine $progress={lastPosition.index != null ? Math.min(100, Number((lastPosition.index / 12764 * 100).toFixed(0))) : 0} />
-              <div>Progress: {lastPosition.index != null ? `${Math.min(100, Number((lastPosition.index / 12764 * 100).toFixed(0)))}% through the text` : 'Position unknown'}</div>
-            </>
-          ) : (
-            <div>Begin exploring to track your position</div>
-          )}
-        </ContextBar>
-
-        <MessagesArea>
-          {messages.length === 0 && !isLoading && !isStreaming && (
-            <EmptyState>
-              <EmptyStateTitle>
-                {activeMode === 'refine_prose'
-                  ? 'What moment would you like to reflect on?'
-                  : 'What would you like to explore?'}
-              </EmptyStateTitle>
-              <SuggestionChips>
-                {activeMode === 'refine_prose' ? (
-                  <>
-                    <SuggestionChip onClick={() => handleSendMessage('I had a quiet morning with coffee and sunlight')}>
-                      A quiet morning
-                    </SuggestionChip>
-                    <SuggestionChip onClick={() => handleSendMessage('I ran into an old friend I hadn\'t seen in years')}>
-                      An unexpected encounter
-                    </SuggestionChip>
-                    <SuggestionChip onClick={() => handleSendMessage('A familiar smell brought back a childhood memory')}>
-                      A sudden memory
-                    </SuggestionChip>
-                  </>
-                ) : (
-                  <>
-                    <SuggestionChip onClick={() => handleSendMessage('The madeleine scene')}>
-                      The madeleine scene
-                    </SuggestionChip>
-                    <SuggestionChip onClick={() => handleSendMessage('Swann\'s jealousy over Odette')}>
-                      Swann's jealousy
-                    </SuggestionChip>
-                    <SuggestionChip onClick={() => handleSendMessage('Time and memory in Proust')}>
-                      Time and memory
-                    </SuggestionChip>
-                  </>
-                )}
-              </SuggestionChips>
-            </EmptyState>
-          )}
-
-          {messages.map(message => (
-            message.passages && message.passages.length > 0 ? (
-              <div key={message.id}>
-                {message.text && (
-                  <MessageBubble $isUser={false}>
-                    <MarkdownMessage content={message.text} />
-                  </MessageBubble>
-                )}
-                <div style={{ alignSelf: 'flex-end', maxWidth: '80%' }}>
-                  {message.passages.map((passage: Passage, idx: number) => (
-                    <PassageDisplay
-                      key={idx}
-                      text={passage.text}
-                      volume={passage.book || "Swann's Way"}
-                      page={passage.index}
-                      narrativeContext={`From ${passage.chapter || 'Unknown chapter'}`}
-                      characters={['Marcel', 'Mother', 'Grandmother']}
-                      onBookmark={() => handleBookmark(passage)}
-                      isBookmarked={isBookmarked(passage.text)}
-                      truncated
-                      onClick={() => {
-                        setLightboxPassages(message.passages!);
-                        setLightboxInitialIndex(idx);
-                        setLightboxOpen(true);
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <MessageBubble key={message.id} $isUser={message.isUser}>
-                {message.isUser ? message.text : <MarkdownMessage content={message.text} />}
-              </MessageBubble>
-            )
-          ))}
-
-          {/* Show streaming response */}
-          {isStreaming && streamingResponse && (
-            <StreamingBubble $isUser={false}>
-              <MarkdownMessage content={streamingResponse} />
-              <StreamingCursor />
-            </StreamingBubble>
-          )}
-
-          {/* Show error if any */}
-          {error && (
-            <ErrorMessage>
-              Error: {error}
-            </ErrorMessage>
-          )}
-
-          {isLoading && !isStreaming && (
-            <LoadingIndicator>Searching through Proust's work...</LoadingIndicator>
-          )}
-
-          <div ref={messagesEndRef} />
-        </MessagesArea>
-
-        <InputArea>
-          <InputWrapper>
-            <Input
-              type="text"
-              placeholder={activeMode === 'refine_prose' ? 'Share a moment from your day...' : 'Ask about a passage, character, or theme...'}
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              disabled={isLoading}
-            />
-            {isStreaming ? (
-              <StopButton onClick={handleStopGenerating}>
-                Stop
-              </StopButton>
-            ) : (
-              <SendButton onClick={() => handleSendMessage()} disabled={isLoading}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 19V5M5 12l7-7 7 7" />
+      <ChatContent>
+        <ConversationPane $readerOpen={readerOpen}>
+          <Header>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <HamburgerButton onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Toggle sidebar">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="3" y1="6" x2="21" y2="6"/>
+                  <line x1="3" y1="12" x2="21" y2="12"/>
+                  <line x1="3" y1="18" x2="21" y2="18"/>
                 </svg>
-              </SendButton>
+              </HamburgerButton>
+              <BackButton onClick={() => navigate('/')}>&larr;</BackButton>
+              <ModeLabel>{getModeDisplay()}</ModeLabel>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <ToggleButton onClick={() => setShowContext(!showContext)}>
+                {showContext ? 'Hide' : 'Where am I?'}
+              </ToggleButton>
+              <Link to="/about" style={{ color: '#8b4513', fontFamily: "'IBM Plex Sans', sans-serif", fontSize: '0.9rem', textDecoration: 'underline' }}>
+                About
+              </Link>
+            </div>
+          </Header>
+
+          <ContextBar $visible={showContext}>
+            {lastPosition ? (
+              <>
+                <div>Current location: {lastPosition.book}, {lastPosition.chapter}</div>
+                <ProgressLine $progress={lastPosition.index != null ? Math.min(100, Number((lastPosition.index / 12764 * 100).toFixed(0))) : 0} />
+                <div>Progress: {lastPosition.index != null ? `${Math.min(100, Number((lastPosition.index / 12764 * 100).toFixed(0)))}% through the text` : 'Position unknown'}</div>
+              </>
+            ) : (
+              <div>Begin exploring to track your position</div>
             )}
-          </InputWrapper>
-        </InputArea>
-      </ChatArea>
-      <PassageLightbox
-        passages={lightboxPassages}
-        initialIndex={lightboxInitialIndex}
-        isOpen={lightboxOpen}
-        onClose={() => setLightboxOpen(false)}
-        onBookmark={handleBookmark}
-        isBookmarked={isBookmarked}
-        onReadInContext={handleReadInContext}
-      />
+          </ContextBar>
+
+          <MessagesArea>
+            {messages.length === 0 && !isLoading && !isStreaming && (
+              <EmptyState>
+                <EmptyStateTitle>
+                  {activeMode === 'refine_prose'
+                    ? 'What moment would you like to reflect on?'
+                    : 'What would you like to explore?'}
+                </EmptyStateTitle>
+                <SuggestionChips>
+                  {(activeMode === 'refine_prose' ? reflectSuggestions : exploreSuggestions).map((text, i) => (
+                    <SuggestionChip key={i} onClick={() => handleSendMessage(text)}>
+                      {text}
+                    </SuggestionChip>
+                  ))}
+                </SuggestionChips>
+              </EmptyState>
+            )}
+
+            {messages.map(message => (
+              message.passages && message.passages.length > 0 ? (
+                <div key={message.id}>
+                  {message.text && (
+                    <MessageBubble $isUser={false}>
+                      <MarkdownMessage content={message.text} />
+                    </MessageBubble>
+                  )}
+
+                  {message.metadata?.synthesis && (
+                    <SynthesisBanner>{message.metadata.synthesis}</SynthesisBanner>
+                  )}
+
+                  <ResultsHeader>
+                    {message.passages.length} passage{message.passages.length !== 1 ? 's' : ''} found
+                  </ResultsHeader>
+
+                  <div style={{ alignSelf: 'flex-start', maxWidth: '80%' }}>
+                    <PassageCard
+                      passages={message.passages}
+                      onBookmark={handleBookmark}
+                      isBookmarked={isBookmarked}
+                      onReadInContext={handleReadInContext}
+                      onSelectPassage={isDesktop ? (p) => handleSelectPassageForReader(p, message.passages!) : undefined}
+                      isDesktop={isDesktop}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <MessageBubble key={message.id} $isUser={message.isUser}>
+                  {message.isUser ? message.text : <MarkdownMessage content={message.text} />}
+                </MessageBubble>
+              )
+            ))}
+
+            {isStreaming && streamingResponse && (
+              <StreamingBubble $isUser={false}>
+                <MarkdownMessage content={streamingResponse} />
+                <StreamingCursor />
+              </StreamingBubble>
+            )}
+
+            {error && (
+              <ErrorMessage>
+                Error: {error}
+              </ErrorMessage>
+            )}
+
+            {isLoading && !isStreaming && (
+              <LoadingIndicator>Searching through Proust's work...</LoadingIndicator>
+            )}
+
+            <div ref={messagesEndRef} />
+          </MessagesArea>
+
+          <FloatingInputArea>
+            <InputLabel>
+              {activeMode === 'refine_prose'
+                ? 'Share a moment or feeling'
+                : 'Ask a question or search across all volumes'}
+            </InputLabel>
+            <InputPill>
+              <Input
+                type="text"
+                placeholder={activeMode === 'refine_prose'
+                  ? "Describe a moment \u2014 I'll help you see it through Proust's eyes"
+                  : 'What are you curious about in Proust?'}
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                disabled={isLoading}
+              />
+              {isStreaming ? (
+                <StopButton onClick={handleStopGenerating}>
+                  Stop
+                </StopButton>
+              ) : (
+                <SendButton onClick={() => handleSendMessage()} disabled={isLoading}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 19V5M5 12l7-7 7 7" />
+                  </svg>
+                </SendButton>
+              )}
+            </InputPill>
+          </FloatingInputArea>
+        </ConversationPane>
+
+        {readerOpen && (
+          <ReaderPanel
+            passage={selectedPassage}
+            allPassages={selectedPassageGroup}
+            onClose={() => setSelectedPassage(null)}
+            onBookmark={handleBookmark}
+            isBookmarked={isBookmarked}
+            onReadInContext={handleReadInContext}
+            onSelectPassage={(p) => setSelectedPassage(p)}
+          />
+        )}
+      </ChatContent>
     </ChatContainer>
   );
 };

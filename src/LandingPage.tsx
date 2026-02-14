@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { useNavigate, Link } from 'react-router-dom';
 import ProustImage from './assets/proust.jpg';
@@ -41,7 +41,7 @@ const Question = styled.p`
   font-weight: 400;
   margin-left: 1rem;
   font-size: 1.1rem;
-  color: #8b4513;
+  color: #2a2a2a;
   margin-bottom: 10px;
 `;
 
@@ -60,9 +60,9 @@ const Button = styled.button`
   font-family: 'IBM Plex Sans', serif;
   font-style: normal;
   font-weight: 400;
-  color: #1a1a1a;
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid #8b4513;
+  color: #3a3028;
+  background: rgba(58, 48, 40, 0.04);
+  border: 1px solid #3a3028;
   border-radius: 10px;
   padding: 15px;
   cursor: pointer;
@@ -74,13 +74,13 @@ const Button = styled.button`
   &:hover {
     background-color: #f1ede9;
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(139, 69, 19, 0.15);
+    box-shadow: 0 2px 8px rgba(58, 48, 40, 0.15);
   }
-  
+
   &:focus {
     outline: none;
-    border-color: #8b4513;
-    box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.3);
+    border-color: #564a40;
+    box-shadow: 0 0 0 3px rgba(58, 48, 40, 0.2);
   }
 `;
 
@@ -209,6 +209,30 @@ const FloatingChatButton = styled.button`
   }
 `;
 
+const LANDING_PROMPTS = [
+  { mode: 'explore_lost_time', text: 'The madeleine scene', prompt: 'What is the madeleine scene really about?' },
+  { mode: 'explore_lost_time', text: 'Swann and Odette', prompt: "How does Swann's love for Odette change over time?" },
+  { mode: 'explore_lost_time', text: 'Falling asleep', prompt: 'Show me passages about falling asleep' },
+  { mode: 'explore_lost_time', text: 'The role of memory', prompt: 'How does Proust explore the role of memory?' },
+  { mode: 'explore_lost_time', text: 'The grandmother', prompt: "What is the narrator's relationship with his grandmother?" },
+  { mode: 'explore_lost_time', text: 'The hawthorn flowers', prompt: 'Tell me about the hawthorn flowers in Combray' },
+  { mode: 'explore_lost_time', text: 'The two ways', prompt: "What are the two 'ways' at Combray?" },
+  { mode: 'explore_lost_time', text: 'The magic lantern', prompt: 'What is the magic lantern scene about?' },
+  { mode: 'refine_prose', text: 'A taste that brought back a place', prompt: 'A taste that brought back a forgotten place' },
+  { mode: 'refine_prose', text: 'Someone I love has changed', prompt: 'I noticed someone I love has changed' },
+  { mode: 'refine_prose', text: 'A childhood place revisited', prompt: 'I went back somewhere from my childhood' },
+  { mode: 'refine_prose', text: 'Beauty in the ordinary', prompt: 'I noticed something beautiful in an ordinary moment' },
+];
+
+function shuffleArray<T>(arr: T[]): T[] {
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [showGuidance, setShowGuidance] = useState(false);
@@ -221,6 +245,8 @@ const LandingPage: React.FC = () => {
       setHasHistory(sessions.some((s: any) => s.messageCount > 0));
     } catch { /* ignore */ }
   }, []);
+
+  const suggestions = useMemo(() => shuffleArray(LANDING_PROMPTS).slice(0, 3), []);
 
   const handleButtonClick = (mode: string, prompt: string) => {
     navigate('/chat', { state: { mode, prompt } });
@@ -235,15 +261,11 @@ const LandingPage: React.FC = () => {
       <Question>How can I help you today?</Question>
 
       <ButtonContainer>
-        <Button onClick={() => handleButtonClick('explore_lost_time', '')}>
-          Explore passages
-        </Button>
-        <Button onClick={() => handleButtonClick('refine_prose', '')}>
-          Reflect in Proust's style
-        </Button>
-        <Button onClick={() => handleButtonClick('explore_lost_time', 'Tell me about memory in Proust')}>
-          Study a theme
-        </Button>
+        {suggestions.map((s, i) => (
+          <Button key={i} onClick={() => handleButtonClick(s.mode, s.prompt)}>
+            {s.text}
+          </Button>
+        ))}
       </ButtonContainer>
 
       <GuidanceToggle onClick={() => setShowGuidance(!showGuidance)}>
