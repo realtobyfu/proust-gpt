@@ -374,15 +374,10 @@ const ReadLink = styled(Link)`
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  margin-top: 1.25rem;
-  margin-left: 1rem;
+  margin-top: 0.75rem;
 
   &:hover {
     text-decoration: underline;
-  }
-
-  @media (max-width: 768px) {
-    margin-left: 0;
   }
 `;
 
@@ -509,16 +504,6 @@ const LandingPage: React.FC = () => {
         ))}
       </ButtonContainer>
 
-      <ReadLink to="/read">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-             strokeLinejoin="round">
-          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-        </svg>
-        Begin reading
-      </ReadLink>
-
       <GuidanceToggle onClick={() => setShowGuidance(!showGuidance)}>
         {showGuidance ? 'Hide' : 'New to Proust?'}
       </GuidanceToggle>
@@ -535,6 +520,15 @@ const LandingPage: React.FC = () => {
 
       <ProustSection>
         <ProustImageContainer src={ProustImage} alt="Marcel Proust" />
+        <ReadLink to="/read">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+               strokeLinejoin="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+          </svg>
+          Begin reading
+        </ReadLink>
       </ProustSection>
 
       {hasHistory && (

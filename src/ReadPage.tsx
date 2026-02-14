@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import TableOfContents from './components/TableOfContents';
 import ReadingView from './components/ReadingView';
-import BookmarksSection from './components/BookmarksSection';
 import BookmarkDropdown from './components/BookmarkDropdown';
 import { useReadingProgress } from './hooks/useReadingProgress';
 import { useLocalStorage } from './hooks/useLocalStorage';
@@ -179,11 +178,10 @@ interface Volume {
 
 const ReadPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [volumes, setVolumes] = useState<Volume[]>([]);
   const [loading, setLoading] = useState(true);
   const { lastPosition } = useReadingProgress();
-  const [bookmarks, setBookmarks] = useLocalStorage<Bookmark[]>('proust-bookmarks', []);
+  const [bookmarks] = useLocalStorage<Bookmark[]>('proust-bookmarks', []);
 
   // Read current view from URL params
   const currentVolume = searchParams.get('volume');
@@ -257,20 +255,6 @@ const ReadPage: React.FC = () => {
       console.error('Failed to locate passage:', err);
     }
   }, [setSearchParams]);
-
-  const handleRemoveBookmark = useCallback((bookmark: Bookmark) => {
-    setBookmarks((prev: Bookmark[]) => prev.filter(b => b.id !== bookmark.id));
-  }, [setBookmarks]);
-
-  const handleExploreInChat = useCallback((bookmark: Bookmark) => {
-    const snippet = bookmark.text.slice(0, 120);
-    navigate('/chat', {
-      state: {
-        mode: 'explore_lost_time',
-        prompt: `Tell me more about this passage from ${bookmark.book}, ${bookmark.chapter}: "${snippet}..."`,
-      },
-    });
-  }, [navigate]);
 
   // Find volume name for breadcrumb
   const getVolumeName = () => {
@@ -354,15 +338,6 @@ const ReadPage: React.FC = () => {
                 </ContinueTextGroup>
               </ContinueBanner>
             </div>
-          )}
-
-          {bookmarks.length > 0 && (
-            <BookmarksSection
-              bookmarks={bookmarks}
-              onNavigate={handleNavigateToBookmark}
-              onRemove={handleRemoveBookmark}
-              onExploreInChat={handleExploreInChat}
-            />
           )}
 
           <TableOfContents
