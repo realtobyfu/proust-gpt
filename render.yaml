@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: proustgpt
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: PINECONE_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: COHERE_API_KEY
+        sync: false
+      - key: SERVE_STATIC
+        value: "true"
+      - key: STATIC_DIR
+        value: "./static"
+      - key: CORS_ORIGINS
+        value: ""
