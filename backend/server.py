@@ -46,6 +46,7 @@ class PassageItem(BaseModel):
     text: str
     volume: Optional[int] = None
     index: Optional[int] = None
+    relevance_summary: Optional[str] = None
 
 
 class ExploreResponse(BaseModel):

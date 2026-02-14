@@ -1,11 +1,23 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import TableOfContents from './components/TableOfContents';
 import ReadingView from './components/ReadingView';
+import BookmarksSection from './components/BookmarksSection';
+import BookmarkDropdown from './components/BookmarkDropdown';
 import { useReadingProgress } from './hooks/useReadingProgress';
+import { useLocalStorage } from './hooks/useLocalStorage';
 
 const API_BASE_URL = 'http://127.0.0.1:5000';
+
+interface Bookmark {
+  id: string;
+  text: string;
+  book: string;
+  chapter: string;
+  index?: number;
+  savedAt: string;
+}
 
 const PageContainer = styled.div`
   background-color: #f7f4f0;
@@ -167,9 +179,11 @@ interface Volume {
 
 const ReadPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [volumes, setVolumes] = useState<Volume[]>([]);
   const [loading, setLoading] = useState(true);
   const { lastPosition } = useReadingProgress();
+  const [bookmarks, setBookmarks] = useLocalStorage<Bookmark[]>('proust-bookmarks', []);
 
   // Read current view from URL params
   const currentVolume = searchParams.get('volume');
@@ -224,6 +238,40 @@ const ReadPage: React.FC = () => {
     }
   };
 
+  const handleNavigateToBookmark = useCallback(async (bookmark: Bookmark) => {
+    if (bookmark.index == null) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/read/locate?index=${bookmark.index}`);
+      const data = await res.json();
+      if (data.error) {
+        console.error('Failed to locate passage:', data.error);
+        return;
+      }
+      setSearchParams({
+        volume: data.volume.toString(),
+        chapter: data.chapter,
+        page: data.page.toString(),
+        passageIndex: data.passageIndex.toString(),
+      });
+    } catch (err) {
+      console.error('Failed to locate passage:', err);
+    }
+  }, [setSearchParams]);
+
+  const handleRemoveBookmark = useCallback((bookmark: Bookmark) => {
+    setBookmarks((prev: Bookmark[]) => prev.filter(b => b.id !== bookmark.id));
+  }, [setBookmarks]);
+
+  const handleExploreInChat = useCallback((bookmark: Bookmark) => {
+    const snippet = bookmark.text.slice(0, 120);
+    navigate('/chat', {
+      state: {
+        mode: 'explore_lost_time',
+        prompt: `Tell me more about this passage from ${bookmark.book}, ${bookmark.chapter}: "${snippet}..."`,
+      },
+    });
+  }, [navigate]);
+
   // Find volume name for breadcrumb
   const getVolumeName = () => {
     if (!currentVolume) return '';
@@ -265,6 +313,10 @@ const ReadPage: React.FC = () => {
           )}
         </Breadcrumb>
         <HeaderLinks>
+          <BookmarkDropdown
+            bookmarks={bookmarks}
+            onNavigate={handleNavigateToBookmark}
+          />
           <Link to="/chat">Chat</Link>
           <Link to="/about">About</Link>
         </HeaderLinks>
@@ -302,6 +354,15 @@ const ReadPage: React.FC = () => {
                 </ContinueTextGroup>
               </ContinueBanner>
             </div>
+          )}
+
+          {bookmarks.length > 0 && (
+            <BookmarksSection
+              bookmarks={bookmarks}
+              onNavigate={handleNavigateToBookmark}
+              onRemove={handleRemoveBookmark}
+              onExploreInChat={handleExploreInChat}
+            />
           )}
 
           <TableOfContents

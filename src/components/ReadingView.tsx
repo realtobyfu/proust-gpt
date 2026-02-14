@@ -10,7 +10,8 @@ const PASSAGES_PER_PAGE = 20;
 const Container = styled.div`
   max-width: 780px;
   margin: 0 auto;
-  padding: 1.5rem 1rem 6rem;
+  padding: 1.5rem 1rem 2rem;
+  position: relative;
 `;
 
 const ChapterTitle = styled.h2`
@@ -25,7 +26,7 @@ const VolumeName = styled.div`
   font-family: 'IBM Plex Sans', sans-serif;
   font-size: 0.85rem;
   color: #8b4513;
-  margin-bottom: 2rem;
+  margin-bottom: 0.25rem;
 `;
 
 const ProgressBarContainer = styled.div`
@@ -127,61 +128,72 @@ const ActionButton = styled.button<{ $active?: boolean }>`
   }
 `;
 
-const NavBar = styled.div`
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(250, 248, 245, 0.95);
-  backdrop-filter: blur(8px);
-  border-top: 1px solid #e0d8cf;
-  padding: 0.75rem 1.5rem;
+const HeaderRow = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  z-index: 20;
+  justify-content: space-between;
+  position: relative;
 `;
 
-const NavButton = styled.button<{ $disabled?: boolean }>`
-  background: none;
-  border: 1px solid ${props => props.$disabled ? '#e0d8cf' : '#8b4513'};
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.85rem;
-  color: ${props => props.$disabled ? '#ccc' : '#8b4513'};
-  cursor: ${props => props.$disabled ? 'default' : 'pointer'};
-  transition: all 0.15s ease;
-
-  &:hover {
-    background: ${props => props.$disabled ? 'none' : 'rgba(139, 69, 19, 0.06)'};
-  }
-`;
-
-const NavInfo = styled.div`
+const PageInfo = styled.span`
   font-family: 'IBM Plex Sans', sans-serif;
   font-size: 0.78rem;
   color: #999;
+`;
+
+const SideArrow = styled.button<{ $side: 'left' | 'right' }>`
+  position: fixed;
+  top: 50%;
+  ${props => props.$side === 'left' ? 'left: 1rem' : 'right: 1rem'};
+  transform: translateY(-50%);
+  background: rgba(250, 248, 245, 0.9);
+  border: 1px solid #e0d8cf;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8b4513;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  z-index: 15;
+  transition: background 0.15s, border-color 0.15s;
+
+  &:hover {
+    background: rgba(139, 69, 19, 0.08);
+    border-color: #8b4513;
+  }
+
+  &:disabled {
+    color: #d4ccc3;
+    border-color: #eee;
+    cursor: default;
+    &:hover { background: rgba(250, 248, 245, 0.9); }
+  }
+
+  @media (max-width: 900px) {
+    display: none;
+  }
 `;
 
 const BackButton = styled.button`
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  background: rgba(139, 69, 19, 0.05);
-  border: 1px solid #d4ccc3;
-  border-radius: 20px;
-  padding: 0.4rem 1rem;
+  background: none;
+  border: none;
+  padding: 0.2rem 0;
   font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.85rem;
-  color: #8b4513;
+  font-size: 0.82rem;
+  color: #999;
   cursor: pointer;
-  margin-bottom: 1rem;
-  transition: all 0.15s ease;
+  white-space: nowrap;
+  transition: color 0.15s ease;
 
   &:hover {
-    background: rgba(139, 69, 19, 0.1);
-    border-color: #8b4513;
+    color: #8b4513;
   }
 `;
 
@@ -425,9 +437,12 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
       </ProgressBarContainer>
 
       <Container ref={containerRef}>
-        <BackButton onClick={onNavigateToToc}>&larr; Contents</BackButton>
+        <HeaderRow>
+          <BackButton onClick={onNavigateToToc}>&larr; Contents</BackButton>
+          {totalPages > 1 && <PageInfo>Page {page + 1} of {totalPages}</PageInfo>}
+        </HeaderRow>
         <VolumeName>{volumeName}</VolumeName>
-        <ChapterTitle>{chapterName}</ChapterTitle>
+        {page === 0 && <ChapterTitle>{chapterName}</ChapterTitle>}
 
         {mergedPassages.map((group, gi) => {
           const mergedText = group.map(p => p.text.trim()).join(' ');
@@ -463,35 +478,29 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
         )}
       </Container>
 
-      <NavBar>
-        {isFirstPage ? (
-          <NavButton
-            $disabled={!prevChapter}
-            onClick={() => handleChapterNav(prevChapter)}
-          >
-            {prevChapter ? '← Prev Chapter' : '←'}
-          </NavButton>
-        ) : (
-          <NavButton onClick={() => handlePageNav(page - 1)}>
-            ← Prev Page
-          </NavButton>
-        )}
-        <NavInfo>
-          Page {page + 1} of {totalPages}
-        </NavInfo>
-        {isLastPage ? (
-          <NavButton
-            $disabled={!nextChapter}
-            onClick={() => handleChapterNav(nextChapter)}
-          >
-            {nextChapter ? 'Next Chapter →' : '→'}
-          </NavButton>
-        ) : (
-          <NavButton onClick={() => handlePageNav(page + 1)}>
-            Next Page →
-          </NavButton>
-        )}
-      </NavBar>
+      {isFirstPage ? (
+        prevChapter && (
+          <SideArrow $side="left" onClick={() => handleChapterNav(prevChapter)} aria-label="Previous chapter">
+            &#8249;
+          </SideArrow>
+        )
+      ) : (
+        <SideArrow $side="left" onClick={() => handlePageNav(page - 1)} aria-label="Previous page">
+          &#8249;
+        </SideArrow>
+      )}
+
+      {isLastPage ? (
+        nextChapter && (
+          <SideArrow $side="right" onClick={() => handleChapterNav(nextChapter)} aria-label="Next chapter">
+            &#8250;
+          </SideArrow>
+        )
+      ) : (
+        <SideArrow $side="right" onClick={() => handlePageNav(page + 1)} aria-label="Next page">
+          &#8250;
+        </SideArrow>
+      )}
     </>
   );
 };

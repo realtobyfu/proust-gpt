@@ -29,9 +29,10 @@ function useIsDesktop() {
 
 const ChatContainer = styled.div`
   display: flex;
-  width: 100%;
+  width: 100vw;
   height: 100vh;
   background-color: #f7f4f0;
+  overflow: hidden;
 `;
 
 const Sidebar = styled.div<{ $isOpen: boolean }>`
@@ -59,7 +60,7 @@ const ChatContent = styled.div`
   }
 `;
 
-const ConversationPane = styled.div<{ $readerOpen: boolean }>`
+const ConversationPane = styled.div<{ $readerOpen: boolean; $splitPercent: number }>`
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -67,7 +68,30 @@ const ConversationPane = styled.div<{ $readerOpen: boolean }>`
   transition: flex 0.3s ease;
 
   @media (min-width: 1025px) {
-    flex: ${props => props.$readerOpen ? '0 0 55%' : '1'};
+    flex: ${props => props.$readerOpen ? `0 0 ${props.$splitPercent}%` : '1'};
+  }
+`;
+
+const Divider = styled.div`
+  width: 6px;
+  cursor: col-resize;
+  background: transparent;
+  position: relative;
+  flex-shrink: 0;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 2px;
+    width: 2px;
+    background: #e0d8cf;
+    transition: background 0.15s;
+  }
+
+  &:hover::after {
+    background: #8b4513;
   }
 `;
 
@@ -142,6 +166,17 @@ const MessagesArea = styled.div`
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #d4ccc3;
+    border-radius: 3px;
+  }
 `;
 
 const MessageBubble = styled.div<{ $isUser: boolean }>`
@@ -593,6 +628,11 @@ const ChatPage: React.FC = () => {
   const [selectedPassage, setSelectedPassage] = useState<Passage | null>(null);
   const [selectedPassageGroup, setSelectedPassageGroup] = useState<Passage[]>([]);
 
+  // Draggable split state
+  const [splitPercent, setSplitPercent] = useState(55);
+  const chatContentRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
+
   // Session management
   const {
     sessions,
@@ -645,6 +685,47 @@ const ChatPage: React.FC = () => {
       saveSession(currentSessionIdRef.current, messages, activeMode);
     }
   }, [messages, activeMode, saveSession]);
+
+  const readerOpen = isDesktop && selectedPassage !== null;
+
+  // Auto-open sidebar for returning users (desktop only)
+  useEffect(() => {
+    if (isDesktop && sessions.some(s => s.messageCount > 0)) {
+      setSidebarOpen(true);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-collapse sidebar when reader panel opens
+  useEffect(() => {
+    if (readerOpen) {
+      setSidebarOpen(false);
+    }
+  }, [readerOpen]);
+
+  // Draggable divider handler
+  const handleDividerMouseDown = useCallback(() => {
+    isDragging.current = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging.current || !chatContentRef.current) return;
+      const rect = chatContentRef.current.getBoundingClientRect();
+      const pct = ((e.clientX - rect.left) / rect.width) * 100;
+      setSplitPercent(Math.min(75, Math.max(30, pct)));
+    };
+
+    const handleMouseUp = () => {
+      isDragging.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, []);
 
   // Session handlers
   const handleSelectSession = useCallback((id: string) => {
@@ -821,8 +902,6 @@ const ChatPage: React.FC = () => {
     'Mme de Guermantes'
   ];
 
-  const readerOpen = isDesktop && selectedPassage !== null;
-
   return (
     <ChatContainer>
       <Sidebar $isOpen={sidebarOpen}>
@@ -897,8 +976,8 @@ const ChatPage: React.FC = () => {
         </SidebarSection>
       </Sidebar>
 
-      <ChatContent>
-        <ConversationPane $readerOpen={readerOpen}>
+      <ChatContent ref={chatContentRef}>
+        <ConversationPane $readerOpen={readerOpen} $splitPercent={splitPercent}>
           <Header>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <HamburgerButton onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Toggle sidebar">
@@ -1039,15 +1118,18 @@ const ChatPage: React.FC = () => {
         </ConversationPane>
 
         {readerOpen && (
-          <ReaderPanel
-            passage={selectedPassage}
-            allPassages={selectedPassageGroup}
-            onClose={() => setSelectedPassage(null)}
-            onBookmark={handleBookmark}
-            isBookmarked={isBookmarked}
-            onReadInContext={handleReadInContext}
-            onSelectPassage={(p) => setSelectedPassage(p)}
-          />
+          <>
+            <Divider onMouseDown={handleDividerMouseDown} />
+            <ReaderPanel
+              passage={selectedPassage}
+              allPassages={selectedPassageGroup}
+              onClose={() => setSelectedPassage(null)}
+              onBookmark={handleBookmark}
+              isBookmarked={isBookmarked}
+              onReadInContext={handleReadInContext}
+              onSelectPassage={(p) => setSelectedPassage(p)}
+            />
+          </>
         )}
       </ChatContent>
     </ChatContainer>
