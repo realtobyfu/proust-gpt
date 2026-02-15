@@ -364,7 +364,8 @@ const PassageCard: React.FC<PassageCardProps> = ({
   }, [currentIndex, goTo]);
 
   const isFr = i18n.language === 'fr';
-  const sourceLabel = [
+  const citationPrefix = passage.citation_index != null ? `[${passage.citation_index}] ` : '';
+  const sourceLabel = citationPrefix + [
     isFr ? frenchName(passage.book || '') || 'À la recherche du temps perdu' : passage.book || 'In Search of Lost Time',
     isFr && passage.chapter ? frenchName(passage.chapter) : passage.chapter,
   ].filter(Boolean).join(' — ');

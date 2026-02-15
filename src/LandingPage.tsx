@@ -19,21 +19,27 @@ function shuffleArray<T>(arr: T[]): T[] {
 // ── Data ──────────────────────────────────────────────────────────────────────
 
 const EXPLORE_PROMPTS = [
-  { textKey: 'landing.explorePrompts.madeleine', prompt: 'What is the madeleine scene really about?' },
-  { textKey: 'landing.explorePrompts.swannOdette', prompt: "How does Swann's love for Odette change over time?" },
-  { textKey: 'landing.explorePrompts.memory', prompt: 'How does Proust explore the role of memory?' },
-  { textKey: 'landing.explorePrompts.twoWays', prompt: "What are the two 'ways' at Combray?" },
-  { textKey: 'landing.explorePrompts.jealousy', prompt: 'How does Proust portray jealousy?' },
-  { textKey: 'landing.explorePrompts.timeAging', prompt: 'How does Proust explore the passage of time and aging?' },
-  { textKey: 'landing.explorePrompts.artBeauty', prompt: 'What role does art play in the novel?' },
-  { textKey: 'landing.explorePrompts.sleepDreams', prompt: 'How does Proust describe sleep and dreams?' },
+  { textKey: 'landing.explorePrompts.madeleine', promptKey: 'landing.exploreFullPrompts.madeleine' },
+  { textKey: 'landing.explorePrompts.swannOdette', promptKey: 'landing.exploreFullPrompts.swannOdette' },
+  { textKey: 'landing.explorePrompts.memory', promptKey: 'landing.exploreFullPrompts.memory' },
+  { textKey: 'landing.explorePrompts.twoWays', promptKey: 'landing.exploreFullPrompts.twoWays' },
+  { textKey: 'landing.explorePrompts.jealousy', promptKey: 'landing.exploreFullPrompts.jealousy' },
+  { textKey: 'landing.explorePrompts.timeAging', promptKey: 'landing.exploreFullPrompts.timeAging' },
+  { textKey: 'landing.explorePrompts.artBeauty', promptKey: 'landing.exploreFullPrompts.artBeauty' },
+  { textKey: 'landing.explorePrompts.sleepDreams', promptKey: 'landing.exploreFullPrompts.sleepDreams' },
+  { textKey: 'landing.explorePrompts.desireIllusion', promptKey: 'landing.exploreFullPrompts.desireIllusion' },
+  { textKey: 'landing.explorePrompts.habitFeeling', promptKey: 'landing.exploreFullPrompts.habitFeeling' },
+  { textKey: 'landing.explorePrompts.martinville', promptKey: 'landing.exploreFullPrompts.martinville' },
+  { textKey: 'landing.explorePrompts.socialClimbing', promptKey: 'landing.exploreFullPrompts.socialClimbing' },
 ];
 
 const REFLECT_PROMPTS = [
-  { textKey: 'landing.reflectPrompts.taste', prompt: 'A taste that brought back a forgotten place' },
-  { textKey: 'landing.reflectPrompts.changed', prompt: 'I noticed someone I love has changed' },
-  { textKey: 'landing.reflectPrompts.place', prompt: 'There is a place I can never return to' },
-  { textKey: 'landing.reflectPrompts.moment', prompt: 'There is a moment I wish I could relive' },
+  { textKey: 'landing.reflectPrompts.taste', promptKey: 'landing.reflectFullPrompts.taste' },
+  { textKey: 'landing.reflectPrompts.changed', promptKey: 'landing.reflectFullPrompts.changed' },
+  { textKey: 'landing.reflectPrompts.place', promptKey: 'landing.reflectFullPrompts.place' },
+  { textKey: 'landing.reflectPrompts.moment', promptKey: 'landing.reflectFullPrompts.moment' },
+  { textKey: 'landing.reflectPrompts.misremember', promptKey: 'landing.reflectFullPrompts.misremember' },
+  { textKey: 'landing.reflectPrompts.outgrowing', promptKey: 'landing.reflectFullPrompts.outgrowing' },
 ];
 
 // ── Styled Components ─────────────────────────────────────────────────────────
@@ -485,7 +491,7 @@ const LandingPage: React.FC = () => {
           <Button
             key={chip.textKey}
             $mode="explore"
-            onClick={() => handleChipClick('explore_lost_time', t(chip.textKey))}
+            onClick={() => handleChipClick('explore_lost_time', t(chip.promptKey))}
           >
             {t(chip.textKey)}
           </Button>
@@ -501,7 +507,7 @@ const LandingPage: React.FC = () => {
           <Button
             key={chip.textKey}
             $mode="reflect"
-            onClick={() => handleChipClick('refine_prose', t(chip.textKey))}
+            onClick={() => handleChipClick('refine_prose', t(chip.promptKey))}
           >
             {t(chip.textKey)}
           </Button>

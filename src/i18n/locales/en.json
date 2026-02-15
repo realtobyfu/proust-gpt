@@ -33,13 +33,41 @@
       "jealousy": "Jealousy in Proust",
       "timeAging": "Time and aging",
       "artBeauty": "Art and beauty",
-      "sleepDreams": "Sleep and dreams"
+      "sleepDreams": "Sleep and dreams",
+      "desireIllusion": "Desire and illusion",
+      "habitFeeling": "Habit vs. genuine feeling",
+      "martinville": "The steeples of Martinville",
+      "socialClimbing": "Social climbing"
     },
     "reflectPrompts": {
       "taste": "A taste that brought back a place",
       "changed": "Someone I love has changed",
       "place": "A place I can never return to",
-      "moment": "A moment I wish I could relive"
+      "moment": "A moment I wish I could relive",
+      "misremember": "A memory I got wrong",
+      "outgrowing": "Outgrowing a past self"
+    },
+    "exploreFullPrompts": {
+      "madeleine": "What is the madeleine scene really about?",
+      "swannOdette": "How does Swann's love for Odette change over time?",
+      "memory": "How does Proust explore the role of memory?",
+      "twoWays": "What are the two 'ways' at Combray?",
+      "jealousy": "How does Proust portray jealousy?",
+      "timeAging": "How does Proust explore the passage of time and aging?",
+      "artBeauty": "What role does art play in the novel?",
+      "sleepDreams": "How does Proust describe sleep and dreams?",
+      "desireIllusion": "What does Proust mean when he says that desire changes the thing desired?",
+      "habitFeeling": "How does the novel portray the difference between habit and genuine feeling?",
+      "martinville": "What does the steeple of Martinville reveal about artistic vocation?",
+      "socialClimbing": "How does social climbing destroy authenticity in the novel?"
+    },
+    "reflectFullPrompts": {
+      "taste": "A taste that brought back a forgotten place",
+      "changed": "I noticed someone I love has changed",
+      "place": "There is a place I can never return to",
+      "moment": "There is a moment I wish I could relive",
+      "misremember": "I realized I was remembering something wrong",
+      "outgrowing": "The quiet grief of outgrowing a version of yourself"
     }
   },
   "chat": {

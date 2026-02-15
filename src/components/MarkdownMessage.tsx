@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import styled from 'styled-components';
+import type { Passage } from '../hooks/useStreamingQuery';
 
 const MarkdownWrapper = styled.div`
   font-family: 'Georgia', serif;
@@ -77,14 +78,73 @@ const MarkdownWrapper = styled.div`
   }
 `;
 
+const CitationRef = styled.span`
+  display: inline;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.7em;
+  font-weight: 600;
+  color: #8b4513;
+  cursor: pointer;
+  vertical-align: super;
+  line-height: 1;
+  padding: 0 0.15em;
+  border-radius: 2px;
+  transition: background 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: rgba(139, 69, 19, 0.12);
+    color: #6b3410;
+  }
+`;
+
 interface MarkdownMessageProps {
   content: string;
+  passages?: Passage[];
+  onCitationClick?: (citationIndex: number) => void;
 }
 
-const MarkdownMessage: React.FC<MarkdownMessageProps> = React.memo(({ content }) => {
+const MarkdownMessage: React.FC<MarkdownMessageProps> = React.memo(({ content, passages, onCitationClick }) => {
+  // Build set of valid citation indices from passages
+  const validIndices = useMemo(() => {
+    if (!passages) return new Set<number>();
+    return new Set(passages.map(p => p.citation_index).filter((n): n is number => n != null));
+  }, [passages]);
+
+  // Pre-process content: replace [N] with HTML cite-ref tags (only for valid, single-digit indices)
+  const processedContent = useMemo(() => {
+    if (validIndices.size === 0) return content;
+    return content.replace(/\[(\d)\]/g, (match, digit) => {
+      const n = parseInt(digit, 10);
+      if (validIndices.has(n)) {
+        return `<cite-ref data-n="${n}">[${n}]</cite-ref>`;
+      }
+      return match;
+    });
+  }, [content, validIndices]);
+
   return (
     <MarkdownWrapper>
-      <ReactMarkdown rehypePlugins={[rehypeRaw]}>{content}</ReactMarkdown>
+      <ReactMarkdown
+        rehypePlugins={[rehypeRaw]}
+        components={{
+          'cite-ref': ({ node, ...props }) => {
+            const n = parseInt((props as Record<string, string>)['data-n'], 10);
+            return (
+              <CitationRef
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCitationClick?.(n);
+                }}
+                title={`Passage ${n}`}
+              >
+                [{n}]
+              </CitationRef>
+            );
+          },
+        } as Record<string, React.ComponentType<any>>}
+      >
+        {processedContent}
+      </ReactMarkdown>
     </MarkdownWrapper>
   );
 });

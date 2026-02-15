@@ -537,6 +537,14 @@ const EXPLORE_PROMPTS = [
   'Who is Baron de Charlus?',
   'How does Proust treat the passage of time?',
   'What role does reading play in the novel?',
+  'Why does the narrator say we are "healed of suffering only by experiencing it to the full"?',
+  'How does Proust describe the gap between who we imagine someone to be and who they really are?',
+  'What does the steeple of Martinville reveal about artistic vocation?',
+  'How does the novel portray the difference between habit and genuine feeling?',
+  'What does Proust mean when he says that desire changes the thing desired?',
+  'How does social climbing destroy authenticity in the novel?',
+  'What is the relationship between places and the self in Proust?',
+  'How does the death of Bergotte reflect on the meaning of art?',
 ];
 
 const REFLECT_PROMPTS = [
@@ -552,6 +560,14 @@ const REFLECT_PROMPTS = [
   'How much I have changed without noticing',
   'An unexpected moment of happiness',
   'The weight of past selves I carry',
+  'I realized I was remembering something wrong',
+  'The person I was jealous of turned out to be unhappy too',
+  'I found an old photograph and did not recognize my own expression',
+  'The difference between the friendship I imagined and the one I had',
+  'Something ended so gradually I never noticed it happening',
+  'I caught myself performing for someone whose opinion no longer matters',
+  'A conversation I keep replaying, changing what I said',
+  'The quiet grief of outgrowing a version of yourself',
 ];
 
 function shuffleArray<T>(arr: T[]): T[] {
@@ -578,6 +594,19 @@ interface LastPassagePosition {
   book: string;
   chapter: string;
   index?: number;
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Extract cited [N] indices from response text (single-digit only). */
+function extractCitedIndices(text: string): Set<number> {
+  const indices = new Set<number>();
+  const re = /\[(\d)\]/g;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    indices.add(parseInt(m[1], 10));
+  }
+  return indices;
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -1015,12 +1044,45 @@ const ChatPage: React.FC = () => {
               </EmptyState>
             )}
 
-            {messages.map(message => (
-              message.passages && message.passages.length > 0 ? (
+            {messages.map(message => {
+              if (message.isUser) {
+                return (
+                  <MessageBubble key={message.id} $isUser>
+                    {message.text}
+                  </MessageBubble>
+                );
+              }
+
+              // Determine which passages were actually cited
+              const allPassages = message.passages || [];
+              const citedIndices = extractCitedIndices(message.text);
+              const citedPassages = allPassages.filter(
+                p => p.citation_index != null && citedIndices.has(p.citation_index)
+              );
+              // Show cited passages if any, otherwise fall back to all passages
+              const displayPassages = citedPassages.length > 0 ? citedPassages : allPassages;
+              const hasPassages = displayPassages.length > 0;
+
+              return (
                 <div key={message.id}>
                   {message.text && (
                     <MessageBubble $isUser={false}>
-                      <MarkdownMessage content={message.text} />
+                      <MarkdownMessage
+                        content={message.text}
+                        passages={allPassages}
+                        onCitationClick={(n) => {
+                          // Find the passage matching citation index
+                          const target = allPassages.find(p => p.citation_index === n);
+                          if (target && isDesktop) {
+                            // Open in split reader panel
+                            handleSelectPassageForReader(target, displayPassages);
+                          } else {
+                            // Mobile fallback: scroll to card
+                            const el = document.getElementById(`passage-card-${message.id}-${n}`);
+                            el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          }
+                        }}
+                      />
                     </MessageBubble>
                   )}
 
@@ -1028,27 +1090,42 @@ const ChatPage: React.FC = () => {
                     <SynthesisBanner>{message.metadata.synthesis}</SynthesisBanner>
                   )}
 
-                  <ResultsHeader>
-                    {t('chat.passagesFound', { count: message.passages.length })}
-                  </ResultsHeader>
+                  {hasPassages && (
+                    <>
+                      <ResultsHeader>
+                        {t('chat.passagesFound', { count: displayPassages.length })}
+                      </ResultsHeader>
 
-                  <div style={{ alignSelf: 'flex-start', maxWidth: '80%' }}>
-                    <PassageCard
-                      passages={message.passages}
-                      onBookmark={handleBookmark}
-                      isBookmarked={isBookmarked}
-                      onReadInContext={handleReadInContext}
-                      onSelectPassage={isDesktop ? (p) => handleSelectPassageForReader(p, message.passages!) : undefined}
-                      isDesktop={isDesktop}
-                    />
-                  </div>
+                      <div style={{ alignSelf: 'flex-start', maxWidth: '80%' }}>
+                        {citedPassages.length > 0 ? (
+                          displayPassages.map(p => (
+                            <div key={p.citation_index} id={`passage-card-${message.id}-${p.citation_index}`}>
+                              <PassageCard
+                                passages={[p]}
+                                onBookmark={handleBookmark}
+                                isBookmarked={isBookmarked}
+                                onReadInContext={handleReadInContext}
+                                onSelectPassage={isDesktop ? (pp) => handleSelectPassageForReader(pp, displayPassages) : undefined}
+                                isDesktop={isDesktop}
+                              />
+                            </div>
+                          ))
+                        ) : (
+                          <PassageCard
+                            passages={displayPassages}
+                            onBookmark={handleBookmark}
+                            isBookmarked={isBookmarked}
+                            onReadInContext={handleReadInContext}
+                            onSelectPassage={isDesktop ? (p) => handleSelectPassageForReader(p, displayPassages) : undefined}
+                            isDesktop={isDesktop}
+                          />
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
-              ) : (
-                <MessageBubble key={message.id} $isUser={message.isUser}>
-                  {message.isUser ? message.text : <MarkdownMessage content={message.text} />}
-                </MessageBubble>
-              )
-            ))}
+              );
+            })}
 
             {isStreaming && streamingResponse && (
               <StreamingBubble $isUser={false}>

@@ -7,6 +7,7 @@ export interface Passage {
   volume?: number;
   index?: number;
   relevance_summary?: string;
+  citation_index?: number;
 }
 
 export interface QueryMetadata {

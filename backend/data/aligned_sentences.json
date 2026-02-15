@@ -1,0 +1,200 @@
+[
+  {
+    "volume": 1,
+    "chapter": "Overture",
+    "en_chars": 472445,
+    "fr_chars": 434931,
+    "anchor_pairs": 142,
+    "aligned_pairs": 502,
+    "output_chunks": 277
+  },
+  {
+    "volume": 1,
+    "chapter": "Swann in Love",
+    "en_chars": 500128,
+    "fr_chars": 455662,
+    "anchor_pairs": 188,
+    "aligned_pairs": 767,
+    "output_chunks": 319
+  },
+  {
+    "volume": 1,
+    "chapter": "Place-Names: The Name",
+    "en_chars": 111515,
+    "fr_chars": 105474,
+    "anchor_pairs": 38,
+    "aligned_pairs": 102,
+    "output_chunks": 64
+  },
+  {
+    "volume": 2,
+    "chapter": "Madame Swann at Home",
+    "en_chars": 531289,
+    "fr_chars": 407985,
+    "anchor_pairs": 151,
+    "aligned_pairs": 443,
+    "output_chunks": 235
+  },
+  {
+    "volume": 2,
+    "chapter": "Place-Names: The Place",
+    "en_chars": 360278,
+    "fr_chars": 387274,
+    "anchor_pairs": 78,
+    "aligned_pairs": 349,
+    "output_chunks": 156
+  },
+  {
+    "volume": 2,
+    "chapter": "Seascape, with Frieze of Girls",
+    "en_chars": 411692,
+    "fr_chars": 436748,
+    "anchor_pairs": 133,
+    "aligned_pairs": 365,
+    "output_chunks": 224
+  },
+  {
+    "volume": 3,
+    "chapter": "Full Volume",
+    "en_chars": 1425790,
+    "fr_chars": 1356449,
+    "anchor_pairs": 500,
+    "aligned_pairs": 2095,
+    "output_chunks": 863
+  },
+  {
+    "volume": 4,
+    "chapter": "Introduction",
+    "en_chars": 78824,
+    "fr_chars": 74440,
+    "anchor_pairs": 22,
+    "aligned_pairs": 40,
+    "output_chunks": 31
+  },
+  {
+    "volume": 4,
+    "chapter": "Chapter 1",
+    "en_chars": 355341,
+    "fr_chars": 347239,
+    "anchor_pairs": 126,
+    "aligned_pairs": 333,
+    "output_chunks": 207
+  },
+  {
+    "volume": 4,
+    "chapter": "Chapter 2",
+    "en_chars": 469846,
+    "fr_chars": 462172,
+    "anchor_pairs": 186,
+    "aligned_pairs": 319,
+    "output_chunks": 229
+  },
+  {
+    "volume": 4,
+    "chapter": "Chapter 3",
+    "en_chars": 323466,
+    "fr_chars": 313115,
+    "anchor_pairs": 122,
+    "aligned_pairs": 190,
+    "output_chunks": 155
+  },
+  {
+    "volume": 4,
+    "chapter": "Chapter 4",
+    "en_chars": 44880,
+    "fr_chars": 43893,
+    "anchor_pairs": 18,
+    "aligned_pairs": 22,
+    "output_chunks": 19
+  },
+  {
+    "volume": 5,
+    "chapter": "Chapter 1 \u2014 Life with Albertine",
+    "en_chars": 444377,
+    "fr_chars": 431262,
+    "anchor_pairs": 163,
+    "aligned_pairs": 412,
+    "output_chunks": 276
+  },
+  {
+    "volume": 5,
+    "chapter": "Chapter 2 \u2014 The Verdurins Quarrel with M. De Charlus",
+    "en_chars": 320691,
+    "fr_chars": 309667,
+    "anchor_pairs": 129,
+    "aligned_pairs": 189,
+    "output_chunks": 161
+  },
+  {
+    "volume": 5,
+    "chapter": "Chapter 3 \u2014 Flight of Albertine",
+    "en_chars": 209324,
+    "fr_chars": 206224,
+    "anchor_pairs": 80,
+    "aligned_pairs": 128,
+    "output_chunks": 103
+  },
+  {
+    "volume": 6,
+    "chapter": "Chapter 1 \u2014 Grief and Oblivion",
+    "en_chars": 337617,
+    "fr_chars": 325367,
+    "anchor_pairs": 134,
+    "aligned_pairs": 228,
+    "output_chunks": 185
+  },
+  {
+    "volume": 6,
+    "chapter": "Chapter 2 \u2014 Mademoiselle De Forcheville",
+    "en_chars": 157146,
+    "fr_chars": 152490,
+    "anchor_pairs": 64,
+    "aligned_pairs": 133,
+    "output_chunks": 94
+  },
+  {
+    "volume": 6,
+    "chapter": "Chapter 3 \u2014 Venice",
+    "en_chars": 66457,
+    "fr_chars": 64020,
+    "anchor_pairs": 21,
+    "aligned_pairs": 91,
+    "output_chunks": 38
+  },
+  {
+    "volume": 6,
+    "chapter": "Chapter 4 \u2014 A Fresh Light Upon Robert De Saint-Loup",
+    "en_chars": 91606,
+    "fr_chars": 86794,
+    "anchor_pairs": 37,
+    "aligned_pairs": 60,
+    "output_chunks": 46
+  },
+  {
+    "volume": 7,
+    "chapter": "Chapter 1 \u2014 Tansonville",
+    "en_chars": 59938,
+    "fr_chars": 62967,
+    "anchor_pairs": 24,
+    "aligned_pairs": 49,
+    "output_chunks": 36
+  },
+  {
+    "volume": 7,
+    "chapter": "Chapter 2 \u2014 M. de Charlus During the War, His Opinions, His Pleasures",
+    "en_chars": 284950,
+    "fr_chars": 301720,
+    "anchor_pairs": 107,
+    "aligned_pairs": 170,
+    "output_chunks": 135
+  },
+  {
+    "volume": 7,
+    "chapter": "Chapter 3 \u2014 An Afternoon Party at the House of the Princesse de Guermantes",
+    "en_chars": 427719,
+    "fr_chars": 465085,
+    "anchor_pairs": 140,
+    "aligned_pairs": 310,
+    "output_chunks": 231
+  }
+]

@@ -1,8 +1,8 @@
 """
 Corpus loading and table-of-contents builder for the Read Proust feature.
 
-Loads parsed_clean.json once at import time and provides lookup functions
-for browsing volumes, chapters, and paginated passages.
+Loads parsed_clean_bilingual.json once at import time and provides lookup
+functions for browsing volumes, chapters, and paginated passages.
 """
 
 import json
@@ -31,6 +31,10 @@ _FRENCH_NAMES = {
     "Madame Swann at Home": "Autour de Mme Swann",
     "Place-Names: The Place": "Noms de pays : le pays",
     "Seascape, with Frieze of Girls": "Autour de Mme Swann (suite)",
+    # Vol 3 part names
+    "Part 1": "Première partie",
+    "Part 2": "Deuxième partie",
+    "Part 3": "Troisième partie",
     # Vol 3-7: generic chapter names
     "Chapter 1": "Chapitre 1",
     "Chapter 2": "Chapitre 2",
@@ -61,8 +65,7 @@ def _fr_name(en_name: str) -> str:
     return _FRENCH_NAMES.get(en_name) or _FRENCH_NAMES.get(normalized, en_name)
 
 
-_DATA_PATH = Path(__file__).parent / "parsed_clean.json"
-_BILINGUAL_PATH = Path(__file__).parent / "parsed_clean_bilingual.json"
+_DATA_PATH = Path(__file__).parent / "parsed_clean_bilingual.json"
 
 # Loaded once at startup
 _passages: list[dict] = []
@@ -79,9 +82,7 @@ _index_to_pos: dict[int, int] = {}
 
 def _load():
     global _passages, _structure, _chapter_order, _index_to_pos
-    # Prefer bilingual corpus if available, fall back to English-only
-    data_path = _BILINGUAL_PATH if _BILINGUAL_PATH.exists() else _DATA_PATH
-    with open(data_path, encoding="utf-8") as f:
+    with open(_DATA_PATH, encoding="utf-8") as f:
         _passages = json.load(f)
 
     # Build volume -> chapter -> passage indices, preserving document order
@@ -193,8 +194,10 @@ def get_chapter_passages(
 
     first_passage = _passages[indices[0]]
     vol_name = first_passage.get("book", f"Volume {volume}")
+    vol_name_en = vol_name
     chapter_display = chapter
-    if lang == "fr":
+    chapter_display_en = chapter
+    if lang in ("fr", "both"):
         vol_name = _fr_name(vol_name)
         chapter_display = _fr_name(chapter)
 
@@ -216,6 +219,7 @@ def get_chapter_passages(
         "has_prev": offset > 0,
         "volume_name": vol_name,
         "chapter_name": chapter_display,
+        **({"volume_name_en": vol_name_en, "chapter_name_en": chapter_display_en} if lang == "both" else {}),
         "prev_chapter": (
             {"volume": prev_chapter[0], "chapter": prev_chapter[1]}
             if prev_chapter

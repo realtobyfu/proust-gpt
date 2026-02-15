@@ -10,11 +10,12 @@ import { formatPassageText } from '../utils/formatPassageText';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 const PASSAGES_PER_PAGE = 20;
 
-const Container = styled.div`
-  max-width: 780px;
+const Container = styled.div<{ $wide?: boolean }>`
+  max-width: ${props => props.$wide ? '1200px' : '780px'};
   margin: 0 auto;
   padding: 1.5rem 1rem 2rem;
   position: relative;
+  transition: max-width 0.3s ease;
 `;
 
 const ChapterTitle = styled.h2`
@@ -263,6 +264,61 @@ const UnavailableNote = styled.span`
   margin-top: 0.25rem;
 `;
 
+const BilingualToggle = styled.button<{ $active: boolean }>`
+  background: none;
+  border: 1px solid ${props => props.$active ? '#8b4513' : '#d4ccc3'};
+  border-radius: 4px;
+  padding: 0.2rem 0.5rem;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.7rem;
+  color: ${props => props.$active ? '#8b4513' : '#aaa'};
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+
+  &:hover {
+    color: #8b4513;
+    border-color: #8b4513;
+  }
+`;
+
+const BilingualRow = styled.div`
+  display: flex;
+  gap: 2rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0;
+  }
+`;
+
+const BilingualColumn = styled.div<{ $secondary?: boolean }>`
+  flex: ${props => props.$secondary ? '0 0 43%' : '1'};
+  min-width: 0;
+
+  ${props => props.$secondary && `
+    border-left: 1px solid #e8e2da;
+    padding-left: 2rem;
+
+    @media (max-width: 768px) {
+      border-left: none;
+      padding-left: 0;
+      border-top: 1px solid #e8e2da;
+      padding-top: 0.25rem;
+    }
+  `}
+`;
+
+const SecondaryPassageText = styled.p`
+  font-family: 'Georgia', serif;
+  font-size: 1.08rem;
+  line-height: 1.9;
+  color: #666;
+  text-align: justify;
+  margin: 0;
+  padding: 0.5rem 0;
+`;
+
 const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavigateToToc, highlightPassageIndex }) => {
   const { t } = useTranslation();
   const { textLanguage } = useLanguage();
@@ -274,11 +330,14 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
   const [totalInChapter, setTotalInChapter] = useState(0);
   const [volumeName, setVolumeName] = useState('');
   const [chapterName, setChapterName] = useState('');
+  const [, setVolumeNameEn] = useState('');
+  const [chapterNameEn, setChapterNameEn] = useState('');
   const [prevChapter, setPrevChapter] = useState<ChapterNav | null>(null);
   const [nextChapter, setNextChapter] = useState<ChapterNav | null>(null);
   const [loading, setLoading] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
   const [atBottom, setAtBottom] = useState(false);
+  const [bilingual, setBilingual] = useLocalStorage<boolean>('proust-bilingual', false);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const totalPages = Math.max(1, Math.ceil(totalInChapter / PASSAGES_PER_PAGE));
@@ -308,6 +367,8 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
       setTotalInChapter(data.total_in_chapter);
       setVolumeName(data.volume_name);
       setChapterName(data.chapter_name);
+      setVolumeNameEn(data.volume_name_en || '');
+      setChapterNameEn(data.chapter_name_en || '');
       setPrevChapter(data.prev_chapter);
       setNextChapter(data.next_chapter);
     } catch (err) {
@@ -321,11 +382,12 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
   // Fetch passages when volume/chapter/page/language changes
   useEffect(() => {
     setInitialLoad(true);
-    fetchPassages(volume, chapter, page, textLanguage);
+    const lang = bilingual ? 'both' : textLanguage;
+    fetchPassages(volume, chapter, page, lang);
     if (highlightPassageIndex == null) {
       window.scrollTo(0, 0);
     }
-  }, [volume, chapter, page, textLanguage, fetchPassages, highlightPassageIndex]);
+  }, [volume, chapter, page, textLanguage, bilingual, fetchPassages, highlightPassageIndex]);
 
   // Track reading progress — single atomic update per page load
   useEffect(() => {
@@ -483,13 +545,35 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
         )}
       </ProgressBarContainer>
 
-      <Container ref={containerRef}>
+      <Container ref={containerRef} $wide={bilingual}>
         <HeaderRow>
-          <BackButton onClick={onNavigateToToc}>&larr; {t('readPage.contents')}</BackButton>
+          <BackButton onClick={onNavigateToToc}>&larr;{!bilingual && ` ${t('readPage.contents')}`}</BackButton>
           <VolumeName>{volumeName}</VolumeName>
-          {totalPages > 1 && <PageInfo>{t('readPage.pageOf', { current: page + 1, total: totalPages })}</PageInfo>}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <BilingualToggle
+              $active={bilingual}
+              onClick={() => setBilingual(!bilingual)}
+              title={bilingual ? 'Hide translation' : 'Show side-by-side translation'}
+            >
+              {bilingual ? 'EN / FR' : 'EN / FR'}
+            </BilingualToggle>
+            {totalPages > 1 && <PageInfo>{t('readPage.pageOf', { current: page + 1, total: totalPages })}</PageInfo>}
+          </div>
         </HeaderRow>
-        {page === 0 && <ChapterTitle>{chapterName}</ChapterTitle>}
+        {page === 0 && (
+          bilingual ? (
+            <BilingualRow>
+              <BilingualColumn>
+                <ChapterTitle>{chapterName}</ChapterTitle>
+              </BilingualColumn>
+              <BilingualColumn $secondary>
+                <ChapterTitle style={{ color: '#666' }}>{chapterNameEn || chapterName}</ChapterTitle>
+              </BilingualColumn>
+            </BilingualRow>
+          ) : (
+            <ChapterTitle>{chapterName}</ChapterTitle>
+          )
+        )}
 
         {mergedPassages.map((group, gi) => {
           const mergedText = group.map(p => p.text.trim()).join(' ');
@@ -499,9 +583,28 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
             <React.Fragment key={`group-${firstPassage.index}`}>
               <PassageBlock data-passage-indices={group.map(p => p.index).join(',')}>
                 <ParagraphNumber>{gi + 1}</ParagraphNumber>
-                <PassageText>{formatPassageText(mergedText)}</PassageText>
-                {textLanguage === 'fr' && group.some(p => p.text_unavailable) && (
-                  <UnavailableNote>{t('passage.frenchUnavailable')}</UnavailableNote>
+                {bilingual ? (() => {
+                  const frText = group.map(p => (p.text_fr || '').trim()).filter(Boolean).join(' ');
+                  return (
+                    <BilingualRow>
+                      <BilingualColumn>
+                        {frText
+                          ? <PassageText>{formatPassageText(frText)}</PassageText>
+                          : <UnavailableNote>{t('passage.frenchUnavailable')}</UnavailableNote>
+                        }
+                      </BilingualColumn>
+                      <BilingualColumn $secondary>
+                        <SecondaryPassageText>{formatPassageText(mergedText)}</SecondaryPassageText>
+                      </BilingualColumn>
+                    </BilingualRow>
+                  );
+                })() : (
+                  <>
+                    <PassageText>{formatPassageText(mergedText)}</PassageText>
+                    {textLanguage === 'fr' && group.some(p => p.text_unavailable) && (
+                      <UnavailableNote>{t('passage.frenchUnavailable')}</UnavailableNote>
+                    )}
+                  </>
                 )}
                 <PassageActions className="passage-actions">
                   <ActionButton
