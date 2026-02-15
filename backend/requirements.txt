@@ -9,6 +9,8 @@ langchain-cohere
 
 # LangChain core
 langchain
+langgraph
+langgraph-prebuilt
 
 # Vector database
 pinecone[grpc]

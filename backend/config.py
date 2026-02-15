@@ -46,6 +46,11 @@ class Config(BaseSettings):
     RETRIEVAL_K: int = 5
     RETRIEVAL_CANDIDATES: int = 20
 
+    # Agent settings
+    AGENT_ENABLED: bool = True
+    REFLECT_AGENT_ENABLED: bool = True
+    AGENT_MAX_STEPS: int = 4
+
     def validate(self) -> list[str]:
         """
         Validate that required configuration is present.

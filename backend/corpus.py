@@ -272,6 +272,46 @@ def get_passage_text(passage_index: int, lang: str = "en") -> dict | None:
     return result
 
 
+def search_passages_by_text(
+    substring: str,
+    volume: int | None = None,
+    limit: int = 10,
+    lang: str = "en",
+) -> list[dict]:
+    """
+    In-memory case-insensitive text search across the corpus.
+
+    Returns a list of passage dicts matching the substring, optionally
+    filtered to a specific volume.  No API calls — purely local.
+    """
+    needle = substring.lower()
+    results: list[dict] = []
+
+    for idx, p in enumerate(_passages):
+        if volume is not None and p.get("volume") != volume:
+            continue
+
+        # Search in the appropriate language text
+        if lang == "fr":
+            text = p.get("text_fr", "") or ""
+        else:
+            text = p.get("text", "")
+
+        if needle in text.lower():
+            entry = {
+                "index": p.get("index", idx),
+                "book": p.get("book", "Unknown"),
+                "chapter": p.get("chapter", "Unknown"),
+                "volume": p.get("volume"),
+                "text": clean_passage_text(text)[:500],
+            }
+            results.append(entry)
+            if len(results) >= limit:
+                break
+
+    return results
+
+
 def locate_passage(passage_index: int) -> dict | None:
     """
     Given a passage index, return its location in the reading view.

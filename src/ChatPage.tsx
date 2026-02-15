@@ -7,7 +7,7 @@ import ReaderPanel from './components/ReaderPanel';
 import MarkdownMessage from './components/MarkdownMessage';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { useLanguage } from './contexts/LanguageContext';
-import { useStreamingQuery, Passage } from './hooks/useStreamingQuery';
+import { useStreamingQuery, Passage, HistoryMessage } from './hooks/useStreamingQuery';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useChatSessions, Message } from './hooks/useChatSessions';
 
@@ -616,7 +616,7 @@ const ChatPage: React.FC = () => {
   const { language } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
-  const { mode: locationMode, prompt } = location.state || { mode: 'explore_lost_time', prompt: '' };
+  const { mode: locationMode, prompt, resumeLastSession } = location.state || { mode: 'explore_lost_time', prompt: '', resumeLastSession: false };
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isDesktop = useIsDesktop();
 
@@ -671,6 +671,21 @@ const ChatPage: React.FC = () => {
   useEffect(() => {
     if (hasInitializedRef.current) return;
     hasInitializedRef.current = true;
+
+    if (resumeLastSession) {
+      const recent = getMostRecentSession();
+      if (recent && recent.messages.length > 0) {
+        currentSessionIdRef.current = recent.id;
+        setMessages(recent.messages);
+        setActiveMode(recent.mode);
+      } else {
+        const session = createSession('explore_lost_time');
+        currentSessionIdRef.current = session.id;
+        setActiveMode('explore_lost_time');
+      }
+      navigate(location.pathname, { replace: true, state: {} });
+      return;
+    }
 
     if (prompt) {
       const mode = locationMode || 'explore_lost_time';
@@ -846,12 +861,19 @@ const ChatPage: React.FC = () => {
       isUser: true
     };
 
+    // Build conversation history from recent messages (last 6)
+    const recentMessages = [...messages].slice(-6);
+    const history: HistoryMessage[] = recentMessages.map(m => ({
+      role: m.isUser ? 'user' as const : 'assistant' as const,
+      content: m.text,
+    }));
+
     setMessages(prev => [...prev, newMessage]);
     setUserInput('');
     setSelectedPassage(null);
 
     const queryMode = activeMode === 'refine_prose' ? 'reflect' : 'explore';
-    await streamQuery(message, queryMode, language);
+    await streamQuery(message, queryMode, language, history.length > 0 ? history : undefined);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

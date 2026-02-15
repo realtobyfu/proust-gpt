@@ -28,6 +28,7 @@ from retrieval import (
     check_pinecone_connection,
     retrieve_passages,
 )
+from agent import stream_agent_response, query_agent, needs_agent
 
 
 # =============================================================================
@@ -35,10 +36,16 @@ from retrieval import (
 # =============================================================================
 
 
+class HistoryMessage(BaseModel):
+    role: str
+    content: str
+
+
 class QueryRequest(BaseModel):
     query: Optional[str] = None
     message: Optional[str] = None
     lang: Optional[str] = "en"
+    history: Optional[list[HistoryMessage]] = None
 
 
 class PassageItem(BaseModel):
@@ -156,7 +163,11 @@ async def explore_lost_time_stream(body: QueryRequest):
     """
     Streaming RAG endpoint using Server-Sent Events.
 
+    Routes complex/follow-up queries through the LangGraph agent,
+    simple queries through the fast single-shot pipeline.
+
     SSE events:
+        {"type": "status", "status": "..."}   - Agent status updates
         {"type": "token", "token": "..."}     - Individual tokens
         {"type": "sources", "passages": [...]} - Source passages
         {"type": "done", "done": true}         - Stream complete
@@ -169,8 +180,21 @@ async def explore_lost_time_stream(body: QueryRequest):
             media_type="text/event-stream",
         )
 
+    lang = body.lang or "en"
+    history = [m.model_dump() for m in body.history] if body.history else None
+
+    if needs_agent(query, history):
+        return StreamingResponse(
+            async_sse_generator(stream_agent_response, query, history, lang),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "X-Accel-Buffering": "no",
+            },
+        )
+
     return StreamingResponse(
-        async_sse_generator(stream_rag_response, query, body.lang or "en"),
+        async_sse_generator(stream_rag_response, query, lang),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
@@ -219,8 +243,14 @@ async def explore_lost_time(body: QueryRequest):
     if not query:
         return {"passages": []}
 
+    lang = body.lang or "en"
+    history = [m.model_dump() for m in body.history] if body.history else None
+
     try:
-        result = await asyncio.to_thread(query_rag, query, body.lang or "en")
+        if needs_agent(query, history):
+            result = await asyncio.to_thread(query_agent, query, history, lang)
+        else:
+            result = await asyncio.to_thread(query_rag, query, lang)
         return {
             "passages": result["passages"],
             "reply": result.get("reply", ""),

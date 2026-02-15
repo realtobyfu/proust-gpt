@@ -28,6 +28,11 @@ interface StreamEvent {
   error?: string;
 }
 
+export interface HistoryMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export interface StreamingQueryResult {
   response: string;
   passages: Passage[];
@@ -36,7 +41,7 @@ export interface StreamingQueryResult {
   isLoading: boolean;
   isStreaming: boolean;
   error: string | null;
-  query: (question: string, mode: 'explore' | 'reflect', lang?: string) => Promise<void>;
+  query: (question: string, mode: 'explore' | 'reflect', lang?: string, history?: HistoryMessage[]) => Promise<void>;
   abort: () => void;
   reset: () => void;
 }
@@ -94,16 +99,22 @@ export function useStreamingQuery(options: {
   const queryNonStreaming = useCallback(async (
     question: string,
     mode: 'explore' | 'reflect',
-    lang: string = 'en'
+    lang: string = 'en',
+    history?: HistoryMessage[]
   ): Promise<void> => {
     const endpoint = mode === 'reflect'
       ? `${API_BASE_URL}/api/reflect`
       : `${API_BASE_URL}/api/explore_lost_time`;
 
+    const body: Record<string, unknown> = { query: question, message: question, lang };
+    if (history && history.length > 0) {
+      body.history = history;
+    }
+
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: question, message: question, lang }),
+      body: JSON.stringify(body),
     });
 
     const data = await response.json();
@@ -119,7 +130,8 @@ export function useStreamingQuery(options: {
   const queryStreaming = useCallback(async (
     question: string,
     mode: 'explore' | 'reflect',
-    lang: string = 'en'
+    lang: string = 'en',
+    history?: HistoryMessage[]
   ): Promise<void> => {
     // Create abort controller for this request
     abortControllerRef.current = new AbortController();
@@ -128,10 +140,15 @@ export function useStreamingQuery(options: {
       ? `${API_BASE_URL}/api/reflect/stream`
       : `${API_BASE_URL}/api/explore_lost_time/stream`;
 
+    const body: Record<string, unknown> = { query: question, message: question, lang };
+    if (history && history.length > 0) {
+      body.history = history;
+    }
+
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: question, message: question, lang }),
+      body: JSON.stringify(body),
       signal: abortControllerRef.current.signal,
     });
 
@@ -216,7 +233,8 @@ export function useStreamingQuery(options: {
   const query = useCallback(async (
     question: string,
     mode: 'explore' | 'reflect',
-    lang: string = 'en'
+    lang: string = 'en',
+    history?: HistoryMessage[]
   ): Promise<void> => {
     // Reset state
     setResponse('');
@@ -229,7 +247,7 @@ export function useStreamingQuery(options: {
 
     try {
       // Try streaming first
-      await queryStreaming(question, mode, lang);
+      await queryStreaming(question, mode, lang, history);
     } catch (streamError) {
       // Check if aborted
       if (streamError instanceof Error && streamError.name === 'AbortError') {
@@ -243,7 +261,7 @@ export function useStreamingQuery(options: {
         try {
           setResponse('');
           setPassages([]);
-          await queryNonStreaming(question, mode, lang);
+          await queryNonStreaming(question, mode, lang, history);
         } catch (fallbackError) {
           setError(fallbackError instanceof Error ? fallbackError.message : 'Unknown error');
         }

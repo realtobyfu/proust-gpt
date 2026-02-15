@@ -84,20 +84,20 @@ Write in flowing prose paragraphs — no lists, no headings. Use *italics* spari
 REFLECT_SYSTEM_PROMPT_FR = """Vous êtes un conversateur sage et réfléchi dans l'esprit de Marcel Proust. Vous aidez le lecteur à contempler sa vie intérieure, en vous appuyant sur les thèmes de la mémoire, du temps, de la sensation et du moi.
 Écrivez en paragraphes de prose fluide — pas de listes, pas de titres. Utilisez les *italiques* avec parcimonie. Adaptez la longueur à la profondeur de la question. Terminez par une question réfléchie pour inviter à une réflexion plus profonde. Répondez en français."""
 
-_RAG_FALLBACK_TEMPLATE = """You are a literary companion guiding a reader through Marcel Proust's "In Search of Lost Time."
-Write in flowing prose paragraphs — no lists, no headings. Use *italics* for titles and brief quotations only. Match length to the question's scope. Quote brief phrases from the passages naturally.
+_RAG_FALLBACK_TEMPLATE = """You are a literary companion for Marcel Proust's "In Search of Lost Time."
+Write in flowing prose — no lists, no headings. Be concise: aim for 2-3 short paragraphs. Quote brief phrases from the passages directly rather than summarizing at length. Do not restate the question.
 
-When your answer draws on a specific passage, include [1], [2], etc. at the end of the relevant sentence to indicate which passage you are referencing. If the question is general and no specific passage is needed, answer without any bracketed references.
+When your answer draws on a specific passage, include [1], [2], etc. at the end of the relevant sentence. If no specific passage is needed, answer without bracketed references.
 
 Context passages:
 {context}
 
 Reader's question: {question}"""
 
-_RAG_FALLBACK_TEMPLATE_FR = """Vous êtes un compagnon littéraire guidant un lecteur à travers « À la recherche du temps perdu » de Marcel Proust.
-Écrivez en paragraphes de prose fluide — pas de listes, pas de titres. Utilisez les *italiques* pour les titres et citations brèves uniquement. Adaptez la longueur à la question. Citez de brèves phrases des passages naturellement. Répondez en français.
+_RAG_FALLBACK_TEMPLATE_FR = """Vous êtes un compagnon littéraire pour « À la recherche du temps perdu » de Marcel Proust.
+Écrivez en prose fluide — pas de listes, pas de titres. Soyez concis : visez 2-3 courts paragraphes. Citez de brèves phrases des passages directement. Ne reformulez pas la question. Répondez en français.
 
-Lorsque votre réponse s'appuie sur un passage spécifique, incluez [1], [2], etc. à la fin de la phrase concernée pour indiquer quel passage vous référencez. Si la question est générale et qu'aucun passage spécifique n'est nécessaire, répondez sans références entre crochets.
+Lorsque votre réponse s'appuie sur un passage spécifique, incluez [1], [2], etc. à la fin de la phrase concernée. Si aucun passage spécifique n'est nécessaire, répondez sans références entre crochets.
 
 Passages de contexte :
 {context}
@@ -115,17 +115,25 @@ def _get_rag_fallback_template(lang: str = "en") -> str:
 
 # ── Retrieval helpers ─────────────────────────────────────────────────────────
 
-def _pinecone_query(query: str, top_k: int, lang: str = "en") -> list[Document]:
+def _pinecone_query(
+    query: str,
+    top_k: int,
+    lang: str = "en",
+    metadata_filter: dict | None = None,
+) -> list[Document]:
     embeddings = get_embeddings()
     query_vector = embeddings.embed_query(query)
 
     index = get_pinecone_index()
-    results = index.query(
+    query_kwargs: dict = dict(
         vector=query_vector,
         top_k=top_k,
         include_metadata=True,
         namespace=lang,
     )
+    if metadata_filter:
+        query_kwargs["filter"] = metadata_filter
+    results = index.query(**query_kwargs)
 
     docs = []
     for match in results.matches:
