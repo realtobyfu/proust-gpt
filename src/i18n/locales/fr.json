@@ -137,7 +137,9 @@
     "previousPassage": "Passage pr\u00e9c\u00e9dent",
     "nextPassage": "Passage suivant",
     "goToPassage": "Aller au passage {{number}}",
-    "frenchUnavailable": "(Texte fran\u00e7ais indisponible pour ce passage)"
+    "frenchUnavailable": "(Texte fran\u00e7ais indisponible pour ce passage)",
+    "seeOriginal": "voir l'original",
+    "seeTranslation": "voir la traduction"
   },
   "bookmarks": {
     "savedPassages": "Passages enregistr\u00e9s",

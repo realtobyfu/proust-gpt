@@ -415,6 +415,35 @@ const FloatingChatButton = styled.button`
   }
 `;
 
+const NewChatChip = styled.button`
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 1.3rem;
+  line-height: 1;
+  color: #5a6b5a;
+  background: rgba(90, 107, 90, 0.06);
+  border: 1px dashed #8a9b8a;
+  border-radius: 10px;
+  padding: 12px 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: rgba(90, 107, 90, 0.14);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(90, 107, 90, 0.15);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #5a6b5a;
+    box-shadow: 0 0 0 3px rgba(90, 107, 90, 0.2);
+  }
+
+  @media (max-width: 768px) {
+    padding: 12px 16px;
+  }
+`;
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 const LandingPage: React.FC = () => {
@@ -512,6 +541,9 @@ const LandingPage: React.FC = () => {
             {t(chip.textKey)}
           </Button>
         ))}
+        <NewChatChip onClick={() => navigate('/chat', { state: { mode: 'refine_prose', prompt: '' } })}>
+          +
+        </NewChatChip>
       </ButtonContainer>
 
       <GuidanceToggle onClick={() => setShowGuidance(!showGuidance)}>
@@ -543,7 +575,7 @@ const LandingPage: React.FC = () => {
       </ProustSection>
 
       {hasHistory && (
-        <FloatingChatButton onClick={() => navigate('/chat', { state: { mode: 'explore_lost_time', prompt: '' } })}>
+        <FloatingChatButton onClick={() => navigate('/chat', { state: { resumeLastSession: true } })}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" strokeWidth="2" strokeLinecap="round"
                strokeLinejoin="round">

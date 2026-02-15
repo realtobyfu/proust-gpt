@@ -28,7 +28,7 @@ from retrieval import (
     check_pinecone_connection,
     retrieve_passages,
 )
-from agent import stream_agent_response, query_agent, needs_agent
+from agent import stream_agent_response, query_agent, needs_agent, stream_reflect_agent_response, query_reflect_agent
 
 
 # =============================================================================
@@ -52,8 +52,10 @@ class PassageItem(BaseModel):
     book: str
     chapter: str
     text: str
+    text_fr: Optional[str] = None
     volume: Optional[int] = None
     index: Optional[int] = None
+    citation_index: Optional[int] = None
     relevance_summary: Optional[str] = None
 
 
@@ -65,6 +67,7 @@ class ExploreResponse(BaseModel):
 
 class ReflectResponse(BaseModel):
     reply: str
+    passages: list[PassageItem] = []
 
 
 class HealthResponse(BaseModel):
@@ -208,9 +211,14 @@ async def reflect_stream(body: QueryRequest):
     """
     Streaming reflection endpoint using Server-Sent Events.
 
+    Routes through the reflect agent (with optional corpus search) when
+    enabled, falls back to pure LLM streaming otherwise.
+
     SSE events:
-        {"type": "token", "token": "..."}  - Individual tokens
-        {"type": "done", "done": true}     - Stream complete
+        {"type": "status", "status": "..."}   - Agent status updates
+        {"type": "token", "token": "..."}      - Individual tokens
+        {"type": "sources", "passages": [...]} - Source passages (when agent finds relevant text)
+        {"type": "done", "done": true}         - Stream complete
     """
     message = body.message or ""
 
@@ -220,8 +228,21 @@ async def reflect_stream(body: QueryRequest):
             media_type="text/event-stream",
         )
 
+    lang = body.lang or "en"
+    history = [m.model_dump() for m in body.history] if body.history else None
+
+    if config.REFLECT_AGENT_ENABLED:
+        return StreamingResponse(
+            async_sse_generator(stream_reflect_agent_response, message, history, lang),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "X-Accel-Buffering": "no",
+            },
+        )
+
     return StreamingResponse(
-        async_sse_generator(stream_reflect_response, message, body.lang or "en"),
+        async_sse_generator(stream_reflect_response, message, lang),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
@@ -265,6 +286,7 @@ async def explore_lost_time(body: QueryRequest):
                     "book": doc.metadata.get("book", "Unknown"),
                     "chapter": doc.metadata.get("chapter", "Unknown"),
                     "text": doc.page_content,
+                    "text_fr": doc.metadata.get("_text_fr") or doc.metadata.get("text_fr"),
                     "volume": doc.metadata.get("volume"),
                     "index": doc.metadata.get("index"),
                 })
@@ -273,7 +295,7 @@ async def explore_lost_time(body: QueryRequest):
             return ExploreResponse(passages=[], error=str(inner_e))
 
 
-@app.post("/api/reflect", response_model=ReflectResponse)
+@app.post("/api/reflect")
 async def reflect_on_day(body: QueryRequest):
     """Non-streaming reflection endpoint."""
     message = body.message or ""
@@ -281,8 +303,17 @@ async def reflect_on_day(body: QueryRequest):
     if not message:
         return {"reply": "No message received."}
 
+    lang = body.lang or "en"
+    history = [m.model_dump() for m in body.history] if body.history else None
+
     try:
-        reply = await asyncio.to_thread(query_reflect, message, body.lang or "en")
+        if config.REFLECT_AGENT_ENABLED:
+            result = await asyncio.to_thread(query_reflect_agent, message, history, lang)
+            return {
+                "reply": result["reply"],
+                "passages": result.get("passages", []),
+            }
+        reply = await asyncio.to_thread(query_reflect, message, lang)
         return {"reply": reply}
     except Exception as e:
         return {"reply": f"I apologize, but I encountered an error: {str(e)}"}

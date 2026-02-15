@@ -219,32 +219,21 @@ const AnimatedContent = styled.div<{ $dir: 'left' | 'right' | null }>`
   ${props => props.$dir === 'right' && css`animation: ${slideRight} 250ms ease;`}
 `;
 
-const LangPill = styled.div`
-  display: inline-flex;
-  align-items: center;
-  background: rgba(139, 69, 19, 0.04);
-  border: 1px solid #d4ccc3;
-  border-radius: 10px;
-  overflow: hidden;
+const SeeOriginalLink = styled.button`
+  background: none;
+  border: none;
   font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.65rem;
+  font-size: 0.72rem;
+  color: #8b4513;
+  cursor: pointer;
+  padding: 0;
   margin-left: 0.5rem;
   vertical-align: middle;
-`;
-
-const LangOption = styled.button<{ $active: boolean }>`
-  background: ${props => props.$active ? 'rgba(139, 69, 19, 0.12)' : 'transparent'};
-  color: ${props => props.$active ? '#8b4513' : '#999'};
-  border: none;
-  padding: 0.15rem 0.35rem;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: inherit;
-  font-weight: ${props => props.$active ? 600 : 400};
-  transition: all 0.15s ease;
+  transition: color 0.15s ease;
 
   &:hover {
-    color: #8b4513;
+    color: #6b3410;
+    text-decoration: underline;
   }
 `;
 
@@ -270,7 +259,7 @@ const PassageCard: React.FC<PassageCardProps> = ({
   const [slideDir, setSlideDir] = useState<'left' | 'right' | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [measuredHeight, setMeasuredHeight] = useState<string>('5.6em');
-  const [cardLang, setCardLang] = useState<'en' | 'fr'>('en');
+  const [showOriginal, setShowOriginal] = useState(false);
   const [frenchTexts, setFrenchTexts] = useState<Record<number, string | null>>({});
   const [fetchingFr, setFetchingFr] = useState(false);
 
@@ -295,20 +284,28 @@ const PassageCard: React.FC<PassageCardProps> = ({
     }
   }, [frenchTexts]);
 
-  // When toggling to French, fetch text if needed
-  const handleLangToggle = useCallback((lang: 'en' | 'fr', e: React.MouseEvent) => {
+  // Toggle "see original" — fetch on-demand if text_fr not in passage data
+  const handleToggleOriginal = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    setCardLang(lang);
-    if (lang === 'fr' && passage.index != null) {
+    const next = !showOriginal;
+    setShowOriginal(next);
+    if (next && !passage.text_fr && passage.index != null) {
       fetchFrenchText(passage.index);
     }
-  }, [passage, fetchFrenchText]);
+  }, [showOriginal, passage, fetchFrenchText]);
 
   // Determine display text
-  const displayText = cardLang === 'fr' && passage.index != null && frenchTexts[passage.index]
-    ? frenchTexts[passage.index]!
-    : passage.text;
-  const showFrUnavailable = cardLang === 'fr' && passage.index != null && frenchTexts[passage.index] === null;
+  const isFr = i18n.language === 'fr';
+  const frText = passage.text_fr || (passage.index != null ? frenchTexts[passage.index] : undefined);
+  let displayText: string;
+  if (isFr) {
+    displayText = frText || passage.text;
+  } else if (showOriginal && frText) {
+    displayText = frText;
+  } else {
+    displayText = passage.text;
+  }
+  const showFrUnavailable = showOriginal && !isFr && !frText && passage.index != null && frenchTexts[passage.index] === null;
 
   // Measure content for smooth expand
   useEffect(() => {
@@ -363,12 +360,12 @@ const PassageCard: React.FC<PassageCardProps> = ({
     }
   }, [currentIndex, goTo]);
 
-  const isFr = i18n.language === 'fr';
   const citationPrefix = passage.citation_index != null ? `[${passage.citation_index}] ` : '';
+  const indexSuffix = passage.index != null ? `, §${passage.index}` : '';
   const sourceLabel = citationPrefix + [
     isFr ? frenchName(passage.book || '') || 'À la recherche du temps perdu' : passage.book || 'In Search of Lost Time',
     isFr && passage.chapter ? frenchName(passage.chapter) : passage.chapter,
-  ].filter(Boolean).join(' — ');
+  ].filter(Boolean).join(' — ') + indexSuffix;
 
   return (
     <CardWrapper $expanded={expanded} onClick={handleCardClick}>
@@ -383,11 +380,10 @@ const PassageCard: React.FC<PassageCardProps> = ({
 
         <AnimatedContent $dir={slideDir}>
           <SourceChip>{sourceLabel}</SourceChip>
-          {passage.index != null && (
-            <LangPill>
-              <LangOption $active={cardLang === 'en'} onClick={(e) => handleLangToggle('en', e)}>EN</LangOption>
-              <LangOption $active={cardLang === 'fr'} onClick={(e) => handleLangToggle('fr', e)}>FR</LangOption>
-            </LangPill>
+          {!isFr && (passage.text_fr || passage.index != null) && (
+            <SeeOriginalLink onClick={handleToggleOriginal}>
+              {showOriginal ? t('passage.seeTranslation') : t('passage.seeOriginal')}
+            </SeeOriginalLink>
           )}
 
           <TextPreview
@@ -395,7 +391,7 @@ const PassageCard: React.FC<PassageCardProps> = ({
             $expanded={expanded}
             $maxHeight={expanded ? measuredHeight : '5.6em'}
           >
-            {fetchingFr && cardLang === 'fr' ? t('common.loading') : displayText}
+            {fetchingFr && showOriginal ? t('common.loading') : displayText}
           </TextPreview>
 
           {showFrUnavailable && (
@@ -420,7 +416,7 @@ const PassageCard: React.FC<PassageCardProps> = ({
           </ActionRow>
         )}
 
-        {hasMultiple && (expanded || isDesktop) && (
+        {hasMultiple && (
           <NavFooter onClick={(e) => e.stopPropagation()}>
             <NavArrow onClick={goPrev} disabled={currentIndex === 0} aria-label="Previous passage">
               &#8249;

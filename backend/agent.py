@@ -210,7 +210,7 @@ Strategy:
 - Character arcs: use find_character_mentions, then get_adjacent for context
 - Prefer free tools (get_adjacent, find_character, chapter_overview, toc) over search
 
-Style: Write in flowing prose. Be concise — aim for 2-3 short paragraphs, not essays. Cite passages with [1], [2], etc. Quote brief phrases directly rather than summarizing at length. Do not restate the question. Keep to 2-3 tool calls max."""
+Style: Write in flowing prose. Be concise — aim for 2-3 short paragraphs, not essays. Cite passages with [1], [2], etc. Quote brief phrases directly rather than summarizing at length. Do not restate the question. End with one thoughtful follow-up question to deepen the reader's exploration. Keep to 2-3 tool calls max."""
 
 AGENT_SYSTEM_PROMPT_FR = """Vous êtes un compagnon littéraire pour « À la recherche du temps perdu » de Marcel Proust (7 volumes, ~12 900 passages).
 
@@ -223,7 +223,7 @@ Stratégie :
 - Arcs narratifs : utilisez find_character_mentions, puis get_adjacent pour le contexte
 - Préférez les outils gratuits aux recherches quand c'est possible
 
-Style : Écrivez en prose fluide. Soyez concis — visez 2-3 courts paragraphes. Citez les passages avec [1], [2], etc. Citez de brèves phrases directement. Ne reformulez pas la question. Limitez-vous à 2-3 appels d'outils. Répondez en français."""
+Style : Écrivez en prose fluide. Soyez concis — visez 2-3 courts paragraphes. Citez les passages avec [1], [2], etc. Citez de brèves phrases directement. Ne reformulez pas la question. Terminez par une question de suivi réfléchie pour approfondir l'exploration du lecteur. Limitez-vous à 2-3 appels d'outils. Répondez en français."""
 
 
 # ── Reflect agent system prompts ─────────────────────────────────────────
@@ -474,6 +474,109 @@ def query_agent(
     passages = []
 
     for event in stream_agent_response(query, history=history, lang=lang):
+        if event["type"] == "token":
+            reply_parts.append(event["token"])
+        elif event["type"] == "sources":
+            passages = event["passages"]
+
+    return {
+        "reply": "".join(reply_parts),
+        "passages": passages,
+    }
+
+
+# ── Reflect agent streaming ─────────────────────────────────────────────
+
+
+def stream_reflect_agent_response(
+    message: str,
+    history: list[dict] | None = None,
+    lang: str = "en",
+) -> Generator[dict, None, None]:
+    """
+    Run the reflect LangGraph agent and yield SSE events.
+
+    Same event format as stream_agent_response but uses the reflect agent
+    (fewer tools, introspective system prompt).
+    """
+    passage_list: list[dict] = []
+    _tool_passages_var.set(passage_list)
+
+    yield {"type": "status", "status": "Reflecting..."}
+
+    messages: list = []
+    if history:
+        for msg in history:
+            role = msg.get("role", "user")
+            content = msg.get("content", "")
+            if role == "user":
+                messages.append(HumanMessage(content=content))
+            elif role == "assistant":
+                messages.append(AIMessage(content=content))
+    messages.append(HumanMessage(content=message))
+
+    agent = create_reflect_agent(lang=lang)
+
+    accumulated_response = ""
+    steps_taken = 0
+
+    for event in agent.stream(
+        {"messages": messages},
+        config={"recursion_limit": config.AGENT_MAX_STEPS * 2 + 2},
+        stream_mode="updates",
+    ):
+        for node_name, node_output in event.items():
+            if node_name == "agent":
+                agent_messages = node_output.get("messages", [])
+                for msg in agent_messages:
+                    if hasattr(msg, "tool_calls") and msg.tool_calls:
+                        for tc in msg.tool_calls:
+                            steps_taken += 1
+                            if steps_taken > config.AGENT_MAX_STEPS:
+                                break
+                            status = describe_tool_call(tc)
+                            yield {"type": "status", "status": status}
+                    elif hasattr(msg, "content") and msg.content and (
+                        not hasattr(msg, "tool_calls") or not msg.tool_calls
+                    ):
+                        content = msg.content
+                        chunk_size = 12
+                        for i in range(0, len(content), chunk_size):
+                            chunk = content[i:i + chunk_size]
+                            accumulated_response += chunk
+                            yield {"type": "token", "token": chunk}
+                            if _detect_repetition(accumulated_response):
+                                break
+
+    # Deduplicate passages by index
+    seen_indices: set[int] = set()
+    unique_passages: list[dict] = []
+    citation_idx = 1
+    for p in passage_list:
+        p_index = p.get("index")
+        if p_index is not None and p_index in seen_indices:
+            continue
+        if p_index is not None:
+            seen_indices.add(p_index)
+        p["citation_index"] = citation_idx
+        citation_idx += 1
+        unique_passages.append(p)
+
+    if unique_passages:
+        yield {"type": "sources", "passages": unique_passages}
+    yield {"type": "done", "done": True}
+
+
+def query_reflect_agent(
+    message: str,
+    history: list[dict] | None = None,
+    lang: str = "en",
+) -> dict:
+    """Run the reflect agent non-streaming. Returns {"reply": ..., "passages": [...]}."""
+    reply_parts = []
+    passages = []
+
+    for event in stream_reflect_agent_response(message, history=history, lang=lang):
         if event["type"] == "token":
             reply_parts.append(event["token"])
         elif event["type"] == "sources":

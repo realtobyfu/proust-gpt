@@ -137,7 +137,9 @@
     "previousPassage": "Previous passage",
     "nextPassage": "Next passage",
     "goToPassage": "Go to passage {{number}}",
-    "frenchUnavailable": "(French text unavailable for this passage)"
+    "frenchUnavailable": "(French text unavailable for this passage)",
+    "seeOriginal": "see original",
+    "seeTranslation": "see translation"
   },
   "bookmarks": {
     "savedPassages": "Saved Passages",

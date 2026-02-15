@@ -208,30 +208,19 @@ const Dot = styled.button<{ $active: boolean }>`
   ${props => props.$active && `transform: scale(1.3);`}
 `;
 
-const LangPill = styled.div`
-  display: inline-flex;
-  align-items: center;
-  background: rgba(139, 69, 19, 0.04);
-  border: 1px solid #d4ccc3;
-  border-radius: 10px;
-  overflow: hidden;
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.65rem;
-`;
-
-const LangOption = styled.button<{ $active: boolean }>`
-  background: ${props => props.$active ? 'rgba(139, 69, 19, 0.12)' : 'transparent'};
-  color: ${props => props.$active ? '#8b4513' : '#999'};
+const SeeOriginalLink = styled.button`
+  background: none;
   border: none;
-  padding: 0.15rem 0.35rem;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.72rem;
+  color: #8b4513;
   cursor: pointer;
-  font-family: inherit;
-  font-size: inherit;
-  font-weight: ${props => props.$active ? 600 : 400};
-  transition: all 0.15s ease;
+  padding: 0;
+  transition: color 0.15s ease;
 
   &:hover {
-    color: #8b4513;
+    color: #6b3410;
+    text-decoration: underline;
   }
 `;
 
@@ -253,7 +242,7 @@ const ReaderPanel: React.FC<ReaderPanelProps> = ({
   onSelectPassage,
 }) => {
   const { t, i18n } = useTranslation();
-  const [panelLang, setPanelLang] = useState<'en' | 'fr'>('en');
+  const [showOriginal, setShowOriginal] = useState(false);
   const [frenchTexts, setFrenchTexts] = useState<Record<number, string | null>>({});
   const [fetchingFr, setFetchingFr] = useState(false);
 
@@ -277,12 +266,13 @@ const ReaderPanel: React.FC<ReaderPanelProps> = ({
     }
   }, [frenchTexts]);
 
-  const handleLangToggle = useCallback((lang: 'en' | 'fr') => {
-    setPanelLang(lang);
-    if (lang === 'fr' && passage?.index != null) {
+  const handleToggleOriginal = useCallback(() => {
+    const next = !showOriginal;
+    setShowOriginal(next);
+    if (next && !passage?.text_fr && passage?.index != null) {
       fetchFrenchText(passage.index);
     }
-  }, [passage, fetchFrenchText]);
+  }, [showOriginal, passage, fetchFrenchText]);
 
   const goTo = useCallback((index: number) => {
     if (index >= 0 && index < allPassages.length) {
@@ -292,27 +282,33 @@ const ReaderPanel: React.FC<ReaderPanelProps> = ({
 
   if (!passage) return null;
 
-  const displayText = panelLang === 'fr' && passage.index != null && frenchTexts[passage.index]
-    ? frenchTexts[passage.index]!
-    : passage.text;
-  const showFrUnavailable = panelLang === 'fr' && passage.index != null && frenchTexts[passage.index] === null;
-
   const isFr = i18n.language === 'fr';
+  const frText = passage.text_fr || (passage.index != null ? frenchTexts[passage.index] : undefined);
+  let displayText: string;
+  if (isFr) {
+    displayText = frText || passage.text;
+  } else if (showOriginal && frText) {
+    displayText = frText;
+  } else {
+    displayText = passage.text;
+  }
+  const showFrUnavailable = showOriginal && !isFr && !frText && passage.index != null && frenchTexts[passage.index] === null;
+
+  const indexSuffix = passage.index != null ? `, §${passage.index}` : '';
   const sourceLabel = [
     isFr ? frenchName(passage.book || '') || 'À la recherche du temps perdu' : passage.book || 'In Search of Lost Time',
     isFr && passage.chapter ? frenchName(passage.chapter) : passage.chapter,
-  ].filter(Boolean).join(' — ');
+  ].filter(Boolean).join(' — ') + indexSuffix;
 
   return (
     <PanelContainer>
       <PanelHeader>
         <SourceChip>{sourceLabel}</SourceChip>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {passage.index != null && (
-            <LangPill>
-              <LangOption $active={panelLang === 'en'} onClick={() => handleLangToggle('en')}>EN</LangOption>
-              <LangOption $active={panelLang === 'fr'} onClick={() => handleLangToggle('fr')}>FR</LangOption>
-            </LangPill>
+          {!isFr && (passage.text_fr || passage.index != null) && (
+            <SeeOriginalLink onClick={handleToggleOriginal}>
+              {showOriginal ? t('passage.seeTranslation') : t('passage.seeOriginal')}
+            </SeeOriginalLink>
           )}
           <CloseButton onClick={onClose} aria-label="Close reader panel">
             &times;
@@ -322,7 +318,7 @@ const ReaderPanel: React.FC<ReaderPanelProps> = ({
 
       <PanelBody>
         <PassageText>
-          {fetchingFr && panelLang === 'fr' ? t('common.loading') : formatPassageText(displayText)}
+          {fetchingFr && showOriginal ? t('common.loading') : formatPassageText(displayText)}
         </PassageText>
 
         {showFrUnavailable && (

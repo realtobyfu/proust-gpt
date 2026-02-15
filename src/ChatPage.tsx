@@ -703,11 +703,11 @@ const ChatPage: React.FC = () => {
       handleSendMessage(prompt);
     } else {
       const mode = locationMode || 'explore_lost_time';
-      // Reuse the most recent empty session instead of always creating a new one
+      // Reuse the most recent empty session if it matches the requested mode
       const recent = getMostRecentSession();
-      if (recent && recent.messages.length === 0) {
+      if (recent && recent.messages.length === 0 && recent.mode === mode) {
         currentSessionIdRef.current = recent.id;
-        setActiveMode(recent.mode);
+        setActiveMode(mode);
       } else {
         const session = createSession(mode);
         currentSessionIdRef.current = session.id;
@@ -1093,14 +1093,12 @@ const ChatPage: React.FC = () => {
                         content={message.text}
                         passages={allPassages}
                         onCitationClick={(n) => {
-                          // Find the passage matching citation index
                           const target = allPassages.find(p => p.citation_index === n);
                           if (target && isDesktop) {
-                            // Open in split reader panel
                             handleSelectPassageForReader(target, displayPassages);
                           } else {
-                            // Mobile fallback: scroll to card
-                            const el = document.getElementById(`passage-card-${message.id}-${n}`);
+                            // Scroll to the passage carousel card
+                            const el = document.getElementById(`passage-carousel-${message.id}`);
                             el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                           }
                         }}
@@ -1118,30 +1116,15 @@ const ChatPage: React.FC = () => {
                         {t('chat.passagesFound', { count: displayPassages.length })}
                       </ResultsHeader>
 
-                      <div style={{ alignSelf: 'flex-start', maxWidth: '80%' }}>
-                        {citedPassages.length > 0 ? (
-                          displayPassages.map(p => (
-                            <div key={p.citation_index} id={`passage-card-${message.id}-${p.citation_index}`}>
-                              <PassageCard
-                                passages={[p]}
-                                onBookmark={handleBookmark}
-                                isBookmarked={isBookmarked}
-                                onReadInContext={handleReadInContext}
-                                onSelectPassage={isDesktop ? (pp) => handleSelectPassageForReader(pp, displayPassages) : undefined}
-                                isDesktop={isDesktop}
-                              />
-                            </div>
-                          ))
-                        ) : (
-                          <PassageCard
-                            passages={displayPassages}
-                            onBookmark={handleBookmark}
-                            isBookmarked={isBookmarked}
-                            onReadInContext={handleReadInContext}
-                            onSelectPassage={isDesktop ? (p) => handleSelectPassageForReader(p, displayPassages) : undefined}
-                            isDesktop={isDesktop}
-                          />
-                        )}
+                      <div id={`passage-carousel-${message.id}`} style={{ alignSelf: 'flex-start', maxWidth: '80%' }}>
+                        <PassageCard
+                          passages={displayPassages}
+                          onBookmark={handleBookmark}
+                          isBookmarked={isBookmarked}
+                          onReadInContext={handleReadInContext}
+                          onSelectPassage={isDesktop ? (p) => handleSelectPassageForReader(p, displayPassages) : undefined}
+                          isDesktop={isDesktop}
+                        />
                       </div>
                     </>
                   )}
@@ -1162,7 +1145,7 @@ const ChatPage: React.FC = () => {
               </ErrorMessage>
             )}
 
-            {isLoading && !isStreaming && (
+            {isLoading && !streamingResponse && (
               <LoadingIndicator>
                 <LoadingDot $delay="0s" />
                 <LoadingDot $delay="0.2s" />

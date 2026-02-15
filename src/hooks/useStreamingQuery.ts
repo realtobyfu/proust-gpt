@@ -4,6 +4,7 @@ export interface Passage {
   book: string;
   chapter: string;
   text: string;
+  text_fr?: string;
   volume?: number;
   index?: number;
   relevance_summary?: string;

@@ -68,7 +68,7 @@ def test_reflect_returns_reply(client):
     assert resp.status_code == 200
     data = resp.json()
     assert "reply" in data
-    assert "Mocked reflection" in data["reply"]
+    assert "Mocked agent reflection" in data["reply"]
 
 
 def test_reflect_empty_message(client):
@@ -135,6 +135,44 @@ def test_reflect_stream_empty_message(client):
     assert resp.status_code == 200
     events = _parse_sse(resp.text)
     assert any(e.get("type") == "error" for e in events)
+
+
+def test_reflect_stream_with_history(client):
+    resp = client.post(
+        "/api/reflect/stream",
+        json={
+            "message": "The smell of rain reminded me of my grandmother's garden.",
+            "history": [
+                {"role": "user", "content": "I had a beautiful walk today."},
+                {"role": "assistant", "content": "What a lovely experience."},
+            ],
+        },
+    )
+    assert resp.status_code == 200
+    assert "text/event-stream" in resp.headers["content-type"]
+
+    events = _parse_sse(resp.text)
+    types = [e["type"] for e in events]
+    assert "status" in types
+    assert "token" in types
+    assert "done" in types
+
+
+def test_reflect_with_history_non_streaming(client):
+    resp = client.post(
+        "/api/reflect",
+        json={
+            "message": "The smell of rain reminded me of my grandmother's garden.",
+            "history": [
+                {"role": "user", "content": "I had a beautiful walk today."},
+                {"role": "assistant", "content": "What a lovely experience."},
+            ],
+        },
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "reply" in data
+    assert "agent reflection" in data["reply"]
 
 
 # =============================================================================
