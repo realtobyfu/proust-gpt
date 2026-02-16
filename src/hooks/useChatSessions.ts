@@ -68,7 +68,11 @@ function writeSession(session: ChatSession) {
       })),
     })),
   };
-  localStorage.setItem(SESSION_KEY_PREFIX + session.id, JSON.stringify(trimmed));
+  try {
+    localStorage.setItem(SESSION_KEY_PREFIX + session.id, JSON.stringify(trimmed));
+  } catch (e) {
+    console.warn('Failed to write session to localStorage:', e);
+  }
 }
 
 function deleteSessionStorage(id: string) {

@@ -660,6 +660,11 @@ const ChatPage: React.FC = () => {
 
   const currentSessionIdRef = useRef<string | null>(null);
   const hasInitializedRef = useRef(false);
+  // Keep refs in sync for save-on-unmount (closures in cleanup capture stale state)
+  const messagesRef = useRef<Message[]>([]);
+  const activeModeRef = useRef(activeMode);
+  messagesRef.current = messages;
+  activeModeRef.current = activeMode;
 
   // Use streaming query hook
   const {
@@ -709,8 +714,20 @@ const ChatPage: React.FC = () => {
       setActiveMode(mode);
       navigate(location.pathname, { replace: true, state: {} });
       handleSendMessage(prompt);
+    } else if (!locationMode) {
+      // No location state at all (page refresh) — resume most recent session
+      const recent = getMostRecentSession();
+      if (recent && recent.messages.length > 0) {
+        currentSessionIdRef.current = recent.id;
+        setMessages(recent.messages);
+        setActiveMode(recent.mode);
+      } else {
+        const session = createSession('explore_lost_time');
+        currentSessionIdRef.current = session.id;
+        setActiveMode('explore_lost_time');
+      }
     } else {
-      const mode = locationMode || 'explore_lost_time';
+      const mode = locationMode;
       // Reuse the most recent empty session if it matches the requested mode
       const recent = getMostRecentSession();
       if (recent && recent.messages.length === 0 && recent.mode === mode) {
@@ -735,6 +752,23 @@ const ChatPage: React.FC = () => {
       saveSession(currentSessionIdRef.current, messages, activeMode);
     }
   }, [messages, activeMode, saveSession]);
+
+  // Save on page close/refresh and on component unmount (navigation away)
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (currentSessionIdRef.current && messagesRef.current.length > 0) {
+        saveSession(currentSessionIdRef.current, messagesRef.current, activeModeRef.current);
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      // Save on unmount (e.g. navigating to another route via React Router)
+      if (currentSessionIdRef.current && messagesRef.current.length > 0) {
+        saveSession(currentSessionIdRef.current, messagesRef.current, activeModeRef.current);
+      }
+    };
+  }, [saveSession]);
 
   const readerOpen = isDesktop && selectedPassage !== null;
 
@@ -826,7 +860,7 @@ const ChatPage: React.FC = () => {
     }
   }, [deleteSession, getMostRecentSession, loadSession, createSession, activeMode, resetStream]);
 
-  // When streaming completes, add the response as a message and track position
+  // When streaming completes, add the response as a message, save immediately, and track position
   useEffect(() => {
     if (!isLoading && !isStreaming && streamingResponse) {
       const aiMessage: Message = {
@@ -836,7 +870,15 @@ const ChatPage: React.FC = () => {
         passages: streamingPassages.length > 0 ? streamingPassages : undefined,
         metadata: streamingMetadata || undefined,
       };
-      setMessages(prev => [...prev, aiMessage]);
+      setMessages(prev => {
+        const updated = [...prev, aiMessage];
+        // Save immediately rather than waiting for the auto-save effect,
+        // which runs on the next render and can be missed if the user navigates away
+        if (currentSessionIdRef.current) {
+          saveSession(currentSessionIdRef.current, updated, activeMode);
+        }
+        return updated;
+      });
 
       if (streamingPassages.length > 0) {
         const lastPassage = streamingPassages[streamingPassages.length - 1];
@@ -849,7 +891,7 @@ const ChatPage: React.FC = () => {
 
       resetStream();
     }
-  }, [isLoading, isStreaming, streamingResponse, streamingPassages, streamingMetadata, resetStream]);
+  }, [isLoading, isStreaming, streamingResponse, streamingPassages, streamingMetadata, resetStream, activeMode, saveSession]);
 
   const getModeDisplay = () => {
     switch (activeMode) {
