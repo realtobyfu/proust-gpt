@@ -321,6 +321,11 @@ def stream_rag_response(query: str, lang: str = "en") -> Generator[dict, None, N
         - {"type": "done", "done": True} when complete
     """
     docs = retrieve_passages(query, lang=lang)
+    passages = _format_passages(docs, lang=lang)
+
+    # Send sources early so the frontend has them even if the stream is interrupted
+    yield {"type": "sources", "passages": passages}
+
     context = "\n\n---\n\n".join(
         f"[{i+1}] {doc.page_content}"
         for i, doc in enumerate(docs)
@@ -336,7 +341,6 @@ def stream_rag_response(query: str, lang: str = "en") -> Generator[dict, None, N
             if _detect_repetition(accumulated):
                 break
 
-    yield {"type": "sources", "passages": _format_passages(docs, lang=lang)}
     yield {"type": "done", "done": True}
 
 
