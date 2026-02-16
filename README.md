@@ -30,6 +30,8 @@ A full-stack web application combining RAG (Retrieval-Augmented Generation) with
 
 ## Agentic RAG Architecture
 
+[Interactive architecture deep dive](https://realtobyfu.github.io/proust-gpt/architecture.html)
+
 Every query flows through a **complexity router** that decides whether to use fast single-step RAG or a multi-step LangGraph ReAct agent. Simple questions get fast answers; complex queries — comparisons across volumes, character arc tracing, follow-up questions — get multi-step reasoning with tool use.
 
 ```mermaid
