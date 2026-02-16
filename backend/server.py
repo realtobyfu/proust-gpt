@@ -7,6 +7,7 @@ Provides both streaming (SSE) and non-streaming endpoints for:
 """
 import asyncio
 import json
+import logging
 import os
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Optional
@@ -109,9 +110,18 @@ app.add_middleware(
 # =============================================================================
 
 
+logger = logging.getLogger("proust.sse")
+
+
 def sse_format(data: dict) -> str:
     """Format data as SSE event."""
-    return f"data: {json.dumps(data)}\n\n"
+    line = f"data: {json.dumps(data)}\n\n"
+    event_type = data.get("type", "?")
+    size = len(line.encode("utf-8"))
+    logger.info(f"SSE event type={event_type} size={size}B")
+    if size > 4000:
+        logger.warning(f"SSE LARGE EVENT type={event_type} size={size}B")
+    return line
 
 
 async def async_sse_generator(sync_gen_func, *args) -> AsyncGenerator[str, None]:

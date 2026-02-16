@@ -1196,10 +1196,11 @@ const ChatPage: React.FC = () => {
               );
             })}
 
-            {isStreaming && streamingResponse && (
+            {/* Show streaming bubble while actively streaming OR while waiting for commit */}
+            {((isStreaming && streamingResponse) || (!isLoading && !isStreaming && streamingResponse)) && (
               <StreamingBubble $isUser={false}>
                 <MarkdownMessage content={streamingResponse} />
-                <StreamingCursor />
+                {isStreaming && <StreamingCursor />}
               </StreamingBubble>
             )}
 

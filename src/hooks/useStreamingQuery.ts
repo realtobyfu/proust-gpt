@@ -18,7 +18,7 @@ export interface QueryMetadata {
 }
 
 interface StreamEvent {
-  type: 'token' | 'sources' | 'metadata' | 'status' | 'done' | 'error';
+  type: 'token' | 'sources' | 'sources_fr' | 'metadata' | 'status' | 'done' | 'error';
   token?: string;
   passages?: Passage[];
   synthesis?: string;
@@ -178,6 +178,11 @@ export function useStreamingQuery(options: {
         const jsonStr = line.slice(6); // Remove 'data: ' prefix
         const event: StreamEvent = JSON.parse(jsonStr);
 
+        console.log(`[SSE] type=${event.type} size=${jsonStr.length}B` +
+          (event.type === 'sources' || event.type === 'sources_fr'
+            ? ` passages=${event.passages?.length ?? 0}`
+            : ''));
+
         switch (event.type) {
           case 'token':
             if (event.token) {
@@ -196,6 +201,19 @@ export function useStreamingQuery(options: {
             if (event.passages) {
               setPassages(prev => {
                 const updated = [...prev, ...event.passages!];
+                passagesRef.current = updated;
+                return updated;
+              });
+            }
+            break;
+
+          case 'sources_fr':
+            if (event.passages) {
+              setPassages(prev => {
+                const updated = prev.map(p => {
+                  const fr = event.passages!.find(f => f.citation_index === p.citation_index);
+                  return fr ? { ...p, text_fr: fr.text_fr } : p;
+                });
                 passagesRef.current = updated;
                 return updated;
               });
@@ -256,6 +274,8 @@ export function useStreamingQuery(options: {
           processSSELine(line);
         }
       }
+
+      console.log(`[SSE] Stream complete. passages=${passagesRef.current.length}, parseFailures=${parseFailCountRef.current}`);
     } finally {
       readerRef.current = null;
     }

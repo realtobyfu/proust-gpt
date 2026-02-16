@@ -417,7 +417,7 @@ def stream_agent_response(
     sources_sent = False
 
     def _dedupe_sources() -> list[dict]:
-        """Deduplicate accumulated passages and return per-passage event list."""
+        """Deduplicate accumulated passages and return per-passage EN + FR event list."""
         nonlocal sources_sent
         if sources_sent:
             return []
@@ -434,7 +434,16 @@ def stream_agent_response(
             p["citation_index"] = cit
             cit += 1
             unique.append(p)
-        return [{"type": "sources", "passages": [p]} for p in unique]
+        # Split EN and FR into separate events to reduce per-event size
+        events: list[dict] = []
+        for p in unique:
+            p_en = {k: v for k, v in p.items() if k != "text_fr"}
+            events.append({"type": "sources", "passages": [p_en]})
+            if p.get("text_fr"):
+                events.append({"type": "sources_fr", "passages": [
+                    {"index": p.get("index"), "citation_index": p.get("citation_index"), "text_fr": p["text_fr"]}
+                ]})
+        return events
 
     for event in agent.stream(
         {"messages": messages},
@@ -491,6 +500,13 @@ def query_agent(
             reply_parts.append(event["token"])
         elif event["type"] == "sources":
             passages.extend(event["passages"])
+        elif event["type"] == "sources_fr":
+            # Merge French text back into passages by citation_index
+            for fr in event["passages"]:
+                for p in passages:
+                    if p.get("citation_index") == fr.get("citation_index"):
+                        p["text_fr"] = fr.get("text_fr", "")
+                        break
 
     return {
         "reply": "".join(reply_parts),
@@ -551,7 +567,16 @@ def stream_reflect_agent_response(
             p["citation_index"] = cit
             cit += 1
             unique.append(p)
-        return [{"type": "sources", "passages": [p]} for p in unique]
+        # Split EN and FR into separate events to reduce per-event size
+        events: list[dict] = []
+        for p in unique:
+            p_en = {k: v for k, v in p.items() if k != "text_fr"}
+            events.append({"type": "sources", "passages": [p_en]})
+            if p.get("text_fr"):
+                events.append({"type": "sources_fr", "passages": [
+                    {"index": p.get("index"), "citation_index": p.get("citation_index"), "text_fr": p["text_fr"]}
+                ]})
+        return events
 
     for event in agent.stream(
         {"messages": messages},
@@ -605,6 +630,13 @@ def query_reflect_agent(
             reply_parts.append(event["token"])
         elif event["type"] == "sources":
             passages.extend(event["passages"])
+        elif event["type"] == "sources_fr":
+            # Merge French text back into passages by citation_index
+            for fr in event["passages"]:
+                for p in passages:
+                    if p.get("citation_index") == fr.get("citation_index"):
+                        p["text_fr"] = fr.get("text_fr", "")
+                        break
 
     return {
         "reply": "".join(reply_parts),
