@@ -670,6 +670,7 @@ const ChatPage: React.FC = () => {
   const {
     response: streamingResponse,
     passages: streamingPassages,
+    passagesRef: streamingPassagesRef,
     metadata: streamingMetadata,
     status: streamingStatus,
     isLoading,
@@ -863,11 +864,17 @@ const ChatPage: React.FC = () => {
   // When streaming completes, add the response as a message, save immediately, and track position
   useEffect(() => {
     if (!isLoading && !isStreaming && streamingResponse) {
+      // Use ref as fallback — protects against React batching edge cases
+      // where streamingPassages state might be stale
+      const finalPassages = streamingPassages.length > 0
+        ? streamingPassages
+        : (streamingPassagesRef.current ?? []);
+
       const aiMessage: Message = {
         id: Date.now().toString(),
         text: streamingResponse,
         isUser: false,
-        passages: streamingPassages.length > 0 ? streamingPassages : undefined,
+        passages: finalPassages.length > 0 ? finalPassages : undefined,
         metadata: streamingMetadata || undefined,
       };
       setMessages(prev => {
@@ -880,8 +887,8 @@ const ChatPage: React.FC = () => {
         return updated;
       });
 
-      if (streamingPassages.length > 0) {
-        const lastPassage = streamingPassages[streamingPassages.length - 1];
+      if (finalPassages.length > 0) {
+        const lastPassage = finalPassages[finalPassages.length - 1];
         setLastPosition({
           book: lastPassage.book || "Unknown",
           chapter: lastPassage.chapter || "Unknown",
@@ -891,7 +898,7 @@ const ChatPage: React.FC = () => {
 
       resetStream();
     }
-  }, [isLoading, isStreaming, streamingResponse, streamingPassages, streamingMetadata, resetStream, activeMode, saveSession]);
+  }, [isLoading, isStreaming, streamingResponse, streamingPassages, streamingPassagesRef, streamingMetadata, resetStream, activeMode, saveSession]);
 
   const getModeDisplay = () => {
     switch (activeMode) {

@@ -416,11 +416,11 @@ def stream_agent_response(
     steps_taken = 0
     sources_sent = False
 
-    def _dedupe_and_yield_sources():
-        """Deduplicate accumulated passages and yield sources event."""
+    def _dedupe_sources() -> list[dict]:
+        """Deduplicate accumulated passages and return per-passage event list."""
         nonlocal sources_sent
         if sources_sent:
-            return None
+            return []
         sources_sent = True
         seen_indices: set[int] = set()
         unique: list[dict] = []
@@ -434,9 +434,7 @@ def stream_agent_response(
             p["citation_index"] = cit
             cit += 1
             unique.append(p)
-        if unique:
-            return {"type": "sources", "passages": unique}
-        return None
+        return [{"type": "sources", "passages": [p]} for p in unique]
 
     for event in agent.stream(
         {"messages": messages},
@@ -461,9 +459,8 @@ def stream_agent_response(
                     ):
                         # Send sources BEFORE the first token so the frontend
                         # has passage data even if the proxy drops later events
-                        sources_event = _dedupe_and_yield_sources()
-                        if sources_event:
-                            yield sources_event
+                        for src_event in _dedupe_sources():
+                            yield src_event
 
                         content = msg.content
                         chunk_size = 12
@@ -475,9 +472,8 @@ def stream_agent_response(
                                 break
 
     # Fallback: if no text response was generated, send sources now
-    sources_event = _dedupe_and_yield_sources()
-    if sources_event:
-        yield sources_event
+    for src_event in _dedupe_sources():
+        yield src_event
     yield {"type": "done", "done": True}
 
 
@@ -494,7 +490,7 @@ def query_agent(
         if event["type"] == "token":
             reply_parts.append(event["token"])
         elif event["type"] == "sources":
-            passages = event["passages"]
+            passages.extend(event["passages"])
 
     return {
         "reply": "".join(reply_parts),
@@ -538,10 +534,10 @@ def stream_reflect_agent_response(
     steps_taken = 0
     sources_sent = False
 
-    def _dedupe_and_yield_sources():
+    def _dedupe_sources() -> list[dict]:
         nonlocal sources_sent
         if sources_sent:
-            return None
+            return []
         sources_sent = True
         seen_indices: set[int] = set()
         unique: list[dict] = []
@@ -555,9 +551,7 @@ def stream_reflect_agent_response(
             p["citation_index"] = cit
             cit += 1
             unique.append(p)
-        if unique:
-            return {"type": "sources", "passages": unique}
-        return None
+        return [{"type": "sources", "passages": [p]} for p in unique]
 
     for event in agent.stream(
         {"messages": messages},
@@ -579,9 +573,8 @@ def stream_reflect_agent_response(
                         not hasattr(msg, "tool_calls") or not msg.tool_calls
                     ):
                         # Send sources BEFORE tokens (same fix as explore agent)
-                        sources_event = _dedupe_and_yield_sources()
-                        if sources_event:
-                            yield sources_event
+                        for src_event in _dedupe_sources():
+                            yield src_event
 
                         content = msg.content
                         chunk_size = 12
@@ -593,9 +586,8 @@ def stream_reflect_agent_response(
                                 break
 
     # Fallback: if no text response was generated, send sources now
-    sources_event = _dedupe_and_yield_sources()
-    if sources_event:
-        yield sources_event
+    for src_event in _dedupe_sources():
+        yield src_event
     yield {"type": "done", "done": True}
 
 
@@ -612,7 +604,7 @@ def query_reflect_agent(
         if event["type"] == "token":
             reply_parts.append(event["token"])
         elif event["type"] == "sources":
-            passages = event["passages"]
+            passages.extend(event["passages"])
 
     return {
         "reply": "".join(reply_parts),

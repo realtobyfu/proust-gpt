@@ -323,8 +323,9 @@ def stream_rag_response(query: str, lang: str = "en") -> Generator[dict, None, N
     docs = retrieve_passages(query, lang=lang)
     passages = _format_passages(docs, lang=lang)
 
-    # Send sources early so the frontend has them even if the stream is interrupted
-    yield {"type": "sources", "passages": passages}
+    # Send sources as individual events so each stays under proxy line-size limits
+    for p in passages:
+        yield {"type": "sources", "passages": [p]}
 
     context = "\n\n---\n\n".join(
         f"[{i+1}] {doc.page_content}"
@@ -358,7 +359,7 @@ def query_rag(query: str, lang: str = "en") -> dict:
         if event["type"] == "token":
             reply_parts.append(event["token"])
         elif event["type"] == "sources":
-            passages = event["passages"]
+            passages.extend(event["passages"])
 
     return {
         "reply": "".join(reply_parts),

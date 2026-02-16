@@ -37,6 +37,7 @@ export interface HistoryMessage {
 export interface StreamingQueryResult {
   response: string;
   passages: Passage[];
+  passagesRef: React.RefObject<Passage[]>;
   metadata: QueryMetadata | null;
   status: string | null;
   isLoading: boolean;
@@ -73,10 +74,13 @@ export function useStreamingQuery(options: {
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | null>(null);
+  const passagesRef = useRef<Passage[]>([]);
+  const parseFailCountRef = useRef(0);
 
   const reset = useCallback(() => {
     setResponse('');
     setPassages([]);
+    passagesRef.current = [];
     setMetadata(null);
     setStatus(null);
     setError(null);
@@ -190,7 +194,11 @@ export function useStreamingQuery(options: {
 
           case 'sources':
             if (event.passages) {
-              setPassages(event.passages);
+              setPassages(prev => {
+                const updated = [...prev, ...event.passages!];
+                passagesRef.current = updated;
+                return updated;
+              });
             }
             break;
 
@@ -215,6 +223,7 @@ export function useStreamingQuery(options: {
             && !String(parseError).includes('JSON')) {
           throw parseError;
         }
+        parseFailCountRef.current += 1;
         console.warn('Failed to parse SSE event:', line, parseError);
       }
     };
@@ -261,6 +270,8 @@ export function useStreamingQuery(options: {
     // Reset state
     setResponse('');
     setPassages([]);
+    passagesRef.current = [];
+    parseFailCountRef.current = 0;
     setMetadata(null);
     setStatus(null);
     setError(null);
@@ -294,12 +305,19 @@ export function useStreamingQuery(options: {
       setIsLoading(false);
       setIsStreaming(false);
       abortControllerRef.current = null;
+
+      // Surface a warning if SSE parse failures occurred and no passages arrived
+      if (parseFailCountRef.current > 0 && passagesRef.current.length === 0 && mode === 'explore') {
+        console.warn(`${parseFailCountRef.current} SSE event(s) failed to parse and no passages were received`);
+        setError('Passage data was lost in transit. Please try again.');
+      }
     }
   }, [queryStreaming, queryNonStreaming, fallbackToNonStreaming]);
 
   return {
     response,
     passages,
+    passagesRef,
     metadata,
     status,
     isLoading,
