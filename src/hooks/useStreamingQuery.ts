@@ -167,6 +167,58 @@ export function useStreamingQuery(options: {
     const decoder = new TextDecoder();
     let buffer = '';
 
+    const processSSELine = (line: string) => {
+      if (!line.startsWith('data: ')) return;
+
+      try {
+        const jsonStr = line.slice(6); // Remove 'data: ' prefix
+        const event: StreamEvent = JSON.parse(jsonStr);
+
+        switch (event.type) {
+          case 'token':
+            if (event.token) {
+              setStatus(null);
+              setResponse(prev => prev + event.token);
+            }
+            break;
+
+          case 'status':
+            if (event.status) {
+              setStatus(event.status);
+            }
+            break;
+
+          case 'sources':
+            if (event.passages) {
+              setPassages(event.passages);
+            }
+            break;
+
+          case 'metadata':
+            setMetadata({
+              synthesis: event.synthesis,
+              passage_count: event.passage_count,
+              query_echo: event.query_echo,
+            });
+            break;
+
+          case 'error':
+            throw new Error(event.error || 'Unknown streaming error');
+
+          case 'done':
+            // Stream complete
+            break;
+        }
+      } catch (parseError) {
+        // Re-throw actual errors (from 'error' events)
+        if (parseError instanceof Error && parseError.message !== 'Unknown streaming error'
+            && !String(parseError).includes('JSON')) {
+          throw parseError;
+        }
+        console.warn('Failed to parse SSE event:', line, parseError);
+      }
+    };
+
     try {
       while (true) {
         const { done, value } = await reader.read();
@@ -180,50 +232,19 @@ export function useStreamingQuery(options: {
         buffer = lines.pop() || ''; // Keep incomplete message in buffer
 
         for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
+          processSSELine(line);
+        }
+      }
 
-          try {
-            const jsonStr = line.slice(6); // Remove 'data: ' prefix
-            const event: StreamEvent = JSON.parse(jsonStr);
-
-            switch (event.type) {
-              case 'token':
-                if (event.token) {
-                  setStatus(null);
-                  setResponse(prev => prev + event.token);
-                }
-                break;
-
-              case 'status':
-                if (event.status) {
-                  setStatus(event.status);
-                }
-                break;
-
-              case 'sources':
-                if (event.passages) {
-                  setPassages(event.passages);
-                }
-                break;
-
-              case 'metadata':
-                setMetadata({
-                  synthesis: event.synthesis,
-                  passage_count: event.passage_count,
-                  query_echo: event.query_echo,
-                });
-                break;
-
-              case 'error':
-                throw new Error(event.error || 'Unknown streaming error');
-
-              case 'done':
-                // Stream complete
-                break;
-            }
-          } catch (parseError) {
-            console.warn('Failed to parse SSE event:', line, parseError);
-          }
+      // Flush the decoder and process any remaining buffered events.
+      // On some proxies (e.g. Render), the final SSE events (sources, done)
+      // may arrive in the last chunk without a trailing \n\n, leaving them
+      // stranded in the buffer when the stream closes.
+      buffer += decoder.decode(); // flush any remaining bytes
+      if (buffer.trim()) {
+        const remaining = buffer.split('\n\n');
+        for (const line of remaining) {
+          processSSELine(line);
         }
       }
     } finally {

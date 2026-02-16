@@ -414,6 +414,29 @@ def stream_agent_response(
     # Stream the agent execution
     accumulated_response = ""
     steps_taken = 0
+    sources_sent = False
+
+    def _dedupe_and_yield_sources():
+        """Deduplicate accumulated passages and yield sources event."""
+        nonlocal sources_sent
+        if sources_sent:
+            return None
+        sources_sent = True
+        seen_indices: set[int] = set()
+        unique: list[dict] = []
+        cit = 1
+        for p in passage_list:
+            p_idx = p.get("index")
+            if p_idx is not None and p_idx in seen_indices:
+                continue
+            if p_idx is not None:
+                seen_indices.add(p_idx)
+            p["citation_index"] = cit
+            cit += 1
+            unique.append(p)
+        if unique:
+            return {"type": "sources", "passages": unique}
+        return None
 
     for event in agent.stream(
         {"messages": messages},
@@ -436,6 +459,12 @@ def stream_agent_response(
                     elif hasattr(msg, "content") and msg.content and (
                         not hasattr(msg, "tool_calls") or not msg.tool_calls
                     ):
+                        # Send sources BEFORE the first token so the frontend
+                        # has passage data even if the proxy drops later events
+                        sources_event = _dedupe_and_yield_sources()
+                        if sources_event:
+                            yield sources_event
+
                         content = msg.content
                         chunk_size = 12
                         for i in range(0, len(content), chunk_size):
@@ -445,22 +474,10 @@ def stream_agent_response(
                             if _detect_repetition(accumulated_response):
                                 break
 
-    # Deduplicate passages by index
-    seen_indices: set[int] = set()
-    unique_passages: list[dict] = []
-    citation_idx = 1
-    for p in passage_list:
-        p_index = p.get("index")
-        if p_index is not None and p_index in seen_indices:
-            continue
-        if p_index is not None:
-            seen_indices.add(p_index)
-        p["citation_index"] = citation_idx
-        citation_idx += 1
-        unique_passages.append(p)
-
-    if unique_passages:
-        yield {"type": "sources", "passages": unique_passages}
+    # Fallback: if no text response was generated, send sources now
+    sources_event = _dedupe_and_yield_sources()
+    if sources_event:
+        yield sources_event
     yield {"type": "done", "done": True}
 
 
@@ -519,6 +536,28 @@ def stream_reflect_agent_response(
 
     accumulated_response = ""
     steps_taken = 0
+    sources_sent = False
+
+    def _dedupe_and_yield_sources():
+        nonlocal sources_sent
+        if sources_sent:
+            return None
+        sources_sent = True
+        seen_indices: set[int] = set()
+        unique: list[dict] = []
+        cit = 1
+        for p in passage_list:
+            p_idx = p.get("index")
+            if p_idx is not None and p_idx in seen_indices:
+                continue
+            if p_idx is not None:
+                seen_indices.add(p_idx)
+            p["citation_index"] = cit
+            cit += 1
+            unique.append(p)
+        if unique:
+            return {"type": "sources", "passages": unique}
+        return None
 
     for event in agent.stream(
         {"messages": messages},
@@ -539,6 +578,11 @@ def stream_reflect_agent_response(
                     elif hasattr(msg, "content") and msg.content and (
                         not hasattr(msg, "tool_calls") or not msg.tool_calls
                     ):
+                        # Send sources BEFORE tokens (same fix as explore agent)
+                        sources_event = _dedupe_and_yield_sources()
+                        if sources_event:
+                            yield sources_event
+
                         content = msg.content
                         chunk_size = 12
                         for i in range(0, len(content), chunk_size):
@@ -548,22 +592,10 @@ def stream_reflect_agent_response(
                             if _detect_repetition(accumulated_response):
                                 break
 
-    # Deduplicate passages by index
-    seen_indices: set[int] = set()
-    unique_passages: list[dict] = []
-    citation_idx = 1
-    for p in passage_list:
-        p_index = p.get("index")
-        if p_index is not None and p_index in seen_indices:
-            continue
-        if p_index is not None:
-            seen_indices.add(p_index)
-        p["citation_index"] = citation_idx
-        citation_idx += 1
-        unique_passages.append(p)
-
-    if unique_passages:
-        yield {"type": "sources", "passages": unique_passages}
+    # Fallback: if no text response was generated, send sources now
+    sources_event = _dedupe_and_yield_sources()
+    if sources_event:
+        yield sources_event
     yield {"type": "done", "done": True}
 
 
