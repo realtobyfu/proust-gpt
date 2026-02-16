@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProustGPT — Architecture Deep Dive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Belgrano&family=IBM+Plex+Mono:wght@400;500&family=Georgia&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brown: #8b4513;
+    --brown-light: #a0522d;
+    --cream: #f7f4f0;
+    --cream-dark: #ebe5db;
+    --text: #333;
+    --text-light: #666;
+    --accent: #c9944a;
+    --code-bg: #1e1e2e;
+    --code-text: #cdd6f4;
+    --green: #a6e3a1;
+    --blue: #89b4fa;
+    --mauve: #cba6f7;
+    --peach: #fab387;
+    --red: #f38ba8;
+    --yellow: #f9e2af;
+    --teal: #94e2d5;
+    --pink: #f5c2e7;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    background: var(--cream);
+    color: var(--text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, var(--brown) 0%, var(--brown-light) 100%);
+    color: var(--cream);
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  header h1 {
+    font-family: 'Belgrano', Georgia, serif;
+    font-size: 2.4rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.02em;
+  }
+  header p {
+    font-size: 1.1rem;
+    opacity: 0.85;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* ── Layout ── */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  /* ── Navigation ── */
+  nav {
+    position: sticky;
+    top: 0;
+    background: var(--cream-dark);
+    border-bottom: 1px solid #d4cdc2;
+    z-index: 100;
+    padding: 0.6rem 2rem;
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  nav a {
+    color: var(--brown);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 0.2rem 0;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.2s;
+  }
+  nav a:hover { border-bottom-color: var(--brown); }
+
+  /* ── Sections ── */
+  section {
+    padding: 3rem 0;
+    border-bottom: 1px solid #d4cdc2;
+  }
+  section:last-of-type { border-bottom: none; }
+
+  h2 {
+    font-family: 'Belgrano', Georgia, serif;
+    font-size: 1.8rem;
+    color: var(--brown);
+    margin-bottom: 1.5rem;
+  }
+  h3 {
+    font-family: 'Belgrano', Georgia, serif;
+    font-size: 1.25rem;
+    color: var(--brown);
+    margin: 2rem 0 1rem;
+  }
+  p { margin-bottom: 1rem; }
+  p + p { margin-top: 0; }
+
+  /* ── Concept cards ── */
+  .concept-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  @media (max-width: 700px) { .concept-grid { grid-template-columns: 1fr; } }
+
+  .concept-card {
+    background: white;
+    border: 1px solid #d4cdc2;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: box-shadow 0.2s;
+  }
+  .concept-card:hover {
+    box-shadow: 0 4px 16px rgba(139, 69, 19, 0.1);
+  }
+  .concept-card h4 {
+    font-family: 'Belgrano', Georgia, serif;
+    color: var(--brown);
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+  }
+  .concept-card p {
+    font-size: 0.92rem;
+    color: var(--text-light);
+    margin-bottom: 0;
+  }
+  .concept-card .tag {
+    display: inline-block;
+    background: var(--cream-dark);
+    color: var(--brown);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    margin-bottom: 0.5rem;
+  }
+
+  /* ── Diagrams ── */
+  .diagram-container {
+    background: white;
+    border: 1px solid #d4cdc2;
+    border-radius: 8px;
+    padding: 2rem;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+  }
+  .diagram-container svg {
+    display: block;
+    margin: 0 auto;
+  }
+
+  /* ── Code blocks ── */
+  .code-block {
+    background: var(--code-bg);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+    position: relative;
+  }
+  .code-block code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--code-text);
+    white-space: pre;
+  }
+  .code-block .file-label {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.75rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: #6c7086;
+    background: rgba(30, 30, 46, 0.8);
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+  }
+
+  /* Syntax highlighting */
+  .kw { color: var(--mauve); }
+  .fn { color: var(--blue); }
+  .str { color: var(--green); }
+  .cm { color: #6c7086; font-style: italic; }
+  .op { color: var(--teal); }
+  .num { color: var(--peach); }
+  .dec { color: var(--yellow); }
+  .cls { color: var(--yellow); }
+  .var { color: var(--code-text); }
+  .par { color: var(--peach); }
+  .typ { color: var(--yellow); }
+
+  /* ── Callout boxes ── */
+  .callout {
+    background: white;
+    border-left: 4px solid var(--accent);
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.92rem;
+  }
+  .callout strong {
+    color: var(--brown);
+  }
+  .callout.insight {
+    border-left-color: var(--brown);
+    background: #faf6f1;
+  }
+
+  /* ── Connector line between diagram and code ── */
+  .flow-step {
+    position: relative;
+    padding-left: 2.5rem;
+    margin: 1.5rem 0;
+  }
+  .flow-step::before {
+    content: attr(data-step);
+    position: absolute;
+    left: 0;
+    top: 0.15rem;
+    width: 1.8rem;
+    height: 1.8rem;
+    background: var(--brown);
+    color: white;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+  }
+  .flow-step h4 {
+    font-family: 'Belgrano', Georgia, serif;
+    color: var(--brown);
+    margin-bottom: 0.3rem;
+  }
+  .flow-step p {
+    font-size: 0.92rem;
+    color: var(--text-light);
+  }
+
+  /* ── Tool table ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+  }
+  th {
+    background: var(--cream-dark);
+    color: var(--brown);
+    text-align: left;
+    padding: 0.6rem 0.8rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  td {
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid #e8e2d8;
+  }
+  tr:hover td { background: #faf8f4; }
+  .badge {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    border-radius: 3px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+  }
+  .badge.api { background: #fde8e8; color: #c53030; }
+  .badge.free { background: #e6f7e6; color: #276727; }
+
+  /* ── Animated flow ── */
+  @keyframes flowPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+  .flow-dot {
+    animation: flowPulse 2s ease-in-out infinite;
+  }
+  @keyframes dash {
+    to { stroke-dashoffset: -12; }
+  }
+  .dashed-animated {
+    stroke-dasharray: 6 6;
+    animation: dash 0.6s linear infinite;
+  }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-light);
+    font-size: 0.85rem;
+    border-top: 1px solid #d4cdc2;
+  }
+  footer a { color: var(--brown); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ProustGPT Architecture</h1>
+  <p>How RAG, agentic orchestration, and bilingual alignment work together under the hood</p>
+</header>
+
+<nav>
+  <a href="#foundations">Foundations</a>
+  <a href="#vectordb">Vector Database</a>
+  <a href="#rag">RAG Pipeline</a>
+  <a href="#agent">Agentic System</a>
+  <a href="#routing">Complexity Routing</a>
+  <a href="#streaming">Streaming</a>
+  <a href="#alignment">Bilingual Alignment</a>
+</nav>
+
+<div class="container">
+
+<!-- ╔══════════════════════════════════════════════════════════════════════════╗ -->
+<!-- ║  SECTION 1 — FOUNDATIONAL CONCEPTS                                      ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════════════════╝ -->
+<section id="foundations">
+  <h2>Foundational Concepts</h2>
+  <p>Before diving into the architecture, here are the building blocks. Every piece of ProustGPT relies on these ideas.</p>
+
+  <div class="concept-grid">
+    <div class="concept-card">
+      <span class="tag">Core Idea</span>
+      <h4>Embeddings</h4>
+      <p>A way to turn text into a list of numbers (a <em>vector</em>) that captures its meaning. "The madeleine triggered a flood of memory" and "A small cake unlocked forgotten recollections" produce similar vectors, even though the words are different. We use <strong>Cohere embed-v4.0</strong> — a multilingual model, so French and English text about the same thing land near each other in vector space.</p>
+    </div>
+    <div class="concept-card">
+      <span class="tag">Core Idea</span>
+      <h4>Vector Database</h4>
+      <p>A database optimized for storing and searching vectors. Instead of SQL queries (<code>WHERE title = ...</code>), you give it a vector and ask "find the 20 closest ones." We use <strong>Pinecone</strong> — it holds all ~12,900 Proust passages as 1536-dimensional vectors and returns the most semantically similar ones in milliseconds.</p>
+    </div>
+    <div class="concept-card">
+      <span class="tag">Framework</span>
+      <h4>LangChain</h4>
+      <p>A Python framework that provides standard interfaces for LLMs, embeddings, and vector stores. Instead of writing raw API calls to Cohere, Groq, and Pinecone, we use LangChain's abstractions — <code>CohereEmbeddings</code>, <code>ChatGroq</code>, <code>CohereRerank</code>. This makes it easy to swap providers without rewriting logic.</p>
+    </div>
+    <div class="concept-card">
+      <span class="tag">Framework</span>
+      <h4>LangGraph</h4>
+      <p>Built on top of LangChain, LangGraph lets you build <em>stateful agents</em> — LLMs that can call tools in a loop, observe results, and decide what to do next. Unlike a simple prompt-in/response-out flow, a LangGraph agent can make multiple tool calls before generating its final answer. We use it for the <strong>ReAct agent</strong>.</p>
+    </div>
+  </div>
+
+  <div class="callout insight">
+    <strong>Why not just use LangChain for everything?</strong> LangChain is great for linear pipelines (embed → retrieve → generate). But when you need an LLM to <em>decide</em> which tools to call, how many times, and in what order — that's where LangGraph comes in. It adds the control flow that makes an agent possible.
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════════════════╗ -->
+<!-- ║  SECTION 2 — VECTOR DATABASE                                            ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════════════════╝ -->
+<section id="vectordb">
+  <h2>Vector Database: How Passages are Stored</h2>
+  <p>Every passage from Proust's 7 volumes is embedded and stored in a Pinecone index. Here's how a passage goes from text to searchable vector:</p>
+
+  <div class="diagram-container">
+    <svg viewBox="0 0 800 220" width="800" height="220" xmlns="http://www.w3.org/2000/svg">
+      <!-- Passage box -->
+      <rect x="10" y="50" width="180" height="120" rx="8" fill="#faf6f1" stroke="#8b4513" stroke-width="1.5"/>
+      <text x="100" y="75" text-anchor="middle" font-family="Belgrano, serif" font-size="12" fill="#8b4513">Proust Passage</text>
+      <text x="25" y="100" font-family="Georgia, serif" font-size="10" fill="#666" font-style="italic">"For a long time I</text>
+      <text x="25" y="115" font-family="Georgia, serif" font-size="10" fill="#666" font-style="italic">used to go to bed</text>
+      <text x="25" y="130" font-family="Georgia, serif" font-size="10" fill="#666" font-style="italic">early..."</text>
+      <text x="25" y="155" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a0522d">vol: 1, ch: Overture</text>
+
+      <!-- Arrow 1 -->
+      <line x1="195" y1="110" x2="265" y2="110" stroke="#8b4513" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+      <text x="230" y="100" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8b4513">embed</text>
+
+      <!-- Cohere box -->
+      <rect x="270" y="75" width="140" height="70" rx="8" fill="#e8f0fe" stroke="#4285f4" stroke-width="1.5"/>
+      <text x="340" y="100" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#4285f4" font-weight="500">Cohere</text>
+      <text x="340" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#666">embed-v4.0</text>
+      <text x="340" y="133" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#666">1536 dimensions</text>
+
+      <!-- Arrow 2 -->
+      <line x1="415" y1="110" x2="485" y2="110" stroke="#4285f4" stroke-width="1.5" marker-end="url(#arrowhead-blue)"/>
+
+      <!-- Vector -->
+      <rect x="490" y="70" width="120" height="80" rx="8" fill="#f0f0f0" stroke="#666" stroke-width="1"/>
+      <text x="550" y="95" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#333">Vector</text>
+      <text x="550" y="112" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="#888">[0.021, -0.183,</text>
+      <text x="550" y="125" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="#888">0.447, ... ×1536]</text>
+
+      <!-- Arrow 3 -->
+      <line x1="615" y1="110" x2="675" y2="110" stroke="#666" stroke-width="1.5" marker-end="url(#arrowhead-gray)"/>
+      <text x="645" y="100" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#666">store</text>
+
+      <!-- Pinecone -->
+      <rect x="680" y="55" width="110" height="110" rx="8" fill="#e8f8e8" stroke="#276727" stroke-width="1.5"/>
+      <text x="735" y="85" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#276727" font-weight="500">Pinecone</text>
+      <text x="735" y="103" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="#666">12,900 vectors</text>
+      <text x="735" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="#666">+ metadata:</text>
+      <text x="735" y="133" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="#666">text, text_fr,</text>
+      <text x="735" y="148" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="#666">volume, chapter</text>
+
+      <!-- Arrowhead markers -->
+      <defs>
+        <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#8b4513"/></marker>
+        <marker id="arrowhead-blue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4285f4"/></marker>
+        <marker id="arrowhead-gray" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#666"/></marker>
+        <marker id="arrowhead-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#276727"/></marker>
+        <marker id="arrowhead-red" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#c53030"/></marker>
+        <marker id="arrowhead-accent" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#c9944a"/></marker>
+      </defs>
+    </svg>
+  </div>
+
+  <div class="callout">
+    <strong>Key insight: Multilingual search for free.</strong> Because Cohere embed-v4.0 is multilingual, a French query like "la jalousie de Swann" produces a vector that's close to English passages about Swann's jealousy. We only embed the English text — French queries just <em>work</em> without needing a separate French index.
+  </div>
+
+  <p>Here's the actual code that queries Pinecone. The <code>namespace</code> parameter selects which language's text to return:</p>
+
+  <div class="code-block">
+    <span class="file-label">backend/retrieval.py</span>
+    <code><span class="kw">def</span> <span class="fn">_pinecone_query</span>(
+    query: <span class="typ">str</span>, top_k: <span class="typ">int</span>, lang: <span class="typ">str</span> = <span class="str">"en"</span>,
+    metadata_filter: <span class="typ">dict</span> | <span class="typ">None</span> = <span class="kw">None</span>,
+) -> <span class="typ">list</span>[Document]:
+    embeddings = <span class="fn">get_embeddings</span>()
+    query_vector = embeddings.<span class="fn">embed_query</span>(query)  <span class="cm"># text → 1536-dim vector</span>
+
+    index = <span class="fn">get_pinecone_index</span>()
+    results = index.<span class="fn">query</span>(
+        vector=query_vector,
+        top_k=top_k,            <span class="cm"># fetch 20 candidates</span>
+        include_metadata=<span class="kw">True</span>,
+        namespace=lang,         <span class="cm"># "en" or "fr" namespace</span>
+    )
+
+    <span class="cm"># Build LangChain Document objects from Pinecone results</span>
+    docs = []
+    <span class="kw">for</span> match <span class="kw">in</span> results.matches:
+        metadata = match.metadata <span class="kw">or</span> {}
+        text_en = metadata.<span class="fn">pop</span>(<span class="str">"text"</span>, <span class="str">""</span>)
+        text_fr = metadata.<span class="fn">pop</span>(<span class="str">"text_fr"</span>, <span class="str">""</span>)
+        <span class="cm"># Use French text when requested</span>
+        page_content = text_fr <span class="kw">if</span> (lang == <span class="str">"fr"</span> <span class="kw">and</span> text_fr) <span class="kw">else</span> text_en
+        docs.<span class="fn">append</span>(Document(page_content=page_content, metadata=metadata))
+    <span class="kw">return</span> docs</code>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════════════════╗ -->
+<!-- ║  SECTION 3 — RAG PIPELINE                                               ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════════════════╝ -->
+<section id="rag">
+  <h2>RAG Pipeline: From Question to Answer</h2>
+  <p>RAG (Retrieval-Augmented Generation) means: before the LLM answers, we first find relevant passages from Proust's text, then give those passages to the LLM as context. This grounds the response in the actual text instead of relying on the LLM's training data.</p>
+
+  <div class="diagram-container">
+    <svg viewBox="0 0 800 340" width="800" height="340" xmlns="http://www.w3.org/2000/svg">
+      <!-- Step 1: Query -->
+      <rect x="310" y="10" width="180" height="50" rx="8" fill="#faf6f1" stroke="#8b4513" stroke-width="2"/>
+      <text x="400" y="40" text-anchor="middle" font-family="Georgia, serif" font-size="13" fill="#8b4513">"What is involuntary memory?"</text>
+
+      <!-- Arrow down -->
+      <line x1="400" y1="60" x2="400" y2="90" stroke="#8b4513" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+      <text x="440" y="80" font-family="IBM Plex Mono, monospace" font-size="9" fill="#666">1. embed</text>
+
+      <!-- Step 2: Embed -->
+      <rect x="325" y="90" width="150" height="40" rx="6" fill="#e8f0fe" stroke="#4285f4" stroke-width="1.5"/>
+      <text x="400" y="115" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#4285f4">Cohere embed-v4.0</text>
+
+      <!-- Arrow down -->
+      <line x1="400" y1="130" x2="400" y2="160" stroke="#4285f4" stroke-width="1.5" marker-end="url(#arrowhead-blue)"/>
+      <text x="450" y="150" font-family="IBM Plex Mono, monospace" font-size="9" fill="#666">2. search (k=20)</text>
+
+      <!-- Step 3: Pinecone -->
+      <rect x="325" y="160" width="150" height="40" rx="6" fill="#e8f8e8" stroke="#276727" stroke-width="1.5"/>
+      <text x="400" y="185" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#276727">Pinecone</text>
+
+      <!-- Arrow down with "20 candidates" label -->
+      <line x1="400" y1="200" x2="400" y2="230" stroke="#276727" stroke-width="1.5" marker-end="url(#arrowhead-green)"/>
+      <text x="460" y="220" font-family="IBM Plex Mono, monospace" font-size="9" fill="#666">3. rerank → top 5</text>
+
+      <!-- Step 4: Rerank -->
+      <rect x="325" y="230" width="150" height="40" rx="6" fill="#fef3e8" stroke="#c9944a" stroke-width="1.5"/>
+      <text x="400" y="255" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a0522d">Cohere rerank-v3.5</text>
+
+      <!-- Arrow down -->
+      <line x1="400" y1="270" x2="400" y2="295" stroke="#c9944a" stroke-width="1.5" marker-end="url(#arrowhead-accent)"/>
+      <text x="450" y="288" font-family="IBM Plex Mono, monospace" font-size="9" fill="#666">4. generate</text>
+
+      <!-- Step 5: LLM -->
+      <rect x="290" y="295" width="220" height="40" rx="6" fill="#f3e8fe" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="400" y="320" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#7c3aed">Groq / Kimi K2 (131K ctx)</text>
+
+      <!-- Side annotation: 20 → 5 funnel -->
+      <rect x="30" y="155" width="120" height="30" rx="4" fill="white" stroke="#ddd" stroke-width="1"/>
+      <text x="90" y="175" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#888">20 candidates</text>
+      <line x1="150" y1="170" x2="320" y2="180" stroke="#ddd" stroke-width="1" stroke-dasharray="4 4"/>
+
+      <rect x="30" y="235" width="120" height="30" rx="4" fill="white" stroke="#ddd" stroke-width="1"/>
+      <text x="90" y="255" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#888">5 best passages</text>
+      <line x1="150" y1="250" x2="320" y2="250" stroke="#ddd" stroke-width="1" stroke-dasharray="4 4"/>
+
+      <!-- Side annotation: context stitching -->
+      <rect x="575" y="195" width="190" height="55" rx="6" fill="#fffbeb" stroke="#d4a843" stroke-width="1"/>
+      <text x="670" y="215" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8b6914" font-weight="500">Context Stitching</text>
+      <text x="670" y="232" text-anchor="middle" font-family="Georgia, serif" font-size="9" fill="#888">Fetches adjacent passages</text>
+      <text x="670" y="244" text-anchor="middle" font-family="Georgia, serif" font-size="9" fill="#888">if text starts/ends mid-sentence</text>
+      <line x1="575" y1="220" x2="480" y2="200" stroke="#d4a843" stroke-width="1" stroke-dasharray="4 4"/>
+    </svg>
+  </div>
+
+  <div class="callout insight">
+    <strong>Why rerank?</strong> Embedding search is fast but approximate — it finds 20 "close enough" passages. The Cohere reranker then reads the actual text of all 20 candidates against the query and picks the 5 that are genuinely most relevant. This two-stage approach gives better results than just increasing <code>top_k</code>.
+  </div>
+
+  <p>The full pipeline in code — note how compact it is thanks to LangChain abstractions:</p>
+
+  <div class="code-block">
+    <span class="file-label">backend/retrieval.py</span>
+    <code><span class="kw">def</span> <span class="fn">retrieve_passages</span>(query: <span class="typ">str</span>, lang: <span class="typ">str</span> = <span class="str">"en"</span>) -> <span class="typ">list</span>[Document]:
+    <span class="cm"># Stage 1: Semantic search (20 candidates)</span>
+    candidates = <span class="fn">_pinecone_query</span>(query, top_k=config.RETRIEVAL_CANDIDATES, lang=lang)
+
+    <span class="cm"># Stage 2: Rerank to top 5</span>
+    reranker = <span class="fn">get_reranker</span>()
+    reranked = <span class="kw">list</span>(reranker.<span class="fn">compress_documents</span>(candidates, query))
+
+    <span class="cm"># Stage 3: Stitch adjacent passages for context continuity</span>
+    <span class="kw">return</span> <span class="fn">_stitch_context</span>(reranked, lang=lang)
+
+
+<span class="kw">def</span> <span class="fn">stream_rag_response</span>(query: <span class="typ">str</span>, lang: <span class="typ">str</span> = <span class="str">"en"</span>) -> Generator:
+    docs = <span class="fn">retrieve_passages</span>(query, lang=lang)
+
+    <span class="cm"># Build context string with citation markers</span>
+    context = <span class="str">"\n\n---\n\n"</span>.<span class="fn">join</span>(
+        <span class="str">f"[{i+1}] {doc.page_content}"</span> <span class="kw">for</span> i, doc <span class="kw">in</span> <span class="fn">enumerate</span>(docs)
+    )
+    prompt = rag_template.<span class="fn">format</span>(context=context, question=query)
+
+    <span class="cm"># Stream LLM response token by token</span>
+    llm = <span class="fn">get_llm</span>()
+    <span class="kw">for</span> chunk <span class="kw">in</span> llm.<span class="fn">stream</span>(prompt):
+        <span class="kw">yield</span> {<span class="str">"type"</span>: <span class="str">"token"</span>, <span class="str">"token"</span>: chunk.content}
+
+    <span class="kw">yield</span> {<span class="str">"type"</span>: <span class="str">"sources"</span>, <span class="str">"passages"</span>: <span class="fn">_format_passages</span>(docs)}
+    <span class="kw">yield</span> {<span class="str">"type"</span>: <span class="str">"done"</span>, <span class="str">"done"</span>: <span class="kw">True</span>}</code>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════════════════╗ -->
+<!-- ║  SECTION 4 — AGENTIC SYSTEM                                             ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════════════════╝ -->
+<section id="agent">
+  <h2>Agentic System: When RAG Isn't Enough</h2>
+  <p>Simple RAG works for direct questions. But what about: <em>"How does Swann's jealousy compare to the narrator's jealousy of Albertine?"</em> That requires searching twice (once for each character), reading context around the results, and synthesizing across volumes. A single retrieval step can't do this.</p>
+
+  <p>This is where the <strong>ReAct agent</strong> comes in. ReAct stands for <strong>Reason + Act</strong> — the LLM thinks about what it needs, calls a tool, observes the result, thinks again, and repeats until it has enough information to answer.</p>
+
+  <div class="diagram-container">
+    <svg viewBox="0 0 800 400" width="800" height="400" xmlns="http://www.w3.org/2000/svg">
+      <!-- Agent loop -->
+      <text x="400" y="30" text-anchor="middle" font-family="Belgrano, serif" font-size="15" fill="#8b4513">ReAct Agent Loop</text>
+
+      <!-- Think -->
+      <rect x="280" y="50" width="240" height="55" rx="10" fill="#f3e8fe" stroke="#7c3aed" stroke-width="2"/>
+      <text x="400" y="72" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#7c3aed" font-weight="500">THINK</text>
+      <text x="400" y="92" text-anchor="middle" font-family="Georgia, serif" font-size="10.5" fill="#666">"I need to find passages about Swann's jealousy"</text>
+
+      <!-- Arrow to Act -->
+      <path d="M 520 77 Q 580 77 580 140" fill="none" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arrowhead-purple)"/>
+      <defs><marker id="arrowhead-purple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#7c3aed"/></marker></defs>
+
+      <!-- Act -->
+      <rect x="440" y="135" width="280" height="55" rx="10" fill="#e8f0fe" stroke="#4285f4" stroke-width="2"/>
+      <text x="580" y="157" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#4285f4" font-weight="500">ACT</text>
+      <text x="580" y="177" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#666">search_passages("Swann jealousy")</text>
+
+      <!-- Arrow to Observe -->
+      <path d="M 580 190 Q 580 220 500 230" fill="none" stroke="#4285f4" stroke-width="1.5" marker-end="url(#arrowhead-blue)"/>
+
+      <!-- Observe -->
+      <rect x="280" y="220" width="240" height="55" rx="10" fill="#e8f8e8" stroke="#276727" stroke-width="2"/>
+      <text x="400" y="242" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#276727" font-weight="500">OBSERVE</text>
+      <text x="400" y="262" text-anchor="middle" font-family="Georgia, serif" font-size="10.5" fill="#666">5 passages about Swann's torment returned</text>
+
+      <!-- Arrow back to Think (loop) -->
+      <path d="M 280 247 Q 200 247 200 140 Q 200 77 280 77" fill="none" stroke="#276727" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrowhead-green)"/>
+      <text x="160" y="165" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#888" transform="rotate(-90, 160, 165)">loop up to 4×</text>
+
+      <!-- After loop: Final answer -->
+      <line x1="400" y1="275" x2="400" y2="310" stroke="#8b4513" stroke-width="2" marker-end="url(#arrowhead)"/>
+      <text x="450" y="296" font-family="IBM Plex Mono, monospace" font-size="9" fill="#666">enough info</text>
+
+      <rect x="250" y="310" width="300" height="55" rx="10" fill="#faf6f1" stroke="#8b4513" stroke-width="2"/>
+      <text x="400" y="332" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#8b4513" font-weight="500">RESPOND</text>
+      <text x="400" y="352" text-anchor="middle" font-family="Georgia, serif" font-size="10.5" fill="#666">Synthesize findings into flowing prose with [1], [2] citations</text>
+
+      <!-- Example multi-step annotation -->
+      <rect x="590" y="280" width="195" height="90" rx="6" fill="white" stroke="#ddd" stroke-width="1"/>
+      <text x="687" y="298" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8b4513" font-weight="500">Example multi-step:</text>
+      <text x="600" y="315" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="#666">1. search_passages("Swann")</text>
+      <text x="600" y="330" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="#666">2. search_passages("Albertine")</text>
+      <text x="600" y="345" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="#666">3. get_adjacent(#4521)</text>
+      <text x="600" y="360" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="#666">4. → final synthesis</text>
+    </svg>
+  </div>
+
+  <p>Creating the agent is remarkably concise — LangGraph's <code>create_react_agent</code> handles the entire loop:</p>
+
+  <div class="code-block">
+    <span class="file-label">backend/agent.py</span>
+    <code><span class="kw">from</span> langgraph.prebuilt <span class="kw">import</span> create_react_agent
+
+<span class="cm"># Define the 6 tools the agent can use</span>
+_TOOLS = [
+    search_passages,           <span class="cm"># Semantic search (API call)</span>
+    search_by_volume,          <span class="cm"># Volume-filtered search (API call)</span>
+    get_adjacent_passages,     <span class="cm"># Read nearby passages (FREE)</span>
+    get_chapter_overview,      <span class="cm"># Chapter start (FREE)</span>
+    find_character_mentions,   <span class="cm"># Text search by name (FREE)</span>
+    get_toc,                   <span class="cm"># Table of contents (FREE)</span>
+]
+
+<span class="kw">def</span> <span class="fn">create_proust_agent</span>(lang: <span class="typ">str</span> = <span class="str">"en"</span>):
+    llm = <span class="fn">get_llm</span>()  <span class="cm"># Groq / Kimi K2</span>
+    agent = <span class="fn">create_react_agent</span>(llm, _TOOLS, prompt=AGENT_SYSTEM_PROMPT)
+    <span class="kw">return</span> agent  <span class="cm"># Ready to .stream() or .invoke()</span></code>
+  </div>
+
+  <h3>Agent Tools</h3>
+  <p>Each tool is a Python function decorated with <code>@tool</code>. The LLM sees the docstrings and decides which to call. Four of the six tools are <strong>free</strong> — they search the in-memory corpus without making any API calls:</p>
+
+  <table>
+    <thead>
+      <tr><th>Tool</th><th>Cost</th><th>What It Does</th><th>When the Agent Uses It</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>search_passages</code></td>
+        <td><span class="badge api">API</span></td>
+        <td>Semantic vector search across full corpus</td>
+        <td>General questions about themes, scenes, quotes</td>
+      </tr>
+      <tr>
+        <td><code>search_by_volume</code></td>
+        <td><span class="badge api">API</span></td>
+        <td>Search filtered to one volume</td>
+        <td>Comparing across specific volumes</td>
+      </tr>
+      <tr>
+        <td><code>get_adjacent_passages</code></td>
+        <td><span class="badge free">FREE</span></td>
+        <td>Read passages before/after a known index</td>
+        <td>"What happens next?" or expanding context</td>
+      </tr>
+      <tr>
+        <td><code>get_chapter_overview</code></td>
+        <td><span class="badge free">FREE</span></td>
+        <td>First 5 passages of a chapter</td>
+        <td>Understanding chapter scope before searching</td>
+      </tr>
+      <tr>
+        <td><code>find_character_mentions</code></td>
+        <td><span class="badge free">FREE</span></td>
+        <td>In-memory text search for character names</td>
+        <td>Character analysis, tracking appearances</td>
+      </tr>
+      <tr>
+        <td><code>get_toc</code></td>
+        <td><span class="badge free">FREE</span></td>
+        <td>Full table of contents for all 7 volumes</td>
+        <td>Understanding novel structure, finding chapters</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>Here's what a tool definition looks like — the docstring is what the LLM reads to decide whether to call it:</p>
+
+  <div class="code-block">
+    <span class="file-label">backend/agent.py</span>
+    <code><span class="dec">@tool</span>
+<span class="kw">def</span> <span class="fn">get_adjacent_passages</span>(
+    passage_index: <span class="typ">int</span>, before: <span class="typ">int</span> = <span class="num">2</span>, after: <span class="typ">int</span> = <span class="num">2</span>, lang: <span class="typ">str</span> = <span class="str">"en"</span>
+) -> <span class="typ">str</span>:
+    <span class="str">"""Get passages immediately before and/or after a known passage.
+
+    Use this to read what happens next or before a scene you've already found.
+    This is a FREE operation (no API calls) — prefer it over new searches when
+    you already know the passage location.
+    """</span>
+    results = []
+    <span class="kw">for</span> offset <span class="kw">in</span> <span class="fn">range</span>(-before, after + <span class="num">1</span>):
+        idx = passage_index + offset
+        p = <span class="fn">get_passage_text</span>(idx, lang=lang)
+        <span class="kw">if</span> p:
+            results.<span class="fn">append</span>(<span class="str">f"[passage {idx}] ({p['book']}, {p['chapter']})\n{p['text'][:500]}"</span>)
+    <span class="kw">return</span> <span class="str">"\n\n---\n\n"</span>.<span class="fn">join</span>(results)</code>
+  </div>
+
+  <h3>Two Agent Modes</h3>
+
+  <div class="diagram-container">
+    <svg viewBox="0 0 800 200" width="800" height="200" xmlns="http://www.w3.org/2000/svg">
+      <!-- Explore mode -->
+      <rect x="30" y="20" width="350" height="170" rx="10" fill="white" stroke="#8b4513" stroke-width="2"/>
+      <text x="205" y="48" text-anchor="middle" font-family="Belgrano, serif" font-size="14" fill="#8b4513">Explore Mode</text>
+      <text x="205" y="68" text-anchor="middle" font-family="Georgia, serif" font-size="10" fill="#888">Literary analysis — all 6 tools</text>
+      <line x1="60" y1="78" x2="350" y2="78" stroke="#e8e2d8" stroke-width="1"/>
+
+      <text x="55" y="100" font-family="IBM Plex Mono, monospace" font-size="10" fill="#333">search_passages</text>
+      <text x="55" y="118" font-family="IBM Plex Mono, monospace" font-size="10" fill="#333">search_by_volume</text>
+      <text x="55" y="136" font-family="IBM Plex Mono, monospace" font-size="10" fill="#276727">get_adjacent_passages</text>
+      <text x="55" y="154" font-family="IBM Plex Mono, monospace" font-size="10" fill="#276727">get_chapter_overview</text>
+      <text x="55" y="172" font-family="IBM Plex Mono, monospace" font-size="10" fill="#276727">find_character_mentions</text>
+      <text x="250" y="172" font-family="IBM Plex Mono, monospace" font-size="10" fill="#276727">get_toc</text>
+
+      <rect x="230" y="92" width="32" height="16" rx="3" fill="#fde8e8"/>
+      <text x="246" y="103" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#c53030">API</text>
+      <rect x="230" y="110" width="32" height="16" rx="3" fill="#fde8e8"/>
+      <text x="246" y="121" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#c53030">API</text>
+      <rect x="250" y="128" width="38" height="16" rx="3" fill="#e6f7e6"/>
+      <text x="269" y="139" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#276727">FREE</text>
+      <rect x="250" y="146" width="38" height="16" rx="3" fill="#e6f7e6"/>
+      <text x="269" y="157" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#276727">FREE</text>
+
+      <!-- Reflect mode -->
+      <rect x="420" y="20" width="350" height="170" rx="10" fill="white" stroke="#7c3aed" stroke-width="2"/>
+      <text x="595" y="48" text-anchor="middle" font-family="Belgrano, serif" font-size="14" fill="#7c3aed">Reflect Mode</text>
+      <text x="595" y="68" text-anchor="middle" font-family="Georgia, serif" font-size="10" fill="#888">Introspective — 3 tools, used sparingly</text>
+      <line x1="450" y1="78" x2="740" y2="78" stroke="#e8e2d8" stroke-width="1"/>
+
+      <text x="445" y="100" font-family="IBM Plex Mono, monospace" font-size="10" fill="#333">search_passages</text>
+      <text x="445" y="118" font-family="IBM Plex Mono, monospace" font-size="10" fill="#276727">get_adjacent_passages</text>
+      <text x="445" y="136" font-family="IBM Plex Mono, monospace" font-size="10" fill="#276727">find_character_mentions</text>
+
+      <text x="445" y="168" font-family="Georgia, serif" font-size="10" fill="#888" font-style="italic">Default is pure conversation —</text>
+      <text x="445" y="183" font-family="Georgia, serif" font-size="10" fill="#888" font-style="italic">only searches when user's experience</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════════════════╗ -->
+<!-- ║  SECTION 5 — COMPLEXITY ROUTING                                         ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════════════════╝ -->
+<section id="routing">
+  <h2>Complexity Routing: Choosing the Right Path</h2>
+  <p>Not every query needs a multi-step agent. The <strong>complexity router</strong> examines the query and conversation history to decide whether to use fast single-step RAG or the full agent. This keeps simple questions fast and cheap.</p>
+
+  <div class="diagram-container">
+    <svg viewBox="0 0 800 320" width="800" height="320" xmlns="http://www.w3.org/2000/svg">
+      <!-- Query input -->
+      <rect x="300" y="10" width="200" height="40" rx="6" fill="#faf6f1" stroke="#8b4513" stroke-width="1.5"/>
+      <text x="400" y="35" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#8b4513">Incoming Query + History</text>
+
+      <line x1="400" y1="50" x2="400" y2="80" stroke="#8b4513" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+      <!-- Router diamond -->
+      <polygon points="400,80 500,130 400,180 300,130" fill="white" stroke="#8b4513" stroke-width="2"/>
+      <text x="400" y="126" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#8b4513" font-weight="500">needs_agent()</text>
+      <text x="400" y="142" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#888">complexity check</text>
+
+      <!-- Left path: Fast RAG (False) -->
+      <line x1="300" y1="130" x2="140" y2="130" stroke="#276727" stroke-width="2" marker-end="url(#arrowhead-green)"/>
+      <text x="220" y="120" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#276727" font-weight="500">False</text>
+
+      <rect x="20" y="105" width="120" height="50" rx="8" fill="#e8f8e8" stroke="#276727" stroke-width="2"/>
+      <text x="80" y="128" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#276727" font-weight="500">Fast RAG</text>
+      <text x="80" y="145" text-anchor="middle" font-family="Georgia, serif" font-size="9" fill="#666">~2-3 seconds</text>
+
+      <!-- Right path: Agent (True) -->
+      <line x1="500" y1="130" x2="620" y2="130" stroke="#c53030" stroke-width="2" marker-end="url(#arrowhead-red)"/>
+      <text x="560" y="120" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#c53030" font-weight="500">True</text>
+
+      <rect x="620" y="105" width="160" height="50" rx="8" fill="#fde8e8" stroke="#c53030" stroke-width="2"/>
+      <text x="700" y="128" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#c53030" font-weight="500">ReAct Agent</text>
+      <text x="700" y="145" text-anchor="middle" font-family="Georgia, serif" font-size="9" fill="#666">~5-15 seconds</text>
+
+      <!-- Decision rules -->
+      <rect x="50" y="200" width="320" height="110" rx="8" fill="white" stroke="#276727" stroke-width="1"/>
+      <text x="210" y="222" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#276727" font-weight="500">Triggers Fast RAG</text>
+      <text x="65" y="242" font-family="Georgia, serif" font-size="10" fill="#666">"What is the madeleine scene about?"</text>
+      <text x="65" y="260" font-family="Georgia, serif" font-size="10" fill="#666">"Tell me about Combray"</text>
+      <text x="65" y="278" font-family="Georgia, serif" font-size="10" fill="#666">"Quote about time and memory"</text>
+      <text x="65" y="296" font-family="Georgia, serif" font-size="9.5" fill="#888" font-style="italic">Simple, self-contained questions</text>
+
+      <rect x="430" y="200" width="350" height="110" rx="8" fill="white" stroke="#c53030" stroke-width="1"/>
+      <text x="605" y="222" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#c53030" font-weight="500">Triggers Agent</text>
+      <text x="445" y="242" font-family="Georgia, serif" font-size="10" fill="#666">"Compare Swann's jealousy to the narrator's"</text>
+      <text x="445" y="260" font-family="Georgia, serif" font-size="10" fill="#666">"How does the theme of memory evolve?"</text>
+      <text x="445" y="278" font-family="Georgia, serif" font-size="10" fill="#666">"What happens after the Guermantes party?"</text>
+      <text x="445" y="296" font-family="Georgia, serif" font-size="9.5" fill="#888" font-style="italic">Comparative, sequential, or follow-up queries</text>
+    </svg>
+  </div>
+
+  <p>The routing logic is a simple function — no ML model needed, just regex patterns and conversation-length heuristics:</p>
+
+  <div class="code-block">
+    <span class="file-label">backend/agent.py</span>
+    <code><span class="cm"># Patterns that indicate a complex query</span>
+_COMPLEX_PATTERNS = re.<span class="fn">compile</span>(
+    <span class="str">r"\b("</span>
+    <span class="str">r"compare|comparison|vs\.?|versus|differ|difference|contrast"</span>
+    <span class="str">r"|evolve|evolution|develop|change over time|across volumes"</span>
+    <span class="str">r"|what happens (after|next|before|then)"</span>
+    <span class="str">r"|how does .+ change"</span>
+    <span class="str">r"|trace|track|arc|journey"</span>
+    <span class="str">r"|relationship between"</span>
+    <span class="str">r")\b"</span>, re.IGNORECASE
+)
+
+<span class="kw">def</span> <span class="fn">needs_agent</span>(query: <span class="typ">str</span>, history: <span class="typ">list</span> | <span class="kw">None</span> = <span class="kw">None</span>) -> <span class="typ">bool</span>:
+    <span class="kw">if not</span> config.AGENT_ENABLED:
+        <span class="kw">return False</span>
+
+    <span class="cm"># 2+ prior messages → likely needs conversational context</span>
+    <span class="kw">if</span> history:
+        user_msgs = [m <span class="kw">for</span> m <span class="kw">in</span> history <span class="kw">if</span> m[<span class="str">"role"</span>] == <span class="str">"user"</span>]
+        <span class="kw">if</span> <span class="fn">len</span>(user_msgs) >= <span class="num">2</span>:
+            <span class="kw">return True</span>
+
+    <span class="cm"># Query matches complexity patterns</span>
+    <span class="kw">if</span> _COMPLEX_PATTERNS.<span class="fn">search</span>(query):
+        <span class="kw">return True</span>
+
+    <span class="cm"># Short follow-up (e.g. "tell me more", "and Albertine?")</span>
+    <span class="kw">if</span> history <span class="kw">and</span> <span class="fn">len</span>(query.<span class="fn">split</span>()) <= <span class="num">6</span>:
+        <span class="kw">return True</span>
+
+    <span class="kw">return False</span></code>
+  </div>
+
+  <p>And in the server, the routing is a single <code>if</code> statement:</p>
+
+  <div class="code-block">
+    <span class="file-label">backend/server.py</span>
+    <code><span class="dec">@app.post</span>(<span class="str">"/api/explore_lost_time/stream"</span>)
+<span class="kw">async def</span> <span class="fn">explore_lost_time_stream</span>(body: QueryRequest):
+    query = body.query <span class="kw">or</span> body.message <span class="kw">or</span> <span class="str">""</span>
+    lang = body.lang <span class="kw">or</span> <span class="str">"en"</span>
+    history = [m.<span class="fn">model_dump</span>() <span class="kw">for</span> m <span class="kw">in</span> body.history] <span class="kw">if</span> body.history <span class="kw">else None</span>
+
+    <span class="kw">if</span> <span class="fn">needs_agent</span>(query, history):
+        <span class="cm"># Complex → multi-step agent with tool calling</span>
+        <span class="kw">return</span> StreamingResponse(
+            <span class="fn">async_sse_generator</span>(stream_agent_response, query, history, lang),
+            media_type=<span class="str">"text/event-stream"</span>,
+        )
+
+    <span class="cm"># Simple → fast single-shot RAG</span>
+    <span class="kw">return</span> StreamingResponse(
+        <span class="fn">async_sse_generator</span>(stream_rag_response, query, lang),
+        media_type=<span class="str">"text/event-stream"</span>,
+    )</code>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════════════════╗ -->
+<!-- ║  SECTION 6 — STREAMING                                                  ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════════════════╝ -->
+<section id="streaming">
+  <h2>Streaming: Backend to Frontend</h2>
+  <p>Both the fast RAG and agent paths stream their output as <strong>Server-Sent Events (SSE)</strong>. This means the user sees tokens appear in real-time and gets status updates as the agent calls tools — instead of waiting 10 seconds for a complete response.</p>
+
+  <div class="diagram-container">
+    <svg viewBox="0 0 800 280" width="800" height="280" xmlns="http://www.w3.org/2000/svg">
+      <!-- Backend -->
+      <rect x="20" y="30" width="230" height="230" rx="10" fill="white" stroke="#8b4513" stroke-width="1.5"/>
+      <text x="135" y="55" text-anchor="middle" font-family="Belgrano, serif" font-size="13" fill="#8b4513">Backend (Python)</text>
+      <line x1="35" y1="65" x2="235" y2="65" stroke="#e8e2d8" stroke-width="1"/>
+
+      <text x="40" y="88" font-family="IBM Plex Mono, monospace" font-size="9" fill="#7c3aed">{"type":"status",</text>
+      <text x="40" y="101" font-family="IBM Plex Mono, monospace" font-size="9" fill="#7c3aed"> "status":"Searching..."}</text>
+
+      <text x="40" y="125" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4285f4">{"type":"token",</text>
+      <text x="40" y="138" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4285f4"> "token":"Swann's"}</text>
+
+      <text x="40" y="162" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4285f4">{"type":"token",</text>
+      <text x="40" y="175" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4285f4"> "token":" jealousy"}</text>
+
+      <text x="40" y="199" font-family="IBM Plex Mono, monospace" font-size="9" fill="#276727">{"type":"sources",</text>
+      <text x="40" y="212" font-family="IBM Plex Mono, monospace" font-size="9" fill="#276727"> "passages":[...]}</text>
+
+      <text x="40" y="236" font-family="IBM Plex Mono, monospace" font-size="9" fill="#888">{"type":"done",</text>
+      <text x="40" y="249" font-family="IBM Plex Mono, monospace" font-size="9" fill="#888"> "done":true}</text>
+
+      <!-- SSE arrows -->
+      <line x1="255" y1="95" x2="370" y2="95" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arrowhead-purple)"/>
+      <circle cx="310" cy="95" r="3" fill="#7c3aed" class="flow-dot"/>
+
+      <line x1="255" y1="132" x2="370" y2="132" stroke="#4285f4" stroke-width="1.5" marker-end="url(#arrowhead-blue)"/>
+      <circle cx="310" cy="132" r="3" fill="#4285f4" class="flow-dot" style="animation-delay: 0.3s"/>
+
+      <line x1="255" y1="169" x2="370" y2="169" stroke="#4285f4" stroke-width="1.5" marker-end="url(#arrowhead-blue)"/>
+      <circle cx="310" cy="169" r="3" fill="#4285f4" class="flow-dot" style="animation-delay: 0.6s"/>
+
+      <line x1="255" y1="206" x2="370" y2="206" stroke="#276727" stroke-width="1.5" marker-end="url(#arrowhead-green)"/>
+      <circle cx="310" cy="206" r="3" fill="#276727" class="flow-dot" style="animation-delay: 0.9s"/>
+
+      <text x="310" y="25" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#888">SSE (text/event-stream)</text>
+
+      <!-- Frontend -->
+      <rect x="375" y="30" width="405" height="230" rx="10" fill="white" stroke="#4285f4" stroke-width="1.5"/>
+      <text x="577" y="55" text-anchor="middle" font-family="Belgrano, serif" font-size="13" fill="#4285f4">Frontend (React)</text>
+      <line x1="390" y1="65" x2="765" y2="65" stroke="#e8e2d8" stroke-width="1"/>
+
+      <!-- Status display -->
+      <rect x="395" y="78" width="185" height="30" rx="5" fill="#f3e8fe" stroke="#7c3aed" stroke-width="1"/>
+      <text x="407" y="97" font-family="Georgia, serif" font-size="10" fill="#7c3aed">Searching for passages...</text>
+      <text x="600" y="97" font-family="IBM Plex Mono, monospace" font-size="8" fill="#888">← status event</text>
+
+      <!-- Streaming text -->
+      <rect x="395" y="118" width="185" height="65" rx="5" fill="#f8f8f8" stroke="#ddd" stroke-width="1"/>
+      <text x="407" y="137" font-family="Georgia, serif" font-size="10.5" fill="#333">Swann's jealousy</text>
+      <text x="407" y="152" font-family="Georgia, serif" font-size="10.5" fill="#333">manifests as a</text>
+      <text x="407" y="167" font-family="Georgia, serif" font-size="10.5" fill="#333">consuming...</text>
+      <rect x="480" y="162" width="8" height="12" fill="#8b4513" opacity="0.6"><animate attributeName="opacity" values="0;1;0" dur="1s" repeatCount="indefinite"/></rect>
+      <text x="600" y="148" font-family="IBM Plex Mono, monospace" font-size="8" fill="#888">← tokens appended</text>
+
+      <!-- Passages -->
+      <rect x="395" y="193" width="185" height="55" rx="5" fill="#faf6f1" stroke="#d4cdc2" stroke-width="1"/>
+      <text x="407" y="212" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8b4513">[1] Swann in Love</text>
+      <text x="407" y="227" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8b4513">[2] The Guermantes Way</text>
+      <text x="407" y="242" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8b4513">[3] The Captive</text>
+      <text x="600" y="222" font-family="IBM Plex Mono, monospace" font-size="8" fill="#888">← sources event</text>
+    </svg>
+  </div>
+
+  <p>The frontend React hook processes each event type:</p>
+
+  <div class="code-block">
+    <span class="file-label">src/hooks/useStreamingQuery.ts</span>
+    <code><span class="cm">// SSE event types the frontend handles</span>
+<span class="kw">interface</span> <span class="cls">StreamEvent</span> {
+  type: <span class="str">'token'</span> | <span class="str">'sources'</span> | <span class="str">'status'</span> | <span class="str">'done'</span> | <span class="str">'error'</span>;
+  token?: <span class="typ">string</span>;
+  passages?: Passage[];
+  status?: <span class="typ">string</span>;
+}
+
+<span class="cm">// Inside the streaming loop:</span>
+<span class="kw">switch</span> (event.type) {
+  <span class="kw">case</span> <span class="str">'status'</span>:
+    <span class="fn">setStatus</span>(event.status);      <span class="cm">// "Searching for passages about..."</span>
+    <span class="kw">break</span>;
+  <span class="kw">case</span> <span class="str">'token'</span>:
+    <span class="fn">setStatus</span>(<span class="kw">null</span>);               <span class="cm">// Clear status once tokens arrive</span>
+    <span class="fn">setResponse</span>(prev => prev + event.token);
+    <span class="kw">break</span>;
+  <span class="kw">case</span> <span class="str">'sources'</span>:
+    <span class="fn">setPassages</span>(event.passages);  <span class="cm">// Populate the ReaderPanel</span>
+    <span class="kw">break</span>;
+}</code>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════════════════╗ -->
+<!-- ║  SECTION 7 — BILINGUAL ALIGNMENT                                        ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════════════════╝ -->
+<section id="alignment">
+  <h2>Bilingual Alignment: Matching EN and FR Text</h2>
+  <p>Proust's English and French texts don't have matching paragraph structures. Translators split, merge, and restructure paragraphs differently. To show parallel bilingual text, we need to align them semantically.</p>
+
+  <h3>The Problem</h3>
+
+  <div class="diagram-container">
+    <svg viewBox="0 0 800 220" width="800" height="220" xmlns="http://www.w3.org/2000/svg">
+      <text x="400" y="25" text-anchor="middle" font-family="Belgrano, serif" font-size="13" fill="#8b4513">Why Position-Based Alignment Fails</text>
+
+      <!-- English column -->
+      <text x="160" y="55" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#4285f4" font-weight="500">English (872 paragraphs)</text>
+      <rect x="60" y="65" width="200" height="24" rx="3" fill="#e8f0fe" stroke="#4285f4" stroke-width="1"/><text x="70" y="81" font-family="Georgia, serif" font-size="9" fill="#333">EN ¶1: For a long time I used to...</text>
+      <rect x="60" y="93" width="200" height="24" rx="3" fill="#e8f0fe" stroke="#4285f4" stroke-width="1"/><text x="70" y="109" font-family="Georgia, serif" font-size="9" fill="#333">EN ¶2: Sometimes, when I had put...</text>
+      <rect x="60" y="121" width="200" height="24" rx="3" fill="#e8f0fe" stroke="#4285f4" stroke-width="1"/><text x="70" y="137" font-family="Georgia, serif" font-size="9" fill="#333">EN ¶3: the candle was still lit...</text>
+      <rect x="60" y="149" width="200" height="24" rx="3" fill="#e8f0fe" stroke="#4285f4" stroke-width="1"/><text x="70" y="165" font-family="Georgia, serif" font-size="9" fill="#333">EN ¶4: I had not ceased while...</text>
+      <text x="160" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#888">... ¶872</text>
+
+      <!-- French column -->
+      <text x="640" y="55" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#c53030" font-weight="500">French (417 paragraphs)</text>
+      <rect x="540" y="65" width="200" height="24" rx="3" fill="#fde8e8" stroke="#c53030" stroke-width="1"/><text x="550" y="81" font-family="Georgia, serif" font-size="9" fill="#333">FR ¶1: Longtemps, je me suis...</text>
+      <rect x="540" y="93" width="200" height="50" rx="3" fill="#fde8e8" stroke="#c53030" stroke-width="1"/><text x="550" y="109" font-family="Georgia, serif" font-size="9" fill="#333">FR ¶2: Parfois, comme Eve...</text><text x="550" y="125" font-family="Georgia, serif" font-size="8" fill="#888">(combines EN ¶2 + ¶3 + ¶4)</text>
+      <rect x="540" y="149" width="200" height="24" rx="3" fill="#fde8e8" stroke="#c53030" stroke-width="1"/><text x="550" y="165" font-family="Georgia, serif" font-size="9" fill="#333">FR ¶3: Je me rendormais...</text>
+      <text x="640" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#888">... ¶417</text>
+
+      <!-- Crossed lines showing misalignment -->
+      <line x1="260" y1="77" x2="540" y2="77" stroke="#276727" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <line x1="260" y1="105" x2="540" y2="115" stroke="#c53030" stroke-width="1.5" opacity="0.5"/>
+      <line x1="260" y1="133" x2="540" y2="115" stroke="#c53030" stroke-width="1.5" opacity="0.5"/>
+      <line x1="260" y1="161" x2="540" y2="115" stroke="#c53030" stroke-width="1.5" opacity="0.5"/>
+
+      <text x="400" y="82" text-anchor="middle" font-family="Georgia, serif" font-size="9" fill="#276727">correct</text>
+      <text x="400" y="140" text-anchor="middle" font-family="Georgia, serif" font-size="9" fill="#c53030">3 EN ¶ → 1 FR ¶</text>
+    </svg>
+  </div>
+
+  <h3>The Solution: Sentence-Level DP Alignment</h3>
+  <p>Instead of aligning paragraphs (which have different granularity in each language), we split into <strong>individual sentences</strong>, embed them with Cohere, and use dynamic programming to find the optimal monotonic alignment:</p>
+
+  <div class="diagram-container">
+    <svg viewBox="0 0 800 280" width="800" height="280" xmlns="http://www.w3.org/2000/svg">
+      <text x="400" y="25" text-anchor="middle" font-family="Belgrano, serif" font-size="13" fill="#8b4513">Sentence-Level Alignment with DP</text>
+
+      <!-- EN sentences -->
+      <text x="120" y="55" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#4285f4" font-weight="500">EN Sentences</text>
+      <rect x="20" y="65" width="200" height="20" rx="3" fill="#e8f0fe" stroke="#4285f4" stroke-width="1"/><text x="30" y="79" font-family="Georgia, serif" font-size="8.5" fill="#333">For a long time I used to go...</text>
+      <rect x="20" y="89" width="200" height="20" rx="3" fill="#e8f0fe" stroke="#4285f4" stroke-width="1"/><text x="30" y="103" font-family="Georgia, serif" font-size="8.5" fill="#333">Sometimes, when I had put out...</text>
+      <rect x="20" y="113" width="200" height="20" rx="3" fill="#e8f0fe" stroke="#4285f4" stroke-width="1"/><text x="30" y="127" font-family="Georgia, serif" font-size="8.5" fill="#333">my eyes would close so quickly...</text>
+      <rect x="20" y="137" width="200" height="20" rx="3" fill="#e8f0fe" stroke="#4285f4" stroke-width="1"/><text x="30" y="151" font-family="Georgia, serif" font-size="8.5" fill="#333">the candle was still burning...</text>
+      <rect x="20" y="161" width="200" height="20" rx="3" fill="#e8f0fe" stroke="#4285f4" stroke-width="1"/><text x="30" y="175" font-family="Georgia, serif" font-size="8.5" fill="#333">I had not ceased while asleep...</text>
+
+      <!-- FR sentences -->
+      <text x="680" y="55" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#c53030" font-weight="500">FR Sentences</text>
+      <rect x="580" y="65" width="200" height="20" rx="3" fill="#fde8e8" stroke="#c53030" stroke-width="1"/><text x="590" y="79" font-family="Georgia, serif" font-size="8.5" fill="#333">Longtemps, je me suis couché...</text>
+      <rect x="580" y="89" width="200" height="20" rx="3" fill="#fde8e8" stroke="#c53030" stroke-width="1"/><text x="590" y="103" font-family="Georgia, serif" font-size="8.5" fill="#333">Parfois, à peine ma bougie...</text>
+      <rect x="580" y="113" width="200" height="20" rx="3" fill="#fde8e8" stroke="#c53030" stroke-width="1"/><text x="590" y="127" font-family="Georgia, serif" font-size="8.5" fill="#333">mes yeux se fermaient si vite...</text>
+      <rect x="580" y="137" width="200" height="20" rx="3" fill="#fde8e8" stroke="#c53030" stroke-width="1"/><text x="590" y="151" font-family="Georgia, serif" font-size="8.5" fill="#333">la bougie brûlait encore...</text>
+      <rect x="580" y="161" width="200" height="20" rx="3" fill="#fde8e8" stroke="#c53030" stroke-width="1"/><text x="590" y="175" font-family="Georgia, serif" font-size="8.5" fill="#333">je n'avais pas cessé en dormant...</text>
+
+      <!-- Alignment lines (correct 1:1 mapping) -->
+      <line x1="220" y1="75" x2="580" y2="75" stroke="#276727" stroke-width="1.5"/>
+      <line x1="220" y1="99" x2="580" y2="99" stroke="#276727" stroke-width="1.5"/>
+      <line x1="220" y1="123" x2="580" y2="123" stroke="#276727" stroke-width="1.5"/>
+      <line x1="220" y1="147" x2="580" y2="147" stroke="#276727" stroke-width="1.5"/>
+      <line x1="220" y1="171" x2="580" y2="171" stroke="#276727" stroke-width="1.5"/>
+
+      <!-- Cosine similarity scores -->
+      <text x="400" y="73" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#276727">cos=0.92</text>
+      <text x="400" y="97" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#276727">cos=0.87</text>
+      <text x="400" y="121" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#276727">cos=0.91</text>
+      <text x="400" y="145" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#276727">cos=0.89</text>
+      <text x="400" y="169" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#276727">cos=0.85</text>
+
+      <!-- DP explanation -->
+      <rect x="180" y="200" width="440" height="70" rx="8" fill="#e8f8e8" stroke="#276727" stroke-width="1"/>
+      <text x="400" y="222" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#276727" font-weight="500">Dynamic Programming Constraint</text>
+      <text x="400" y="242" text-anchor="middle" font-family="Georgia, serif" font-size="10" fill="#666">EN sentence i maps to FR index >= EN sentence (i-1)'s mapping</text>
+      <text x="400" y="258" text-anchor="middle" font-family="Georgia, serif" font-size="10" fill="#666">→ preserves reading order while maximizing total similarity</text>
+    </svg>
+  </div>
+
+  <div class="callout">
+    <strong>Result:</strong> ~12,900 bilingual passage pairs with 99.98% French coverage. The sentence-level approach fixed a ~18% misalignment rate that the previous paragraph-level method produced.
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>ProustGPT Architecture Visualization &mdash; <a href="https://github.com/realtobyfu/proust-gpt">View on GitHub</a></p>
+</footer>
+
+</body>
+</html>
