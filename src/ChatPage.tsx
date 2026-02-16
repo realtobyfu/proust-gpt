@@ -393,23 +393,31 @@ const ErrorMessage = styled.div`
   }
 `;
 
-const NewChatButton = styled.button`
-  width: 100%;
-  padding: 0.45rem 0;
-  background: rgba(139, 69, 19, 0.08);
-  border: 1px dashed #c4a882;
+const NewChatRow = styled.div`
+  display: flex;
+  gap: 6px;
+  margin-bottom: 0.5rem;
+`;
+
+const NewChatButton = styled.button<{ $mode?: 'explore' | 'reflect' }>`
+  flex: 1;
+  padding: 0.4rem 0;
+  background: ${props => props.$mode === 'reflect' ? 'rgba(90, 107, 90, 0.06)' : 'rgba(139, 69, 19, 0.08)'};
+  border: 1px dashed ${props => props.$mode === 'reflect' ? '#8a9b8a' : '#c4a882'};
   border-radius: 8px;
-  color: #8b4513;
-  font-size: 1.3rem;
-  line-height: 1;
+  color: ${props => props.$mode === 'reflect' ? '#5a6b5a' : '#8b4513'};
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.72rem;
+  line-height: 1.2;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.3rem;
   transition: background 0.2s ease;
 
   &:hover {
-    background: rgba(139, 69, 19, 0.15);
+    background: ${props => props.$mode === 'reflect' ? 'rgba(90, 107, 90, 0.15)' : 'rgba(139, 69, 19, 0.15)'};
   }
 `;
 
@@ -785,13 +793,15 @@ const ChatPage: React.FC = () => {
     }
   }, [messages, activeMode, saveSession, loadSession, resetStream]);
 
-  const handleNewConversation = useCallback(() => {
+  const handleNewConversation = useCallback((mode?: string) => {
     if (currentSessionIdRef.current && messages.length > 0) {
       saveSession(currentSessionIdRef.current, messages, activeMode);
     }
-    const session = createSession(activeMode);
+    const newMode = mode || activeMode;
+    const session = createSession(newMode);
     currentSessionIdRef.current = session.id;
     setMessages([]);
+    setActiveMode(newMode);
     resetStream();
     setSelectedPassage(null);
   }, [messages, activeMode, saveSession, createSession, resetStream]);
@@ -956,9 +966,14 @@ const ChatPage: React.FC = () => {
     <ChatContainer>
       <Sidebar $isOpen={sidebarOpen}>
         <SidebarSection>
-          <NewChatButton onClick={handleNewConversation} title={t('chat.newConversation')}>
-            +
-          </NewChatButton>
+          <NewChatRow>
+            <NewChatButton $mode="explore" onClick={() => handleNewConversation('explore_lost_time')} title={t('chat.modeExplore')}>
+              + {t('chat.modeExplore')}
+            </NewChatButton>
+            <NewChatButton $mode="reflect" onClick={() => handleNewConversation('refine_prose')} title={t('chat.modeReflect')}>
+              + {t('chat.modeReflect')}
+            </NewChatButton>
+          </NewChatRow>
           <SidebarTitle>{t('chat.conversations')}</SidebarTitle>
           {sessions.length === 0 ? (
             <SidebarItem style={{ color: '#aaa', cursor: 'default' }}>
