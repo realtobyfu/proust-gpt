@@ -262,9 +262,37 @@ const PassageCard: React.FC<PassageCardProps> = ({
   const [showOriginal, setShowOriginal] = useState(false);
   const [frenchTexts, setFrenchTexts] = useState<Record<number, string | null>>({});
   const [fetchingFr, setFetchingFr] = useState(false);
+  const [fullTexts, setFullTexts] = useState<Record<number, { text: string; text_fr?: string }>>({});
 
   const passage = passages[currentIndex];
   const hasMultiple = passages.length > 1;
+
+  const isTruncated = (p: Passage) =>
+    p._truncated === true || p.text?.endsWith('\u2026');
+
+  // Fetch full EN+FR text on demand for a truncated passage
+  const fetchFullText = useCallback(async (passageIndex: number) => {
+    if (fullTexts[passageIndex] !== undefined) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/read/passage_text?index=${passageIndex}&lang=both`);
+      const data = await res.json();
+      if (data.text) {
+        setFullTexts(prev => ({
+          ...prev,
+          [passageIndex]: { text: data.text, text_fr: data.text_fr || undefined },
+        }));
+      }
+    } catch {
+      // Silently fail — user sees the preview text
+    }
+  }, [fullTexts]);
+
+  // Lazy-load full text when a truncated passage is expanded
+  useEffect(() => {
+    if (expanded && passage.index != null && isTruncated(passage) && !fullTexts[passage.index]) {
+      fetchFullText(passage.index);
+    }
+  }, [expanded, passage]);
 
   // Fetch French text on demand for a passage
   const fetchFrenchText = useCallback(async (passageIndex: number) => {
@@ -294,16 +322,18 @@ const PassageCard: React.FC<PassageCardProps> = ({
     }
   }, [showOriginal, passage, fetchFrenchText]);
 
-  // Determine display text
+  // Determine display text — prefer lazy-loaded full text over SSE preview
   const isFr = i18n.language === 'fr';
-  const frText = passage.text_fr || (passage.index != null ? frenchTexts[passage.index] : undefined);
+  const full = passage.index != null ? fullTexts[passage.index] : undefined;
+  const enText = full?.text ?? passage.text;
+  const frText = full?.text_fr ?? passage.text_fr ?? (passage.index != null ? frenchTexts[passage.index] : undefined);
   let displayText: string;
   if (isFr) {
-    displayText = frText || passage.text;
+    displayText = frText || enText;
   } else if (showOriginal && frText) {
     displayText = frText;
   } else {
-    displayText = passage.text;
+    displayText = enText;
   }
   const showFrUnavailable = showOriginal && !isFr && !frText && passage.index != null && frenchTexts[passage.index] === null;
 

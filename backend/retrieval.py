@@ -26,6 +26,25 @@ from config import config
 from text_utils import clean_passage_text
 
 
+# ── SSE preview truncation ────────────────────────────────────────────────────
+
+SSE_TEXT_PREVIEW = 200
+
+
+def _preview_passage(p: dict) -> dict:
+    """Return a copy with truncated text for SSE transport.
+
+    Frontend lazy-loads full text via /api/read/passage_text on expand.
+    """
+    preview = dict(p)
+    for key in ("text", "text_fr"):
+        val = preview.get(key, "")
+        if len(val) > SSE_TEXT_PREVIEW:
+            preview[key] = val[:SSE_TEXT_PREVIEW] + "\u2026"
+            preview["_truncated"] = True
+    return preview
+
+
 # ── Module-level singletons (lazy loaded) ────────────────────────────────────
 
 _embeddings: Optional[CohereEmbeddings] = None
@@ -336,10 +355,11 @@ def stream_rag_response(query: str, lang: str = "en") -> Generator[dict, None, N
     docs = retrieve_passages(query, lang=lang)
     passages = _format_passages(docs, lang=lang)
 
-    # Send sources as individual events so each stays under proxy line-size limits.
-    # Multi-line SSE transport in sse_format() handles large payloads.
+    # Send sources as individual events with truncated text so each stays
+    # well under proxy buffer limits (~500B vs 5-60KB).
+    # Frontend lazy-loads full text on card expand.
     for p in passages:
-        yield {"type": "sources", "passages": [p]}
+        yield {"type": "sources", "passages": [_preview_passage(p)]}
 
     context = "\n\n---\n\n".join(
         f"[{i+1}] {doc.page_content}"

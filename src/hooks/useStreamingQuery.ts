@@ -9,6 +9,7 @@ export interface Passage {
   index?: number;
   relevance_summary?: string;
   citation_index?: number;
+  _truncated?: boolean;
 }
 
 export interface QueryMetadata {
