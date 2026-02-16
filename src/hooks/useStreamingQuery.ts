@@ -76,6 +76,7 @@ export function useStreamingQuery(options: {
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | null>(null);
   const passagesRef = useRef<Passage[]>([]);
   const parseFailCountRef = useRef(0);
+  const receivedTokensRef = useRef(false);
 
   const reset = useCallback(() => {
     setResponse('');
@@ -195,6 +196,7 @@ export function useStreamingQuery(options: {
         switch (event.type) {
           case 'token':
             if (event.token) {
+              receivedTokensRef.current = true;
               setStatus(null);
               setResponse(prev => prev + event.token);
             }
@@ -289,6 +291,7 @@ export function useStreamingQuery(options: {
     setPassages([]);
     passagesRef.current = [];
     parseFailCountRef.current = 0;
+    receivedTokensRef.current = false;
     setMetadata(null);
     setStatus(null);
     setError(null);
@@ -298,6 +301,26 @@ export function useStreamingQuery(options: {
     try {
       // Try streaming first
       await queryStreaming(question, mode, lang, history);
+
+      // Detect empty stream: streaming "succeeded" but no tokens arrived.
+      // This happens when a reverse proxy (e.g. Render) drops the connection
+      // during a long blocking operation — the frontend sees a normal stream
+      // end with no content.
+      if (!receivedTokensRef.current) {
+        console.warn('[SSE] Stream completed with no tokens — connection may have been dropped');
+
+        if (fallbackToNonStreaming) {
+          try {
+            setResponse('');
+            setPassages([]);
+            await queryNonStreaming(question, mode, lang, history);
+          } catch (fallbackError) {
+            setError('The connection was interrupted. Please try again.');
+          }
+        } else {
+          setError('The connection was interrupted. Please try again.');
+        }
+      }
     } catch (streamError) {
       // Check if aborted
       if (streamError instanceof Error && streamError.name === 'AbortError') {

@@ -28,6 +28,7 @@ from retrieval import (
     stream_reflect_response,
     check_pinecone_connection,
     retrieve_passages,
+    initialize_clients,
 )
 from agent import stream_agent_response, query_agent, needs_agent, stream_reflect_agent_response, query_reflect_agent
 
@@ -86,11 +87,18 @@ class HealthResponse(BaseModel):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Validate configuration on startup."""
+    """Validate configuration and initialize API clients on startup."""
     missing = config.validate()
     if missing:
         print(f"WARNING: Missing required configuration: {missing}")
         print("Some features may not work. See .env.example for setup instructions.")
+    else:
+        try:
+            await asyncio.to_thread(initialize_clients)
+            print("API clients initialized successfully")
+        except Exception as e:
+            print(f"WARNING: Failed to initialize API clients: {e}")
+            print("Clients will be initialized lazily on first request.")
     yield
 
 
@@ -140,17 +148,37 @@ def sse_format(data: dict) -> str:
     return "".join(lines)
 
 
+KEEPALIVE_INTERVAL = 15  # seconds between SSE keepalive comments
+
+
 async def async_sse_generator(sync_gen_func, *args) -> AsyncGenerator[str, None]:
     """
     Wrap a synchronous generator (from retrieval.py) into an async generator
     that yields SSE-formatted strings. Runs each next() call in a thread
     so the event loop stays unblocked.
+
+    Sends SSE comment keepalives (`: keepalive\\n\\n`) every KEEPALIVE_INTERVAL
+    seconds while waiting for the sync generator. This prevents reverse proxies
+    (e.g. Render) from dropping idle connections during long blocking operations
+    like Pinecone queries or Cohere reranking.
     """
     loop = asyncio.get_event_loop()
     sync_gen = sync_gen_func(*args)
     try:
         while True:
-            event = await loop.run_in_executor(None, next, sync_gen)
+            # Schedule next(sync_gen) in a thread — don't cancel it on timeout
+            future = loop.run_in_executor(None, next, sync_gen)
+            task = asyncio.ensure_future(future)
+
+            while True:
+                done, _ = await asyncio.wait({task}, timeout=KEEPALIVE_INTERVAL)
+                if done:
+                    break
+                # Still waiting — send keepalive comment to prevent proxy timeout
+                logger.debug("SSE keepalive sent")
+                yield ": keepalive\n\n"
+
+            event = task.result()
             yield sse_format(event)
     except StopIteration:
         pass

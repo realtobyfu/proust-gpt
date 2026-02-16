@@ -87,6 +87,19 @@ def get_pinecone_index():
     return _pinecone_index
 
 
+def initialize_clients() -> None:
+    """Eagerly initialize all API clients at startup.
+
+    Calling this removes the 1-3 second cold-start penalty on the first user
+    request by creating the Cohere embeddings, Groq LLM, Cohere reranker,
+    and Pinecone index connections ahead of time.
+    """
+    get_embeddings()
+    get_llm()
+    get_reranker()
+    get_pinecone_index()
+
+
 # ── Prompts ───────────────────────────────────────────────────────────────────
 
 REFLECT_SYSTEM_PROMPT = """You are a wise, reflective conversationalist in the spirit of Marcel Proust. You help the reader contemplate their inner life, drawing on themes of memory, time, sensation, and the self.
