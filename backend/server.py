@@ -113,15 +113,31 @@ app.add_middleware(
 logger = logging.getLogger("proust.sse")
 
 
+SSE_LINE_MAX = 512
+
+
 def sse_format(data: dict) -> str:
-    """Format data as SSE event."""
-    line = f"data: {json.dumps(data)}\n\n"
+    """Format data as SSE event, splitting across multiple data: lines if needed.
+
+    The SSE spec allows multiple `data:` lines per event — the client concatenates
+    them.  Splitting large JSON payloads keeps each line under proxy line-size
+    limits (e.g. Render's reverse proxy), preventing mid-JSON truncation.
+    """
+    payload = json.dumps(data)
     event_type = data.get("type", "?")
-    size = len(line.encode("utf-8"))
-    logger.info(f"SSE event type={event_type} size={size}B")
-    if size > 4000:
-        logger.warning(f"SSE LARGE EVENT type={event_type} size={size}B")
-    return line
+    size = len(payload.encode("utf-8"))
+    logger.info(f"SSE event type={event_type} payload={size}B")
+
+    if size <= SSE_LINE_MAX:
+        return f"data: {payload}\n\n"
+
+    # Split across multiple data: lines for proxy safety
+    lines = []
+    for i in range(0, len(payload), SSE_LINE_MAX):
+        lines.append(f"data: {payload[i:i + SSE_LINE_MAX]}\n")
+    lines.append("\n")  # blank line = event boundary
+    logger.info(f"SSE event type={event_type} split into {len(lines) - 1} data lines")
+    return "".join(lines)
 
 
 async def async_sse_generator(sync_gen_func, *args) -> AsyncGenerator[str, None]:

@@ -324,14 +324,9 @@ def stream_rag_response(query: str, lang: str = "en") -> Generator[dict, None, N
     passages = _format_passages(docs, lang=lang)
 
     # Send sources as individual events so each stays under proxy line-size limits.
-    # Split EN and FR text into separate events to further reduce event size.
+    # Multi-line SSE transport in sse_format() handles large payloads.
     for p in passages:
-        p_en = {k: v for k, v in p.items() if k != "text_fr"}
-        yield {"type": "sources", "passages": [p_en]}
-        if p.get("text_fr"):
-            yield {"type": "sources_fr", "passages": [
-                {"index": p.get("index"), "citation_index": p.get("citation_index"), "text_fr": p["text_fr"]}
-            ]}
+        yield {"type": "sources", "passages": [p]}
 
     context = "\n\n---\n\n".join(
         f"[{i+1}] {doc.page_content}"
@@ -366,13 +361,6 @@ def query_rag(query: str, lang: str = "en") -> dict:
             reply_parts.append(event["token"])
         elif event["type"] == "sources":
             passages.extend(event["passages"])
-        elif event["type"] == "sources_fr":
-            # Merge French text back into passages by citation_index
-            for fr in event["passages"]:
-                for p in passages:
-                    if p.get("citation_index") == fr.get("citation_index"):
-                        p["text_fr"] = fr.get("text_fr", "")
-                        break
 
     return {
         "reply": "".join(reply_parts),

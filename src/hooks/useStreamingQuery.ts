@@ -18,7 +18,7 @@ export interface QueryMetadata {
 }
 
 interface StreamEvent {
-  type: 'token' | 'sources' | 'sources_fr' | 'metadata' | 'status' | 'done' | 'error';
+  type: 'token' | 'sources' | 'metadata' | 'status' | 'done' | 'error';
   token?: string;
   passages?: Passage[];
   synthesis?: string;
@@ -171,15 +171,24 @@ export function useStreamingQuery(options: {
     const decoder = new TextDecoder();
     let buffer = '';
 
-    const processSSELine = (line: string) => {
-      if (!line.startsWith('data: ')) return;
+    const processSSEBlock = (block: string) => {
+      // Reassemble multi-line data: fields (SSE spec: client concatenates them)
+      const dataLines = block.split('\n')
+        .filter(l => l.startsWith('data: '))
+        .map(l => l.slice(6));
+      if (dataLines.length === 0) return;
+      const jsonStr = dataLines.join('');  // concatenate chunks
+
+      // Pre-parse diagnostic (fires even if JSON.parse fails)
+      if (jsonStr.length > 200) {
+        console.log(`[SSE] raw ${jsonStr.length}B (${dataLines.length} lines): ${jsonStr.slice(0, 60)}...`);
+      }
 
       try {
-        const jsonStr = line.slice(6); // Remove 'data: ' prefix
         const event: StreamEvent = JSON.parse(jsonStr);
 
         console.log(`[SSE] type=${event.type} size=${jsonStr.length}B` +
-          (event.type === 'sources' || event.type === 'sources_fr'
+          (event.type === 'sources'
             ? ` passages=${event.passages?.length ?? 0}`
             : ''));
 
@@ -201,19 +210,6 @@ export function useStreamingQuery(options: {
             if (event.passages) {
               setPassages(prev => {
                 const updated = [...prev, ...event.passages!];
-                passagesRef.current = updated;
-                return updated;
-              });
-            }
-            break;
-
-          case 'sources_fr':
-            if (event.passages) {
-              setPassages(prev => {
-                const updated = prev.map(p => {
-                  const fr = event.passages!.find(f => f.citation_index === p.citation_index);
-                  return fr ? { ...p, text_fr: fr.text_fr } : p;
-                });
                 passagesRef.current = updated;
                 return updated;
               });
@@ -242,7 +238,8 @@ export function useStreamingQuery(options: {
           throw parseError;
         }
         parseFailCountRef.current += 1;
-        console.warn('Failed to parse SSE event:', line, parseError);
+        console.warn(`[SSE] PARSE FAIL (${dataLines.length} lines, ${jsonStr.length}B):`,
+          jsonStr.slice(0, 200), parseError);
       }
     };
 
@@ -254,12 +251,12 @@ export function useStreamingQuery(options: {
 
         buffer += decoder.decode(value, { stream: true });
 
-        // Process complete SSE messages
-        const lines = buffer.split('\n\n');
-        buffer = lines.pop() || ''; // Keep incomplete message in buffer
+        // Process complete SSE messages (each block is separated by \n\n)
+        const blocks = buffer.split('\n\n');
+        buffer = blocks.pop() || ''; // Keep incomplete message in buffer
 
-        for (const line of lines) {
-          processSSELine(line);
+        for (const block of blocks) {
+          processSSEBlock(block);
         }
       }
 
@@ -270,8 +267,8 @@ export function useStreamingQuery(options: {
       buffer += decoder.decode(); // flush any remaining bytes
       if (buffer.trim()) {
         const remaining = buffer.split('\n\n');
-        for (const line of remaining) {
-          processSSELine(line);
+        for (const block of remaining) {
+          processSSEBlock(block);
         }
       }
 
