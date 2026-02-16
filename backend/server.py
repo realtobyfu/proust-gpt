@@ -379,7 +379,13 @@ if config.SERVE_STATIC and os.path.isdir(config.STATIC_DIR):
 
     @app.get("/{full_path:path}")
     async def spa_catch_all(request: Request, full_path: str):
-        """Serve index.html for all non-API routes (SPA catch-all)."""
+        """Serve static files if they exist, otherwise index.html for SPA routing."""
+        if full_path:
+            file_path = os.path.join(config.STATIC_DIR, full_path)
+            # Prevent path traversal
+            if os.path.realpath(file_path).startswith(os.path.realpath(config.STATIC_DIR)) \
+               and os.path.isfile(file_path):
+                return FileResponse(file_path)
         return FileResponse(os.path.join(config.STATIC_DIR, "index.html"))
 
 
