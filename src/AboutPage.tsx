@@ -82,6 +82,11 @@ const Text = styled.p`
   margin-bottom: 1rem;
   font-size: 1.05rem;
 
+  a {
+    color: inherit;
+    text-decoration: underline;
+  }
+
   &:last-child {
     margin-bottom: 0;
   }
@@ -91,6 +96,23 @@ const Text = styled.p`
 const Footer = styled.div`
   margin-top: 1rem;
   text-align: center;
+`;
+
+const Credit = styled.div`
+  margin-top: 2rem;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.85rem;
+  color: #999;
+
+  a {
+    color: #999;
+    text-decoration: none;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: #8b4513;
+    }
+  }
 `;
 
 const FooterLink = styled.a`
@@ -157,6 +179,12 @@ const AboutPage: React.FC = () => {
           <Text>
             {t('about.projectDesc2')}
           </Text>
+          <Text>
+            <Trans
+              i18nKey="about.madeBy"
+              components={[<a href="https://tobiasfu.com" target="_blank" rel="noopener noreferrer" />]}
+            />
+          </Text>
         </Section>
 
         <Section>
@@ -199,6 +227,12 @@ const AboutPage: React.FC = () => {
           <FooterLink onClick={() => navigate('/')}>
             &larr; {t('about.backToHome')}
           </FooterLink>
+          <Credit>
+            <Trans
+              i18nKey="about.madeBy"
+              components={[<a href="https://tobiasfu.com" target="_blank" rel="noopener noreferrer" />]}
+            />
+          </Credit>
         </Footer>
       </Content>
     </Container>
