@@ -38,9 +38,9 @@ OUTPUT_PATH = Path(__file__).parent.parent / "parsed_clean_bilingual.json"
 
 # ── Chunk size targets ───────────────────────────────────────────────────────
 
-MIN_CHUNK_CHARS = 500
-MAX_CHUNK_CHARS = 1500
-SHORT_THRESHOLD = 100  # merge chunks shorter than this
+MIN_CHUNK_CHARS = 250
+MAX_CHUNK_CHARS = 750
+SHORT_THRESHOLD = 80  # merge chunks shorter than this
 
 
 # ── Chapter mapping ──────────────────────────────────────────────────────────
@@ -390,20 +390,102 @@ def align_chapter(en_text: str, fr_text: str) -> list[tuple[str, str]]:
 
 # ── Chunking ─────────────────────────────────────────────────────────────────
 
+# Multi-level sentence splitting for EN + FR (Proust writes 3000+ char sentences)
+# L1: standard sentence boundaries
+_SENT_L1 = re.compile(r'(?<=[.!?\u2026\u00BB])\s+(?=[A-ZÀ-Ö\u00AB"\u201C\u2014])')
+# L2: also split on ; and : followed by uppercase/quote
+_SENT_L2 = re.compile(r'(?<=[.!?\u2026\u00BB;:])\s+(?=[A-ZÀ-Ö\u00AB"\u201C\u2014])')
+# L3: split on any sentence-ending punctuation + whitespace (last resort)
+_SENT_L3 = re.compile(r'(?<=[.!?\u2026;,])\s+')
+
+
+def _split_at_sentences(text: str) -> list[str]:
+    """Split text into sentences, progressively more aggressive."""
+    for regex in (_SENT_L1, _SENT_L2, _SENT_L3):
+        parts = regex.split(text)
+        if len(parts) > 1:
+            return [p for p in parts if p.strip()]
+    return [text.strip()] if text.strip() else []
+
+
+def _subdivide_long_pairs(
+    pairs: list[tuple[str, str]],
+) -> list[tuple[str, str]]:
+    """Split paragraph pairs that exceed MAX_CHUNK_CHARS at sentence boundaries.
+
+    Proust writes paragraphs of 2000-4000+ chars. To get smaller chunks,
+    we split both EN and FR at sentence boundaries, then re-pair proportionally.
+    """
+    result: list[tuple[str, str]] = []
+
+    for en_text, fr_text in pairs:
+        # Only split if the longer text exceeds the max
+        if max(len(en_text), len(fr_text)) <= MAX_CHUNK_CHARS:
+            result.append((en_text, fr_text))
+            continue
+
+        en_sents = _split_at_sentences(en_text)
+        fr_sents = _split_at_sentences(fr_text)
+
+        # If we can't split either side, keep as-is
+        if len(en_sents) <= 1 and len(fr_sents) <= 1:
+            result.append((en_text, fr_text))
+            continue
+
+        # Group sentences into sub-chunks targeting MAX_CHUNK_CHARS
+        # Use FR as the guide (it's the original text)
+        if len(fr_sents) > 1:
+            fr_sub_chunks: list[str] = []
+            cur: list[str] = []
+            cur_len = 0
+            for s in fr_sents:
+                if cur and cur_len + len(s) > MAX_CHUNK_CHARS:
+                    fr_sub_chunks.append(" ".join(cur))
+                    cur = []
+                    cur_len = 0
+                cur.append(s)
+                cur_len += len(s) + 1
+            if cur:
+                fr_sub_chunks.append(" ".join(cur))
+        else:
+            fr_sub_chunks = [fr_text]
+
+        n_sub = len(fr_sub_chunks)
+
+        # Proportionally split EN into the same number of sub-chunks
+        if len(en_sents) >= n_sub and n_sub > 1:
+            # Distribute EN sentences across sub-chunks proportionally
+            en_sub_chunks: list[str] = []
+            per_chunk = len(en_sents) / n_sub
+            for k in range(n_sub):
+                start_idx = int(round(k * per_chunk))
+                end_idx = int(round((k + 1) * per_chunk))
+                en_sub_chunks.append(" ".join(en_sents[start_idx:end_idx]))
+        else:
+            en_sub_chunks = [en_text]
+            # Pad to match FR sub-chunks
+            while len(en_sub_chunks) < n_sub:
+                en_sub_chunks.append("")
+
+        for en_sub, fr_sub in zip(en_sub_chunks, fr_sub_chunks):
+            result.append((en_sub, fr_sub))
+
+    return result
+
+
 def group_pairs_into_chunks(
     pairs: list[tuple[str, str]],
 ) -> list[tuple[str, str]]:
-    """Merge aligned paragraph pairs into 500-1500 char chunks.
+    """Merge aligned paragraph pairs into chunks of MIN-MAX_CHUNK_CHARS.
 
-    Each pair is one FR paragraph with its aligned EN text.  FR paragraphs
-    are never split — they are the original text.  Multiple small pairs
-    are combined into chunks; a single large FR paragraph becomes its own
-    chunk regardless of size.
-
-    Uses FR text length (the original) to decide chunk boundaries.
+    First subdivides long paragraphs at sentence boundaries, then merges
+    small pairs together. Uses FR text length to decide chunk boundaries.
     """
     if not pairs:
         return []
+
+    # Subdivide long paragraphs before merging
+    pairs = _subdivide_long_pairs(pairs)
 
     chunks: list[tuple[str, str]] = []
     cur_en_parts: list[str] = []
