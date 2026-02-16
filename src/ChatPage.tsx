@@ -626,6 +626,7 @@ const ChatPage: React.FC = () => {
   const navigate = useNavigate();
   const { mode: locationMode, prompt, resumeLastSession } = location.state || { mode: 'explore_lost_time', prompt: '', resumeLastSession: false };
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const streamCommittedRef = useRef(false);
   const isDesktop = useIsDesktop();
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -861,9 +862,14 @@ const ChatPage: React.FC = () => {
     }
   }, [deleteSession, getMostRecentSession, loadSession, createSession, activeMode, resetStream]);
 
-  // When streaming completes, add the response as a message, save immediately, and track position
+  // When streaming completes, add the response as a message, save immediately, and track position.
+  // We set streamCommittedRef instead of calling resetStream() to avoid a flash where the
+  // streaming bubble disappears (text gone) before the committed message renders (text back).
+  // The ref hides the streaming bubble in the SAME render that adds the committed message.
   useEffect(() => {
-    if (!isLoading && !isStreaming && streamingResponse) {
+    if (!isLoading && !isStreaming && streamingResponse && !streamCommittedRef.current) {
+      streamCommittedRef.current = true;
+
       // Use ref as fallback — protects against React batching edge cases
       // where streamingPassages state might be stale
       const finalPassages = streamingPassages.length > 0
@@ -896,9 +902,11 @@ const ChatPage: React.FC = () => {
         });
       }
 
-      resetStream();
+      // Don't call resetStream() here — clearing streamingResponse causes a
+      // visible flash where text disappears before the committed message renders.
+      // Streaming state is cleaned up when the next query starts.
     }
-  }, [isLoading, isStreaming, streamingResponse, streamingPassages, streamingPassagesRef, streamingMetadata, resetStream, activeMode, saveSession]);
+  }, [isLoading, isStreaming, streamingResponse, streamingPassages, streamingPassagesRef, streamingMetadata, activeMode, saveSession]);
 
   const getModeDisplay = () => {
     switch (activeMode) {
@@ -913,6 +921,7 @@ const ChatPage: React.FC = () => {
 
   const handleSendMessage = async (message: string = userInput) => {
     if (!message.trim() || isLoading) return;
+    streamCommittedRef.current = false;
 
     const newMessage: Message = {
       id: Date.now().toString(),
@@ -1197,7 +1206,7 @@ const ChatPage: React.FC = () => {
             })}
 
             {/* Show streaming bubble while actively streaming OR while waiting for commit */}
-            {((isStreaming && streamingResponse) || (!isLoading && !isStreaming && streamingResponse)) && (
+            {!streamCommittedRef.current && ((isStreaming && streamingResponse) || (!isLoading && !isStreaming && streamingResponse)) && (
               <StreamingBubble $isUser={false}>
                 <MarkdownMessage content={streamingResponse} />
                 {isStreaming && <StreamingCursor />}
