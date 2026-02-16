@@ -36,6 +36,7 @@ export interface HistoryMessage {
 
 export interface StreamingQueryResult {
   response: string;
+  responseRef: React.RefObject<string>;
   passages: Passage[];
   passagesRef: React.RefObject<Passage[]>;
   metadata: QueryMetadata | null;
@@ -75,6 +76,7 @@ export function useStreamingQuery(options: {
   const abortControllerRef = useRef<AbortController | null>(null);
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | null>(null);
   const passagesRef = useRef<Passage[]>([]);
+  const responseRef = useRef('');
   const parseFailCountRef = useRef(0);
   const receivedTokensRef = useRef(false);
 
@@ -197,6 +199,7 @@ export function useStreamingQuery(options: {
           case 'token':
             if (event.token) {
               receivedTokensRef.current = true;
+              responseRef.current += event.token;
               setStatus(null);
               setResponse(prev => prev + event.token);
             }
@@ -290,6 +293,7 @@ export function useStreamingQuery(options: {
     setResponse('');
     setPassages([]);
     passagesRef.current = [];
+    responseRef.current = '';
     parseFailCountRef.current = 0;
     receivedTokensRef.current = false;
     setMetadata(null);
@@ -356,6 +360,7 @@ export function useStreamingQuery(options: {
 
   return {
     response,
+    responseRef,
     passages,
     passagesRef,
     metadata,

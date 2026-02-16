@@ -670,6 +670,7 @@ const ChatPage: React.FC = () => {
   // Use streaming query hook
   const {
     response: streamingResponse,
+    responseRef: streamingResponseRef,
     passages: streamingPassages,
     passagesRef: streamingPassagesRef,
     metadata: streamingMetadata,
@@ -757,18 +758,33 @@ const ChatPage: React.FC = () => {
 
   // Save on page close/refresh and on component unmount (navigation away)
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (currentSessionIdRef.current && messagesRef.current.length > 0) {
-        saveSession(currentSessionIdRef.current, messagesRef.current, activeModeRef.current);
+    const saveWithPartialResponse = () => {
+      let msgs = messagesRef.current;
+      // If there's an uncommitted streaming response, append it as a partial message
+      if (!streamCommittedRef.current && streamingResponseRef.current) {
+        const partialMessage: Message = {
+          id: Date.now().toString(),
+          text: streamingResponseRef.current,
+          isUser: false,
+          passages: (streamingPassagesRef.current ?? []).length > 0
+            ? (streamingPassagesRef.current ?? [])
+            : undefined,
+        };
+        msgs = [...msgs, partialMessage];
       }
+      if (currentSessionIdRef.current && msgs.length > 0) {
+        saveSession(currentSessionIdRef.current, msgs, activeModeRef.current);
+      }
+    };
+
+    const handleBeforeUnload = () => {
+      saveWithPartialResponse();
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       // Save on unmount (e.g. navigating to another route via React Router)
-      if (currentSessionIdRef.current && messagesRef.current.length > 0) {
-        saveSession(currentSessionIdRef.current, messagesRef.current, activeModeRef.current);
-      }
+      saveWithPartialResponse();
     };
   }, [saveSession]);
 
