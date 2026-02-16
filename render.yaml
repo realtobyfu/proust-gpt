@@ -2,7 +2,7 @@ services:
   - type: web
     name: proustgpt
     runtime: docker
-    plan: free
+    plan: starter
     healthCheckPath: /health
     envVars:
       - key: PINECONE_API_KEY
@@ -11,6 +11,8 @@ services:
         sync: false
       - key: COHERE_API_KEY
         sync: false
+      - key: PINECONE_INDEX_NAME
+        value: "proust-index-v2"
       - key: SERVE_STATIC
         value: "true"
       - key: STATIC_DIR

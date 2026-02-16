@@ -12,6 +12,9 @@ langchain
 langgraph
 langgraph-prebuilt
 
+# Observability (opt-in: set LANGCHAIN_TRACING_V2=true to enable)
+langsmith
+
 # Vector database
 pinecone[grpc]
 

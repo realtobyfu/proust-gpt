@@ -11,6 +11,17 @@ from langchain_groq import ChatGroq
 from langchain_core.documents import Document
 from pinecone import Pinecone
 
+try:
+    from langsmith import traceable
+except ImportError:
+    # langsmith not installed — provide a no-op decorator
+    def traceable(*args, **kwargs):  # type: ignore[misc]
+        def decorator(fn):
+            return fn
+        if args and callable(args[0]):
+            return args[0]
+        return decorator
+
 from config import config
 from text_utils import clean_passage_text
 
@@ -115,6 +126,7 @@ def _get_rag_fallback_template(lang: str = "en") -> str:
 
 # ── Retrieval helpers ─────────────────────────────────────────────────────────
 
+@traceable(name="pinecone_query")
 def _pinecone_query(
     query: str,
     top_k: int,
@@ -218,6 +230,7 @@ def _fetch_adjacent_passages(indices: set[int], lang: str = "en") -> dict[int, s
     return texts
 
 
+@traceable(name="stitch_context")
 def _stitch_context(docs: list[Document], lang: str = "en") -> list[Document]:
     needed: set[int] = set()
     for doc in docs:
@@ -274,6 +287,7 @@ def _format_passages(docs: list[Document], relevance_summaries: list[str] | None
     return passages
 
 
+@traceable(name="retrieve_passages")
 def retrieve_passages(query: str, lang: str = "en") -> list[Document]:
     candidates = _pinecone_query(query, top_k=config.RETRIEVAL_CANDIDATES, lang=lang)
     reranker = get_reranker()
@@ -296,6 +310,7 @@ def _detect_repetition(text: str, window: int = 60, threshold: int = 3) -> bool:
 
 # ── Public API ────────────────────────────────────────────────────────────────
 
+@traceable(name="stream_rag_response")
 def stream_rag_response(query: str, lang: str = "en") -> Generator[dict, None, None]:
     """
     Stream a RAG response: retrieve passages, then stream one LLM call.

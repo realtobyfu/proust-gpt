@@ -51,6 +51,11 @@ class Config(BaseSettings):
     REFLECT_AGENT_ENABLED: bool = True
     AGENT_MAX_STEPS: int = 4
 
+    # LangSmith tracing (opt-in)
+    LANGCHAIN_TRACING_V2: bool = False
+    LANGSMITH_API_KEY: str = ""
+    LANGCHAIN_PROJECT: str = "proust-gpt"
+
     def validate(self) -> list[str]:
         """
         Validate that required configuration is present.
