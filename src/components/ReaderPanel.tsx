@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { Passage } from '../hooks/useStreamingQuery';
@@ -23,9 +23,8 @@ const slideIn = keyframes`
 `;
 
 const PanelContainer = styled.div`
-  width: 45%;
+  flex: 1;
   min-width: 380px;
-  max-width: 560px;
   border-left: 1px solid #e0d8cf;
   background: #faf8f5;
   display: flex;
@@ -52,7 +51,7 @@ const CloseButton = styled.button`
   height: 30px;
   border-radius: 50%;
   border: none;
-  background: rgba(139, 69, 19, 0.08);
+  background: none;
   color: #8b4513;
   font-size: 1.1rem;
   cursor: pointer;
@@ -62,7 +61,7 @@ const CloseButton = styled.button`
   transition: background 0.2s ease;
 
   &:hover {
-    background: rgba(139, 69, 19, 0.18);
+    background: rgba(139, 69, 19, 0.08);
   }
 `;
 
@@ -245,6 +244,34 @@ const ReaderPanel: React.FC<ReaderPanelProps> = ({
   const [showOriginal, setShowOriginal] = useState(false);
   const [frenchTexts, setFrenchTexts] = useState<Record<number, string | null>>({});
   const [fetchingFr, setFetchingFr] = useState(false);
+  const [fullTexts, setFullTexts] = useState<Record<number, { text: string; text_fr?: string }>>({});
+
+  const isTruncated = (p: Passage) =>
+    p._truncated === true || p.text?.endsWith('\u2026');
+
+  // Fetch full EN+FR text for truncated passages
+  const fetchFullText = useCallback(async (passageIndex: number) => {
+    if (fullTexts[passageIndex] !== undefined) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/read/passage_text?index=${passageIndex}&lang=both`);
+      const data = await res.json();
+      if (data.text) {
+        setFullTexts(prev => ({
+          ...prev,
+          [passageIndex]: { text: data.text, text_fr: data.text_fr || undefined },
+        }));
+      }
+    } catch {
+      // Silently fail — user sees the preview text
+    }
+  }, [fullTexts]);
+
+  // Auto-fetch full text when panel opens with a truncated passage
+  useEffect(() => {
+    if (passage && passage.index != null && isTruncated(passage) && !fullTexts[passage.index]) {
+      fetchFullText(passage.index);
+    }
+  }, [passage]);
 
   const currentIndex = passage ? allPassages.findIndex(p => p.text === passage.text) : -1;
   const hasMultiple = allPassages.length > 1;
@@ -283,14 +310,16 @@ const ReaderPanel: React.FC<ReaderPanelProps> = ({
   if (!passage) return null;
 
   const isFr = i18n.language === 'fr';
-  const frText = passage.text_fr || (passage.index != null ? frenchTexts[passage.index] : undefined);
+  const full = passage.index != null ? fullTexts[passage.index] : undefined;
+  const enText = full?.text ?? passage.text;
+  const frText = full?.text_fr ?? passage.text_fr ?? (passage.index != null ? frenchTexts[passage.index] : undefined);
   let displayText: string;
   if (isFr) {
-    displayText = frText || passage.text;
+    displayText = frText || enText;
   } else if (showOriginal && frText) {
     displayText = frText;
   } else {
-    displayText = passage.text;
+    displayText = enText;
   }
   const showFrUnavailable = showOriginal && !isFr && !frText && passage.index != null && frenchTexts[passage.index] === null;
 

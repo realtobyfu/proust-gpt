@@ -435,7 +435,7 @@ def stream_agent_response(
             p["citation_index"] = cit
             cit += 1
             unique.append(p)
-        return [{"type": "sources", "passages": [_preview_passage(p)]} for p in unique]
+        return [{"type": "sources", "passages": [p]} for p in unique]
 
     for event in agent.stream(
         {"messages": messages},

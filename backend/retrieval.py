@@ -359,7 +359,7 @@ def stream_rag_response(query: str, lang: str = "en") -> Generator[dict, None, N
     # well under proxy buffer limits (~500B vs 5-60KB).
     # Frontend lazy-loads full text on card expand.
     for p in passages:
-        yield {"type": "sources", "passages": [_preview_passage(p)]}
+        yield {"type": "sources", "passages": [p]}
 
     context = "\n\n---\n\n".join(
         f"[{i+1}] {doc.page_content}"
