@@ -51,6 +51,11 @@ export interface StreamingQueryResult {
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const STREAM_DEBUG = import.meta.env.DEV || import.meta.env.VITE_STREAM_DEBUG === 'true';
+
+function createStreamDebugId(): string {
+  return `sse-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
 
 /**
  * React hook for streaming queries using Server-Sent Events.
@@ -80,6 +85,17 @@ export function useStreamingQuery(options: {
   const responseRef = useRef('');
   const parseFailCountRef = useRef(0);
   const receivedTokensRef = useRef(false);
+  const requestDebugIdRef = useRef<string | null>(null);
+
+  const logStreamDebug = useCallback((message: string, details?: Record<string, unknown>) => {
+    if (!STREAM_DEBUG) return;
+    const requestId = requestDebugIdRef.current || 'no-request';
+    if (details) {
+      console.log(`[SSE:${requestId}] ${message}`, details);
+    } else {
+      console.log(`[SSE:${requestId}] ${message}`);
+    }
+  }, []);
 
   const reset = useCallback(() => {
     setResponse('');
@@ -144,6 +160,7 @@ export function useStreamingQuery(options: {
   ): Promise<void> => {
     // Create abort controller for this request
     abortControllerRef.current = new AbortController();
+    requestDebugIdRef.current = createStreamDebugId();
 
     const endpoint = mode === 'reflect'
       ? `${API_BASE_URL}/api/reflect/stream`
@@ -169,6 +186,12 @@ export function useStreamingQuery(options: {
       throw new Error('No response body');
     }
 
+    logStreamDebug('request start', {
+      endpoint,
+      mode,
+      lang,
+      hasHistory: Boolean(history?.length),
+    });
     setIsStreaming(true);
     const reader = response.body.getReader();
     readerRef.current = reader;
@@ -183,18 +206,14 @@ export function useStreamingQuery(options: {
       if (dataLines.length === 0) return;
       const jsonStr = dataLines.join('');  // concatenate chunks
 
-      // Pre-parse diagnostic (fires even if JSON.parse fails)
-      if (jsonStr.length > 200) {
-        console.log(`[SSE] raw ${jsonStr.length}B (${dataLines.length} lines): ${jsonStr.slice(0, 60)}...`);
-      }
-
       try {
         const event: StreamEvent = JSON.parse(jsonStr);
-
-        console.log(`[SSE] type=${event.type} size=${jsonStr.length}B` +
-          (event.type === 'sources'
-            ? ` passages=${event.passages?.length ?? 0}`
-            : ''));
+        const nextResponseLength = event.type === 'token'
+          ? responseRef.current.length + (event.token?.length ?? 0)
+          : responseRef.current.length;
+        const nextPassageCount = event.type === 'sources'
+          ? passagesRef.current.length + (event.passages?.length ?? 0)
+          : passagesRef.current.length;
 
         switch (event.type) {
           case 'token':
@@ -237,6 +256,12 @@ export function useStreamingQuery(options: {
             // Stream complete
             break;
         }
+        logStreamDebug('event received', {
+          type: event.type,
+          payloadBytes: jsonStr.length,
+          passages: nextPassageCount,
+          responseLength: nextResponseLength,
+        });
       } catch (parseError) {
         // Re-throw actual errors (from 'error' events)
         if (parseError instanceof Error && parseError.message !== 'Unknown streaming error'
@@ -244,6 +269,11 @@ export function useStreamingQuery(options: {
           throw parseError;
         }
         parseFailCountRef.current += 1;
+        logStreamDebug('parse failure', {
+          lines: dataLines.length,
+          payloadBytes: jsonStr.length,
+          preview: jsonStr.slice(0, 200),
+        });
         console.warn(`[SSE] PARSE FAIL (${dataLines.length} lines, ${jsonStr.length}B):`,
           jsonStr.slice(0, 200), parseError);
       }
@@ -278,11 +308,15 @@ export function useStreamingQuery(options: {
         }
       }
 
-      console.log(`[SSE] Stream complete. passages=${passagesRef.current.length}, parseFailures=${parseFailCountRef.current}`);
+      logStreamDebug('stream complete', {
+        passages: passagesRef.current.length,
+        parseFailures: parseFailCountRef.current,
+        responseLength: responseRef.current.length,
+      });
     } finally {
       readerRef.current = null;
     }
-  }, []);
+  }, [logStreamDebug]);
 
   const query = useCallback(async (
     question: string,
@@ -312,6 +346,11 @@ export function useStreamingQuery(options: {
       // during a long blocking operation — the frontend sees a normal stream
       // end with no content.
       if (!receivedTokensRef.current) {
+        logStreamDebug('fallback entered', {
+          reason: 'empty_stream',
+          hadResponse: responseRef.current.length > 0,
+          hadPassages: passagesRef.current.length > 0,
+        });
         console.warn('[SSE] Stream completed with no tokens — connection may have been dropped');
 
         if (fallbackToNonStreaming) {
@@ -332,6 +371,12 @@ export function useStreamingQuery(options: {
         return; // User aborted, don't show error
       }
 
+      logStreamDebug('fallback entered', {
+        reason: 'stream_error',
+        error: streamError instanceof Error ? streamError.message : String(streamError),
+        hadResponse: responseRef.current.length > 0,
+        hadPassages: passagesRef.current.length > 0,
+      });
       console.warn('Streaming failed, error:', streamError);
 
       // Fallback to non-streaming if enabled
@@ -350,6 +395,12 @@ export function useStreamingQuery(options: {
       setIsLoading(false);
       setIsStreaming(false);
       abortControllerRef.current = null;
+      logStreamDebug('request finalize', {
+        isLoading: false,
+        isStreaming: false,
+        passages: passagesRef.current.length,
+        responseLength: responseRef.current.length,
+      });
 
       // Surface a warning if SSE parse failures occurred and no passages arrived
       if (parseFailCountRef.current > 0 && passagesRef.current.length === 0 && mode === 'explore') {
@@ -357,7 +408,7 @@ export function useStreamingQuery(options: {
         setError('Passage data was lost in transit. Please try again.');
       }
     }
-  }, [queryStreaming, queryNonStreaming, fallbackToNonStreaming]);
+  }, [queryStreaming, queryNonStreaming, fallbackToNonStreaming, logStreamDebug]);
 
   return {
     response,

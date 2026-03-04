@@ -11,6 +11,8 @@ import { useStreamingQuery, Passage, HistoryMessage } from './hooks/useStreaming
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useChatSessions, Message } from './hooks/useChatSessions';
 
+const STREAM_DEBUG = import.meta.env.DEV || import.meta.env.VITE_STREAM_DEBUG === 'true';
+
 // ── Responsive hook ──────────────────────────────────────────────────────────
 
 function useIsDesktop() {
@@ -628,6 +630,14 @@ const ChatPage: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const streamCommittedRef = useRef(false);
   const isDesktop = useIsDesktop();
+  const logStreamCommit = useCallback((message: string, details?: Record<string, unknown>) => {
+    if (!STREAM_DEBUG) return;
+    if (details) {
+      console.log(`[StreamCommit] ${message}`, details);
+    } else {
+      console.log(`[StreamCommit] ${message}`);
+    }
+  }, []);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [userInput, setUserInput] = useState('');
@@ -891,6 +901,12 @@ const ChatPage: React.FC = () => {
       const finalPassages = streamingPassages.length > 0
         ? streamingPassages
         : (streamingPassagesRef.current ?? []);
+      logStreamCommit('commit effect entered', {
+        responseLength: streamingResponse.length,
+        passages: finalPassages.length,
+        isLoading,
+        isStreaming,
+      });
 
       const aiMessage: Message = {
         id: Date.now().toString(),
@@ -906,6 +922,11 @@ const ChatPage: React.FC = () => {
         if (currentSessionIdRef.current) {
           saveSession(currentSessionIdRef.current, updated, activeMode);
         }
+        logStreamCommit('message saved', {
+          messageId: aiMessage.id,
+          passages: finalPassages.length,
+          totalMessages: updated.length,
+        });
         return updated;
       });
 
@@ -922,7 +943,7 @@ const ChatPage: React.FC = () => {
       // visible flash where text disappears before the committed message renders.
       // Streaming state is cleaned up when the next query starts.
     }
-  }, [isLoading, isStreaming, streamingResponse, streamingPassages, streamingPassagesRef, streamingMetadata, activeMode, saveSession]);
+  }, [isLoading, isStreaming, streamingResponse, streamingPassages, streamingPassagesRef, streamingMetadata, activeMode, saveSession, logStreamCommit]);
 
   const getModeDisplay = () => {
     switch (activeMode) {
