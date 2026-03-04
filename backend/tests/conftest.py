@@ -40,9 +40,6 @@ def _mock_query_reflect(message: str, lang: str = "en"):
 
 
 def _mock_stream_rag_response(query: str, lang: str = "en"):
-    yield {"type": "token", "token": "Mocked "}
-    yield {"type": "token", "token": "streaming "}
-    yield {"type": "token", "token": "reply."}
     yield {
         "type": "sources",
         "passages": [
@@ -55,6 +52,9 @@ def _mock_stream_rag_response(query: str, lang: str = "en"):
             }
         ],
     }
+    yield {"type": "token", "token": "Mocked "}
+    yield {"type": "token", "token": "streaming "}
+    yield {"type": "token", "token": "reply."}
     yield {"type": "done", "done": True}
 
 
@@ -66,9 +66,6 @@ def _mock_stream_reflect_response(message: str, lang: str = "en"):
 
 def _mock_stream_agent_response(query: str, history=None, lang: str = "en"):
     yield {"type": "status", "status": "Thinking..."}
-    yield {"type": "token", "token": "Mocked "}
-    yield {"type": "token", "token": "agent "}
-    yield {"type": "token", "token": "reply."}
     yield {
         "type": "sources",
         "passages": [
@@ -81,6 +78,9 @@ def _mock_stream_agent_response(query: str, history=None, lang: str = "en"):
             }
         ],
     }
+    yield {"type": "token", "token": "Mocked "}
+    yield {"type": "token", "token": "agent "}
+    yield {"type": "token", "token": "reply."}
     yield {"type": "done", "done": True}
 
 

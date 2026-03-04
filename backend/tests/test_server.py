@@ -3,7 +3,9 @@ Tests for ProustGPT FastAPI endpoints.
 
 All external services are mocked via conftest.py fixtures.
 """
+import asyncio
 import json
+from unittest.mock import patch
 
 
 # =============================================================================
@@ -93,9 +95,8 @@ def test_explore_stream_returns_sse(client):
 
     events = _parse_sse(resp.text)
     types = [e["type"] for e in events]
-    assert "token" in types
-    assert "sources" in types
-    assert "done" in types
+    assert types == ["sources", "token", "token", "token", "done"]
+    assert "error" not in types
 
 
 def test_explore_stream_empty_query(client):
@@ -123,8 +124,22 @@ def test_reflect_stream_returns_sse(client):
 
     events = _parse_sse(resp.text)
     types = [e["type"] for e in events]
-    assert "token" in types
-    assert "done" in types
+    assert types == ["status", "token", "token", "token", "done"]
+    assert "error" not in types
+
+
+def test_explore_stream_agent_returns_expected_order(client):
+    with patch("server.needs_agent", return_value=True):
+        resp = client.post(
+            "/api/explore_lost_time/stream",
+            json={"query": "compare Swann and Charlus"},
+        )
+
+    assert resp.status_code == 200
+    events = _parse_sse(resp.text)
+    types = [e["type"] for e in events]
+    assert types == ["status", "sources", "token", "token", "token", "done"]
+    assert "error" not in types
 
 
 def test_reflect_stream_empty_message(client):
@@ -156,6 +171,7 @@ def test_reflect_stream_with_history(client):
     assert "status" in types
     assert "token" in types
     assert "done" in types
+    assert "error" not in types
 
 
 def test_reflect_with_history_non_streaming(client):
@@ -200,6 +216,26 @@ def test_read_chapter_not_found(client):
     assert resp.status_code == 200
     data = resp.json()
     assert data["error"] == "Chapter not found"
+
+
+def test_async_sse_generator_stops_cleanly():
+    from server import async_sse_generator
+
+    def simple_stream():
+        yield {"type": "token", "token": "Hello"}
+        yield {"type": "sources", "passages": [{"book": "Swann's Way", "chapter": "Combray", "text": "Mocked"}]}
+        yield {"type": "done", "done": True}
+
+    async def collect() -> str:
+        chunks = []
+        async for chunk in async_sse_generator(simple_stream):
+            chunks.append(chunk)
+        return "".join(chunks)
+
+    events = _parse_sse(asyncio.run(collect()))
+    types = [e["type"] for e in events]
+    assert types == ["token", "sources", "done"]
+    assert "error" not in types
 
 
 # =============================================================================

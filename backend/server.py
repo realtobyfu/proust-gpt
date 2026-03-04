@@ -122,6 +122,33 @@ logger = logging.getLogger("proust.sse")
 
 
 SSE_LINE_MAX = 512
+SSE_DEBUG = os.getenv("PROUST_STREAM_DEBUG", "").lower() in {"1", "true", "yes", "on"}
+
+if SSE_DEBUG:
+    logger.setLevel(logging.INFO)
+
+
+def _sse_debug(message: str, *args) -> None:
+    """Emit SSE diagnostics only when explicit stream debugging is enabled."""
+    if SSE_DEBUG:
+        logger.info(message, *args)
+
+
+def _callable_name(fn) -> str:
+    """Best-effort name for functions, partials, and test doubles."""
+    return (
+        getattr(fn, "__name__", None)
+        or getattr(fn, "_mock_name", None)
+        or fn.__class__.__name__
+    )
+
+
+def _next_sse_event(sync_gen) -> tuple[bool, Optional[dict]]:
+    """Pull one event from a sync generator without leaking StopIteration."""
+    try:
+        return True, next(sync_gen)
+    except StopIteration:
+        return False, None
 
 
 def sse_format(data: dict) -> str:
@@ -162,12 +189,15 @@ async def async_sse_generator(sync_gen_func, *args) -> AsyncGenerator[str, None]
     (e.g. Render) from dropping idle connections during long blocking operations
     like Pinecone queries or Cohere reranking.
     """
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     sync_gen = sync_gen_func(*args)
+    fn_name = _callable_name(sync_gen_func)
+    stream_id = f"{fn_name}:{id(sync_gen):x}"
+    _sse_debug("SSE stream start id=%s fn=%s", stream_id, fn_name)
     try:
         while True:
             # Schedule next(sync_gen) in a thread — don't cancel it on timeout
-            future = loop.run_in_executor(None, next, sync_gen)
+            future = loop.run_in_executor(None, _next_sse_event, sync_gen)
             task = asyncio.ensure_future(future)
 
             while True:
@@ -178,12 +208,18 @@ async def async_sse_generator(sync_gen_func, *args) -> AsyncGenerator[str, None]
                 logger.debug("SSE keepalive sent")
                 yield ": keepalive\n\n"
 
-            event = task.result()
+            has_event, event = task.result()
+            if not has_event:
+                _sse_debug("SSE stream exhausted id=%s", stream_id)
+                break
+            event_type = event.get("type", "?") if isinstance(event, dict) else "?"
+            _sse_debug("SSE stream id=%s yielded event=%s", stream_id, event_type)
             yield sse_format(event)
-    except StopIteration:
-        pass
     except Exception as e:
+        _sse_debug("SSE stream exception id=%s error=%s", stream_id, e)
         yield sse_format({"type": "error", "error": str(e)})
+    finally:
+        _sse_debug("SSE stream close id=%s", stream_id)
 
 
 # =============================================================================
