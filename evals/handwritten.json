@@ -1,84 +1,119 @@
 [
   {
     "question": "Where does the madeleine scene happen and what exactly triggers the flood of involuntary memory?",
-    "gold_chunk_id": null,
+    "gold_chunk_id": 196,
     "source": "hand",
     "split": "test",
-    "note": "The famous cake-dipped-in-tea passage; gold should be the moment of recognition, not just any Combray mention."
+    "note": "The famous cake-dipped-in-tea passage; gold should be the moment of recognition, not just any Combray mention.",
+    "accepted_alternates": [
+      199,
+      197
+    ],
+    "review_status": "keep"
   },
   {
     "question": "What does the narrator overhear or witness at Montjouvain that shapes his sense of sadism and desecration?",
-    "gold_chunk_id": null,
+    "gold_chunk_id": 460,
     "source": "hand",
     "split": "test",
-    "note": "Mlle Vinteuil scene."
+    "note": "Mlle Vinteuil scene.",
+    "accepted_alternates": [
+      654
+    ],
+    "review_status": "keep"
   },
   {
     "question": "How does the goodnight kiss the narrator waits for as a child become a source of anguish rather than comfort?",
-    "gold_chunk_id": null,
+    "gold_chunk_id": 40,
     "source": "hand",
-    "split": "test"
+    "split": "test",
+    "review_status": "keep"
   },
   {
     "question": "What do the moving steeples seen from a carriage prompt the young narrator to do for the first time?",
-    "gold_chunk_id": null,
+    "gold_chunk_id": 740,
     "source": "hand",
     "split": "test",
-    "note": "Martinville steeples -> first attempt at writing."
+    "note": "Martinville steeples -> first attempt at writing.",
+    "accepted_alternates": [
+      738
+    ],
+    "review_status": "keep"
   },
   {
     "question": "What flowers along a hedge does the narrator become almost ecstatically fixated on during his walks?",
-    "gold_chunk_id": null,
+    "gold_chunk_id": 566,
     "source": "hand",
     "split": "test",
-    "note": "Hawthorns."
+    "note": "Hawthorns.",
+    "review_status": "keep"
   },
   {
     "question": "How does Swann come to realize the woman he obsessively loves was never really his type?",
-    "gold_chunk_id": null,
+    "gold_chunk_id": 1548,
     "source": "hand",
     "split": "test",
-    "note": "Swann/Odette; the closing line of Swann in Love."
+    "note": "Swann/Odette; the closing line of Swann in Love.",
+    "review_status": "keep"
   },
   {
     "question": "What musical phrase becomes a private emblem of Swann's love affair?",
-    "gold_chunk_id": null,
+    "gold_chunk_id": 964,
     "source": "hand",
     "split": "test",
-    "note": "The 'little phrase' of the Vinteuil sonata."
-  },
-  {
-    "question": "How does the narrator's grandmother behave during their walks in a way that worries the family about her health?",
-    "gold_chunk_id": null,
-    "source": "hand",
-    "split": "test"
+    "note": "The 'little phrase' of the Vinteuil sonata.",
+    "accepted_alternates": [
+      1398
+    ],
+    "review_status": "keep"
   },
   {
     "question": "What childhood magic-lantern figures are projected onto the narrator's bedroom walls at night?",
-    "gold_chunk_id": null,
+    "gold_chunk_id": 25,
     "source": "hand",
     "split": "test",
-    "note": "Golo and Geneviève de Brabant."
+    "note": "Golo and Geneviève de Brabant.",
+    "accepted_alternates": [
+      26,
+      27
+    ],
+    "review_status": "keep"
   },
   {
     "question": "How does uneven paving underfoot at a grand reception suddenly resurrect Venice for the aging narrator?",
-    "gold_chunk_id": null,
+    "gold_chunk_id": 11805,
     "source": "hand",
     "split": "test",
-    "note": "Guermantes matinee, Time Regained; the paving-stones involuntary memory."
+    "note": "Guermantes matinee, Time Regained; the paving-stones involuntary memory.",
+    "accepted_alternates": [
+      11808,
+      11836
+    ],
+    "review_status": "keep"
   },
   {
     "question": "What does the narrator feel when he sees how age has disfigured the guests at the final party, like living puppets?",
-    "gold_chunk_id": null,
+    "gold_chunk_id": 12030,
     "source": "hand",
     "split": "test",
-    "note": "'Bal de têtes' in Time Regained."
+    "note": "'Bal de têtes' in Time Regained.",
+    "accepted_alternates": [
+      12092,
+      12053
+    ],
+    "review_status": "keep"
   },
   {
     "question": "How does the narrator describe the disorientation of waking in the dark, unsure which room or which period of his life he is in?",
-    "gold_chunk_id": null,
+    "gold_chunk_id": 20,
     "source": "hand",
     "split": "test",
-    "note": "Opening pages, the sleeper's shifting sense of place."
+    "note": "Opening pages, the sleeper's shifting sense of place.",
+    "accepted_alternates": [
+      12,
+      762,
+      22
+    ],
+    "review_status": "keep"
   }
 ]

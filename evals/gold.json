@@ -1,0 +1,998 @@
+[
+  {
+    "question": "What was one way M. de Guermantes demonstrated his activity to the people who elected him?",
+    "gold_chunk_id": 5871,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Troisième partie",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "What artwork did the narrator and the Grand Duchess encounter during their visit to the museum?",
+    "gold_chunk_id": 6056,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Troisième partie",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "What was the source of light that was shining while the narrator was with Albertine, and which she admired?",
+    "gold_chunk_id": 10049,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 3 — Flight of Albertine",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What activity was the speaker considering spending time alone with someone doing before going to their aunt's?",
+    "gold_chunk_id": 4651,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Première partie",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What was Saint-Loup's reaction to his uncle's opinion about two famous playwrights?",
+    "gold_chunk_id": 3254,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Place-Names: The Place",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "What location did Swann think might be where he first met Odette, based on someone else's winter habits?",
+    "gold_chunk_id": 1265,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Swann in Love",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What might have changed in her perception of reality if she had been drinking like the narrator?",
+    "gold_chunk_id": 7308,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 2",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "What country had previously fascinated the narrator due to its connection to someone they knew, but now evokes a different emotional response?",
+    "gold_chunk_id": 8431,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 4",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What is the reason Mme Verdurin gives for not socializing with certain high-society women?",
+    "gold_chunk_id": 7845,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 2",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What social event was taking place on the day Forcheville visited her, according to the conversation?",
+    "gold_chunk_id": 1500,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Swann in Love",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What were the people fleeing to their cellars trying to hide along with themselves?",
+    "gold_chunk_id": 11557,
+    "volume": 7,
+    "book": "Time Regained",
+    "chapter": "Chapter 2 — M. de Charlus During the War, His Opinions, His Pleasures",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "Why was the lift-boy's leave stopped that afternoon?",
+    "gold_chunk_id": 7129,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 2",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What typically happened when Saniette started telling a story and people initially gave him their attention?",
+    "gold_chunk_id": 7444,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 2",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What activity or relationship was the narrator uncertain whether Albertine shared with other men besides him?",
+    "gold_chunk_id": 8818,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 1 — Life with Albertine",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "What task had my mother initially assigned to Françoise when she started working for the family?",
+    "gold_chunk_id": 1951,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Madame Swann at Home",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "What values did the daughter's mother teach her to adopt in relation to people of lower social status?",
+    "gold_chunk_id": 5687,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Troisième partie",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What disturbing thought crossed the narrator's mind when his grandmother was late for dinner?",
+    "gold_chunk_id": 1617,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Place-Names: The Name",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What items had the speaker previously ordered in someone else's name, but now wants that person to cancel to avoid unnecessary expense?",
+    "gold_chunk_id": 10213,
+    "volume": 6,
+    "book": "The Sweet Cheat Gone",
+    "chapter": "Chapter 1 — Grief and Oblivion",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What happened to the narrator's thought process when they tried to think of book subjects with deep philosophical meaning?",
+    "gold_chunk_id": 708,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Overture",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What unusual task did he perform with great solemnity, surrounded by a group of onlookers, on a particular occasion?",
+    "gold_chunk_id": 8297,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 3",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What unusual comparison is made between a struggling water plant and certain people known to the narrator's family?",
+    "gold_chunk_id": 693,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Overture",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What was the mother's reaction when she heard the narrator speaking the dialect that she was familiar with?",
+    "gold_chunk_id": 9050,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 1 — Life with Albertine",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "What activity was the narrator engaged in, which although quiet, felt like a discussion with others and brought a particular kind of pleasure?",
+    "gold_chunk_id": 2335,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Madame Swann at Home",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What relation is the Princesse de Poix to the lady with the distinctive hairstyle, according to the passage?",
+    "gold_chunk_id": 4797,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Deuxième partie",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What action did Charlus typically take after keeping his guests standing for a few minutes?",
+    "gold_chunk_id": 6181,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Troisième partie",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What social event is Mme de Guermantes planning to attend that evening where she will see a particular noblewoman?",
+    "gold_chunk_id": 6319,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Troisième partie",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What was the effect of hearing a particular name on the narrator's ability to identify the horrible old woman?",
+    "gold_chunk_id": 12320,
+    "volume": 7,
+    "book": "Time Regained",
+    "chapter": "Chapter 3 — An Afternoon Party at the House of the Princesse de Guermantes",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "What event or events will the narrator have to wait until the next year to experience again in Balbec?",
+    "gold_chunk_id": 3822,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Seascape, with Frieze of Girls",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What effect did learning about Albertine's hidden tastes have on the narrator's perception of her as a person?",
+    "gold_chunk_id": 10500,
+    "volume": 6,
+    "book": "The Sweet Cheat Gone",
+    "chapter": "Chapter 1 — Grief and Oblivion",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What did the speaker ask Odette for her opinion on, sparking a conversation about fashion and leading to Odette's comments about her own life and marriage to Swann?",
+    "gold_chunk_id": 2451,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Madame Swann at Home",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What sound did the pigeons make that led Albertine to comment about the arrival of a new season?",
+    "gold_chunk_id": 9965,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 3 — Flight of Albertine",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What activity does the narrator undertake in a particular location with the hope of catching a glimpse of a specific person?",
+    "gold_chunk_id": 1917,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Madame Swann at Home",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What natural elements entered the train carriage when the door was opened at the station?",
+    "gold_chunk_id": 8108,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 3",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What is the speaker's reaction when someone suggests that a letter might contain something serious?",
+    "gold_chunk_id": 8227,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 3",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What task did the patron instruct someone named Pierrot to perform after the narrator requested a drink to be sent to their room?",
+    "gold_chunk_id": 11590,
+    "volume": 7,
+    "book": "Time Regained",
+    "chapter": "Chapter 2 — M. de Charlus During the War, His Opinions, His Pleasures",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What action did certain people take after being drawn to the scene by curiosity and encountering the speaker's behavior?",
+    "gold_chunk_id": 6581,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 1",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What object was Mme Swann holding in her hands during the scene that evoked memories of the narrator's walks in Combray?",
+    "gold_chunk_id": 2603,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Madame Swann at Home",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What part of the face does a person use as a substitute for a missing body part when showing affection?",
+    "gold_chunk_id": 5435,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Deuxième partie",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What activity was the narrator's grandmother frequently doing with Françoise that the narrator was not allowed to join?",
+    "gold_chunk_id": 3354,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Place-Names: The Place",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What action does Gilberte take to make her gathering feel less formal after some of her guests decline her offer?",
+    "gold_chunk_id": 2046,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Madame Swann at Home",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What effect does the narrator claim to experience after sleeping for a couple of hours, compared to using a certain type of medication?",
+    "gold_chunk_id": 7896,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 3",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What phrase did the Duc de Guermantes start using frequently in discussions about a certain controversial event?",
+    "gold_chunk_id": 8596,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 1 — Life with Albertine",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "How did Albertine appear to be feeling despite thanking the narrator for a gift?",
+    "gold_chunk_id": 9899,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 3 — Flight of Albertine",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What was Mme Verdurin's opinion of Elstir's behavior when he spent time with certain women?",
+    "gold_chunk_id": 7731,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 2",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "What type of artwork is mentioned as depicting the faces of ancient Greeks?",
+    "gold_chunk_id": 4772,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Deuxième partie",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What emotional state did the narrator experience after receiving feedback from M. de Norpois on their writing?",
+    "gold_chunk_id": 1910,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Madame Swann at Home",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What was Mme Verdurin's concern about her husband's potential reaction to a failed attempt at something?",
+    "gold_chunk_id": 9394,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 2 — The Verdurins Quarrel with M. De Charlus",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What unusual article of clothing kept falling from one of the eyes of the young nobleman as he walked?",
+    "gold_chunk_id": 3104,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Place-Names: The Place",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What would Odette often claim to have done at the moment she contacted someone after a short trip, even if it wasn't true?",
+    "gold_chunk_id": 1202,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Swann in Love",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What response does Odette give when asked to confirm or deny a certain past behavior on the medal she wears?",
+    "gold_chunk_id": 1472,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Swann in Love",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What literary device did M. de Norpois often use to embellish his writing in the magazine?",
+    "gold_chunk_id": 1858,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Madame Swann at Home",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What was Andrée's concern about the possibility of the narrator joining her and Gisèle for dinner?",
+    "gold_chunk_id": 10784,
+    "volume": 6,
+    "book": "The Sweet Cheat Gone",
+    "chapter": "Chapter 2 — Mademoiselle De Forcheville",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What activity is Mlle Vinteuil concerned will be observed by others?",
+    "gold_chunk_id": 661,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Overture",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "What action does Cottard suggest taking after realizing the Princess is likely on their train?",
+    "gold_chunk_id": 7527,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 2",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What social engagement is Albertine prioritizing over spending time with the narrator, despite the narrator's poor health?",
+    "gold_chunk_id": 7152,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 2",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What was the French Government's stance regarding the possibility of war with another country if certain conditions were not met?",
+    "gold_chunk_id": 9862,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 3 — Flight of Albertine",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What motivated Andrée to make a statement about Albertine's personal life to the narrator after she left him?",
+    "gold_chunk_id": 10592,
+    "volume": 6,
+    "book": "The Sweet Cheat Gone",
+    "chapter": "Chapter 1 — Grief and Oblivion",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What person's departure from the world is being discussed by the characters in this scene?",
+    "gold_chunk_id": 7566,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 2",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What did the narrator imagine his mistress's life might be like when she was with other people who seemed to know her very well?",
+    "gold_chunk_id": 4654,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Première partie",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What physical change had the man undergone that made him unrecognizable to the narrator, despite knowing his name?",
+    "gold_chunk_id": 12321,
+    "volume": 7,
+    "book": "Time Regained",
+    "chapter": "Chapter 3 — An Afternoon Party at the House of the Princesse de Guermantes",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What was the speaker's immediate response to Gilberte when she expressed a sentiment that made him feel special to her?",
+    "gold_chunk_id": 11122,
+    "volume": 6,
+    "book": "The Sweet Cheat Gone",
+    "chapter": "Chapter 4 — A Fresh Light Upon Robert De Saint-Loup",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "What criteria did the Guermantes family use to determine whether to consider someone charming or intelligent?",
+    "gold_chunk_id": 5783,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Troisième partie",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What was the narrator's response when someone expressed disappointment that they had not seen him perform a particular task at a meal?",
+    "gold_chunk_id": 8299,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 3",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "What honor or award does Charlus mention that Morel will soon be able to display?",
+    "gold_chunk_id": 9679,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 2 — The Verdurins Quarrel with M. De Charlus",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What effect did M Verdurin's comment about a particular piece have on Saniette?",
+    "gold_chunk_id": 7710,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 2",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "How did the man respond when someone mentioned the attractiveness of a male to him?",
+    "gold_chunk_id": 9597,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 2 — The Verdurins Quarrel with M. De Charlus",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What was a significant factor that M. Bloch considered when deciding how to treat his uncle?",
+    "gold_chunk_id": 3299,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Place-Names: The Place",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "What did William II achieve for his country that Louis XIV did not?",
+    "gold_chunk_id": 7758,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 2",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What effect did hearing a certain word have on the narrator when it was spoken by Albertine, despite its normally unpleasant connotation?",
+    "gold_chunk_id": 5413,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Deuxième partie",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What action would the narrator have liked to take regarding M. de Charlus's impending troubles?",
+    "gold_chunk_id": 9577,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 2 — The Verdurins Quarrel with M. De Charlus",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What image does Legrandin use to describe the places he knows in the area his mother-in-law is staying?",
+    "gold_chunk_id": 536,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Overture",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What was the Duke's attitude towards his other guests compared to his attitude towards the narrator?",
+    "gold_chunk_id": 5673,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Troisième partie",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What was the Duchess's reaction when she was told that someone had apparently failed to catch the speaker's name, supposedly referring to her brother-in-law?",
+    "gold_chunk_id": 5500,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Deuxième partie",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What change occurred in her opinion of Ingres as she grew older?",
+    "gold_chunk_id": 12450,
+    "volume": 7,
+    "book": "Time Regained",
+    "chapter": "Chapter 3 — An Afternoon Party at the House of the Princesse de Guermantes",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "How did the Duchess's feelings towards someone change after that person had passed away?",
+    "gold_chunk_id": 10707,
+    "volume": 6,
+    "book": "The Sweet Cheat Gone",
+    "chapter": "Chapter 2 — Mademoiselle De Forcheville",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "What activity does the doctor want the narrator's grandmother to do that she has trouble doing according to her own statement?",
+    "gold_chunk_id": 5208,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Deuxième partie",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "What happened to the appearance of her skin when happiness was particularly evident on her face?",
+    "gold_chunk_id": 3999,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Seascape, with Frieze of Girls",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What kind of society was typically unwelcoming to Republicans during the narrator's early childhood?",
+    "gold_chunk_id": 2081,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Madame Swann at Home",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "What unusual way does Bergotte justify to himself the large amount of money he spends on women?",
+    "gold_chunk_id": 9162,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 1 — Life with Albertine",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What article of clothing did the narrator's father wear on his head due to his health issue?",
+    "gold_chunk_id": 148,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Overture",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What two words written below an invitation seemed unrelated to the message above it?",
+    "gold_chunk_id": 9478,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 2 — The Verdurins Quarrel with M. De Charlus",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What action does the man take with the glass of his monocle after it falls from his eye?",
+    "gold_chunk_id": 1406,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Swann in Love",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "What unusual method did a doctor from Brazil claim could cure the narrator's choking fits?",
+    "gold_chunk_id": 4908,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Deuxième partie",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What was happening to the narrator's hair and hat as they said goodbye to the hawthorns on the hillside?",
+    "gold_chunk_id": 596,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Overture",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What secret message did Albertine write and pass to the narrator?",
+    "gold_chunk_id": 3861,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Seascape, with Frieze of Girls",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What happens to the speaker's perception of Albertine's guilt as the idea becomes more familiar to them?",
+    "gold_chunk_id": 10537,
+    "volume": 6,
+    "book": "The Sweet Cheat Gone",
+    "chapter": "Chapter 1 — Grief and Oblivion",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What did Swann compare leaving Odette to go out alone in Paris to, in terms of the risk of loss or theft?",
+    "gold_chunk_id": 1200,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Swann in Love",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What activity did the narrator eagerly perform at the start of each day to learn about upcoming theatrical performances?",
+    "gold_chunk_id": 297,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Overture",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What is the attitude of the hotel staff towards the narrator upon their late arrival, now that they have become familiar with them?",
+    "gold_chunk_id": 3069,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Place-Names: The Place",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What unusual article of clothing do young girls wear to play a particular outdoor sport, according to the narrator?",
+    "gold_chunk_id": 3747,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Seascape, with Frieze of Girls",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What privileges and small pleasures did Françoise have in her daily life while living with the family?",
+    "gold_chunk_id": 4074,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Première partie",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What was the gardener's son doing as the car arrived at the destination?",
+    "gold_chunk_id": 7950,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 3",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What action did the narrator take in an attempt to better focus on the hawthorns, but which ultimately proved unsuccessful?",
+    "gold_chunk_id": 569,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Overture",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What information did Swann unexpectedly learn from the envelope Odette gave him, which reignited his feelings of unease about her activities?",
+    "gold_chunk_id": 1150,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Swann in Love",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "What action did Mlle. Vinteuil take at the window after appearing weary and preoccupied?",
+    "gold_chunk_id": 669,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Overture",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "What condition allowed M. de Charlus to freely discuss certain topics with his audience?",
+    "gold_chunk_id": 8161,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 3",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What gift did Gilberte give to the narrator after purchasing it and what was the significance of the gift?",
+    "gold_chunk_id": 1630,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Place-Names: The Name",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What motivated Maurice to inflict harm on the Baron despite not seeming to take pleasure in it?",
+    "gold_chunk_id": 11616,
+    "volume": 7,
+    "book": "Time Regained",
+    "chapter": "Chapter 2 — M. de Charlus During the War, His Opinions, His Pleasures",
+    "source": "synthetic",
+    "split": "dev"
+  },
+  {
+    "question": "What change has occurred in the way the speaker's companion looks at them, and how has this affected their interactions?",
+    "gold_chunk_id": 8788,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 1 — Life with Albertine",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "What action did the mother consider taking if she had been able to catch up to her son before he left?",
+    "gold_chunk_id": 5118,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Deuxième partie",
+    "source": "synthetic",
+    "split": "test"
+  },
+  {
+    "question": "Where does the madeleine scene happen and what exactly triggers the flood of involuntary memory?",
+    "gold_chunk_id": 196,
+    "accepted_alternates": [
+      199,
+      197
+    ],
+    "source": "hand",
+    "split": "test"
+  },
+  {
+    "question": "What does the narrator overhear or witness at Montjouvain that shapes his sense of sadism and desecration?",
+    "gold_chunk_id": 460,
+    "accepted_alternates": [
+      654
+    ],
+    "source": "hand",
+    "split": "test"
+  },
+  {
+    "question": "How does the goodnight kiss the narrator waits for as a child become a source of anguish rather than comfort?",
+    "gold_chunk_id": 40,
+    "source": "hand",
+    "split": "test"
+  },
+  {
+    "question": "What do the moving steeples seen from a carriage prompt the young narrator to do for the first time?",
+    "gold_chunk_id": 740,
+    "accepted_alternates": [
+      738
+    ],
+    "source": "hand",
+    "split": "test"
+  },
+  {
+    "question": "What flowers along a hedge does the narrator become almost ecstatically fixated on during his walks?",
+    "gold_chunk_id": 566,
+    "source": "hand",
+    "split": "test"
+  },
+  {
+    "question": "How does Swann come to realize the woman he obsessively loves was never really his type?",
+    "gold_chunk_id": 1548,
+    "source": "hand",
+    "split": "test"
+  },
+  {
+    "question": "What musical phrase becomes a private emblem of Swann's love affair?",
+    "gold_chunk_id": 964,
+    "accepted_alternates": [
+      1398
+    ],
+    "source": "hand",
+    "split": "test"
+  },
+  {
+    "question": "What childhood magic-lantern figures are projected onto the narrator's bedroom walls at night?",
+    "gold_chunk_id": 25,
+    "accepted_alternates": [
+      26,
+      27
+    ],
+    "source": "hand",
+    "split": "test"
+  },
+  {
+    "question": "How does uneven paving underfoot at a grand reception suddenly resurrect Venice for the aging narrator?",
+    "gold_chunk_id": 11805,
+    "accepted_alternates": [
+      11808,
+      11836
+    ],
+    "source": "hand",
+    "split": "test"
+  },
+  {
+    "question": "What does the narrator feel when he sees how age has disfigured the guests at the final party, like living puppets?",
+    "gold_chunk_id": 12030,
+    "accepted_alternates": [
+      12092,
+      12053
+    ],
+    "source": "hand",
+    "split": "test"
+  },
+  {
+    "question": "How does the narrator describe the disorientation of waking in the dark, unsure which room or which period of his life he is in?",
+    "gold_chunk_id": 20,
+    "accepted_alternates": [
+      12,
+      762,
+      22
+    ],
+    "source": "hand",
+    "split": "test"
+  }
+]

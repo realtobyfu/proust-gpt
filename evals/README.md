@@ -10,6 +10,37 @@ MRR                   mean reciprocal rank of the gold chunk
 Latency p50 / p95     end-to-end retrieval, across the whole set (not one query)
 ```
 
+## Results (2026-07-13, reviewed gold set, n=111: 77 dev / 34 test)
+
+Held-out **test** split (34 questions, includes the 11 hard hand-written cases):
+
+| config | R@1 | R@5 | R@10 | MRR | p50ms | p95ms |
+|--------|-----|-----|------|-----|-------|-------|
+| **rerank (production)** | 0.588 | **0.824** | 0.853 | 0.685 | 551 | 950 |
+| vector-only | 0.471 | 0.765 | 0.824 | 0.583 | 345 | 921 |
+| rerank-pool50 | 0.588 | 0.794 | 0.824 | 0.681 | 616 | 907 |
+
+**dev** split (77 synthetic, tuning):
+
+| config | R@1 | R@5 | R@10 | MRR | p50ms |
+|--------|-----|-----|------|-----|-------|
+| rerank (production) | 0.805 | 0.896 | 0.896 | 0.840 | 520 |
+| rerank-pool50 | 0.831 | **0.935** | 0.935 | 0.868 | 599 |
+| vector-only | 0.623 | 0.792 | 0.818 | 0.684 | 306 |
+
+Findings, honestly:
+- **Reranking clearly earns its place** — R@1 jumps 0.47→0.59 (test), 0.62→0.81 (dev).
+- **Test is harder than dev** (0.824 vs 0.896 R@5) because the hand-written questions
+  paraphrase famous scenes; two of the five production misses are hand cases (the
+  magic-lantern *Golo* projection, Swann's "not my type" — retrieval can't reach
+  them from paraphrase alone).
+- **`rerank-pool50` is a cautionary tale:** +3.9pt R@5 on dev but −3pt on test. The
+  wider pool helped on the tuning set and did **not** generalize — exactly why you
+  don't report the config you tuned on.
+
+Reproduce: `python evals/run.py --split test` (and `--split dev`). Dated JSON in
+`results/`.
+
 ## Files
 
 | File | What it is |

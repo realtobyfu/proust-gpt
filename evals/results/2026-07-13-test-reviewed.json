@@ -1,0 +1,82 @@
+{
+  "run_at": "2026-07-13T01:36:06",
+  "git_commit": "9848df2",
+  "gold_set": "evals/gold.json",
+  "split": "test",
+  "depth": 10,
+  "config": {
+    "index": "proust-index-v3",
+    "embed_model": "embed-v4.0",
+    "rerank_model": "rerank-v3.5",
+    "retrieval_candidates": 30
+  },
+  "variants": [
+    {
+      "label": "vector-only",
+      "n": 34,
+      "recall": {
+        "1": 0.4706,
+        "5": 0.7647,
+        "10": 0.8235
+      },
+      "mrr": 0.5826,
+      "latency_p50_ms": 344.5,
+      "latency_p95_ms": 920.8,
+      "latency_mean_ms": 435.8,
+      "num_misses": 6
+    },
+    {
+      "label": "rerank (baseline)",
+      "n": 34,
+      "recall": {
+        "1": 0.5882,
+        "5": 0.8235,
+        "10": 0.8529
+      },
+      "mrr": 0.6853,
+      "latency_p50_ms": 551.3,
+      "latency_p95_ms": 949.6,
+      "latency_mean_ms": 608.8,
+      "num_misses": 5
+    },
+    {
+      "label": "rerank-pool50",
+      "n": 34,
+      "recall": {
+        "1": 0.5882,
+        "5": 0.7941,
+        "10": 0.8235
+      },
+      "mrr": 0.6814,
+      "latency_p50_ms": 615.7,
+      "latency_p95_ms": 907.0,
+      "latency_mean_ms": 674.3,
+      "num_misses": 6
+    }
+  ],
+  "misses": {
+    "vector-only": [
+      "What activity or relationship was the narrator uncertain whether Albertine shared with other men besides him?",
+      "What task had my mother initially assigned to Françoise when she started working for the family?",
+      "What was the narrator's response when someone expressed disappointment that they had not seen him perform a particular task at a meal?",
+      "What change has occurred in the way the speaker's companion looks at them, and how has this affected their interactions?",
+      "How does Swann come to realize the woman he obsessively loves was never really his type?",
+      "What childhood magic-lantern figures are projected onto the narrator's bedroom walls at night?"
+    ],
+    "rerank (baseline)": [
+      "What task had my mother initially assigned to Françoise when she started working for the family?",
+      "What was the narrator's response when someone expressed disappointment that they had not seen him perform a particular task at a meal?",
+      "What change has occurred in the way the speaker's companion looks at them, and how has this affected their interactions?",
+      "How does Swann come to realize the woman he obsessively loves was never really his type?",
+      "What childhood magic-lantern figures are projected onto the narrator's bedroom walls at night?"
+    ],
+    "rerank-pool50": [
+      "What task had my mother initially assigned to Françoise when she started working for the family?",
+      "What was the narrator's response when someone expressed disappointment that they had not seen him perform a particular task at a meal?",
+      "What activity does the doctor want the narrator's grandmother to do that she has trouble doing according to her own statement?",
+      "What change has occurred in the way the speaker's companion looks at them, and how has this affected their interactions?",
+      "How does Swann come to realize the woman he obsessively loves was never really his type?",
+      "What childhood magic-lantern figures are projected onto the narrator's bedroom walls at night?"
+    ]
+  }
+}
