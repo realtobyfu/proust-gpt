@@ -1,0 +1,111 @@
+{
+  "run_at": "2026-07-13T00:58:04",
+  "git_commit": "4d2d998",
+  "gold_set": "evals/gold_candidates.json",
+  "split": "all",
+  "depth": 10,
+  "config": {
+    "index": "proust-index-v3",
+    "embed_model": "embed-v4.0",
+    "rerank_model": "rerank-v3.5",
+    "retrieval_candidates": 30
+  },
+  "variants": [
+    {
+      "label": "vector-only",
+      "n": 120,
+      "recall": {
+        "1": 0.5583,
+        "5": 0.7917,
+        "10": 0.8167
+      },
+      "mrr": 0.6414,
+      "latency_p50_ms": 364.7,
+      "latency_p95_ms": 943.3,
+      "latency_mean_ms": 463.7,
+      "num_misses": 22
+    },
+    {
+      "label": "rerank (baseline)",
+      "n": 120,
+      "recall": {
+        "1": 0.7917,
+        "5": 0.8833,
+        "10": 0.8917
+      },
+      "mrr": 0.8282,
+      "latency_p50_ms": 654.1,
+      "latency_p95_ms": 1330.6,
+      "latency_mean_ms": 750.6,
+      "num_misses": 13
+    },
+    {
+      "label": "rerank-pool50",
+      "n": 120,
+      "recall": {
+        "1": 0.8083,
+        "5": 0.9083,
+        "10": 0.9083
+      },
+      "mrr": 0.845,
+      "latency_p50_ms": 599.5,
+      "latency_p95_ms": 1070.6,
+      "latency_mean_ms": 730.4,
+      "num_misses": 11
+    }
+  ],
+  "misses": {
+    "vector-only": [
+      "What was the source of light that was shining while the narrator was with Albertine, and which she admired?",
+      "What is the reason Mme Verdurin gives for not socializing with certain high-society women?",
+      "What activity or relationship was the narrator uncertain whether Albertine shared with other men besides him?",
+      "What task had my mother initially assigned to Françoise when she started working for the family?",
+      "What disturbing thought crossed the narrator's mind when his grandmother was late for dinner?",
+      "What is the setting that the mistress of the house describes as being more appealing to her husband than their current surroundings?",
+      "What is lacking in the actions of people who frequently express virtuous sentiments?",
+      "What social event is Mme de Guermantes planning to attend that evening where she will see a particular noblewoman?",
+      "What event or events will the narrator have to wait until the next year to experience again in Balbec?",
+      "What activity does the narrator undertake in a particular location with the hope of catching a glimpse of a specific person?",
+      "What action did certain people take after being drawn to the scene by curiosity and encountering the speaker's behavior?",
+      "How did Albertine appear to be feeling despite thanking the narrator for a gift?",
+      "What literary device did M. de Norpois often use to embellish his writing in the magazine?",
+      "What motivated Andrée to make a statement about Albertine's personal life to the narrator after she left him?",
+      "What person's departure from the world is being discussed by the characters in this scene?",
+      "What was the speaker's reaction to the idea of someone having a romantic connection with a person they once loved?",
+      "What was the narrator's response when someone expressed disappointment that they had not seen him perform a particular task at a meal?",
+      "What action would the narrator have liked to take regarding M. de Charlus's impending troubles?",
+      "What secret message did Albertine write and pass to the narrator?",
+      "What unusual article of clothing do young girls wear to play a particular outdoor sport, according to the narrator?",
+      "What happens to a person's appeal when their perceived status or identity is revealed to be false?",
+      "What change has occurred in the way the speaker's companion looks at them, and how has this affected their interactions?"
+    ],
+    "rerank (baseline)": [
+      "What was the source of light that was shining while the narrator was with Albertine, and which she admired?",
+      "What task had my mother initially assigned to Françoise when she started working for the family?",
+      "What disturbing thought crossed the narrator's mind when his grandmother was late for dinner?",
+      "What social event is Mme de Guermantes planning to attend that evening where she will see a particular noblewoman?",
+      "What event or events will the narrator have to wait until the next year to experience again in Balbec?",
+      "What activity does the narrator undertake in a particular location with the hope of catching a glimpse of a specific person?",
+      "What action did certain people take after being drawn to the scene by curiosity and encountering the speaker's behavior?",
+      "What person's departure from the world is being discussed by the characters in this scene?",
+      "What was the speaker's reaction to the idea of someone having a romantic connection with a person they once loved?",
+      "What was the narrator's response when someone expressed disappointment that they had not seen him perform a particular task at a meal?",
+      "What unusual article of clothing do young girls wear to play a particular outdoor sport, according to the narrator?",
+      "What happens to a person's appeal when their perceived status or identity is revealed to be false?",
+      "What change has occurred in the way the speaker's companion looks at them, and how has this affected their interactions?"
+    ],
+    "rerank-pool50": [
+      "What task had my mother initially assigned to Françoise when she started working for the family?",
+      "What disturbing thought crossed the narrator's mind when his grandmother was late for dinner?",
+      "What social event is Mme de Guermantes planning to attend that evening where she will see a particular noblewoman?",
+      "What event or events will the narrator have to wait until the next year to experience again in Balbec?",
+      "What activity does the narrator undertake in a particular location with the hope of catching a glimpse of a specific person?",
+      "What action did certain people take after being drawn to the scene by curiosity and encountering the speaker's behavior?",
+      "What was the speaker's reaction to the idea of someone having a romantic connection with a person they once loved?",
+      "What was the narrator's response when someone expressed disappointment that they had not seen him perform a particular task at a meal?",
+      "What activity does the doctor want the narrator's grandmother to do that she has trouble doing according to her own statement?",
+      "What happens to a person's appeal when their perceived status or identity is revealed to be false?",
+      "What change has occurred in the way the speaker's companion looks at them, and how has this affected their interactions?"
+    ]
+  }
+}

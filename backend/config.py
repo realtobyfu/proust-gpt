@@ -20,7 +20,7 @@ class Config(BaseSettings):
 
     # Groq LLM settings
     GROQ_API_KEY: str = ""
-    LLM_MODEL_NAME: str = "moonshotai/kimi-k2-instruct"
+    LLM_MODEL_NAME: str = "llama-3.3-70b-versatile"
     LLM_TEMPERATURE: float = 0.6
     LLM_MAX_TOKENS: int = 800
     LLM_FREQUENCY_PENALTY: float = 0.6
