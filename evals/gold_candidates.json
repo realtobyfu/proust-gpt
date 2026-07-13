@@ -1,0 +1,2463 @@
+[
+  {
+    "gold_chunk_id": 5871,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Troisième partie",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What was one way M. de Guermantes demonstrated his activity to the people who elected him?",
+    "passage_preview": "For instance in the days when M. de Guermantes, Prince des Laumes, sat in the Chamber, one used to read now and then in the Paris newspapers, albeit it was intended primarily for the Méséglise division, to show the electors there that they had not given their votes to an inactive or voiceless mandatory: (Monsieur de Guermantes-Bouillon, Prince des Laumes:",
+    "passage_len": 357,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "guermantes"
+      ],
+      "num_shared_tokens": 1
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 6056,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Troisième partie",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What artwork did the narrator and the Grand Duchess encounter during their visit to the museum?",
+    "passage_preview": "But really, the other day I was with the Grand Duchess in the Louvre and we happened to pass before Manet’s *Olympia*. Nowadays nobody is in the least surprised by it. It looks just like an Ingres! And yet, heaven only knows how many spears I’ve had to break for that picture, which I don’t altogether like but which is unquestionably the work of *somebody*.” “And is the Grand Duchess well?” inquired the Princesse de Parme, to whom the Tsar’s aunt was infinitely more familiar than Manet’s model.",
+    "passage_len": 498,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "duchess",
+        "grand"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 10049,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 3 — Flight of Albertine",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What was the source of light that was shining while the narrator was with Albertine, and which she admired?",
+    "passage_preview": "For the monuments of Paris had been substituted, pure, linear, without depth, a drawing of the monuments of Paris, as though in an attempt to recall the appearance of a city that had been destroyed. But, round about this picture, there stood out so delicately the pale-blue mounting in which it was framed that one’s greedy eyes sought everywhere for a further trace of that delicious shade which was too sparingly measured out to them: the moon was shining. Albertine admired the moonlight. I dared not tell her that I would have admired it more if I had been alone, or in quest of a strange woman.",
+    "passage_len": 599,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "admired",
+        "albertine",
+        "shining"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 4651,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Première partie",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What activity was the speaker considering spending time alone with someone doing before going to their aunt's?",
+    "passage_preview": "“I should have liked if you and I could have been alone together, in fact I would much rather have had luncheon just with you, and stayed with you until it was time to go to my aunt’s. But this poor girl of mine here, it is such a pleasure to her, and she is so decent to me, don’t you know, I hadn’t the heart to refuse her. You’ll like her, however, she’s literary, you know, a most sensitive nature, and besides it’s such a pleasure to be with her in a restaurant, she is so charming, so simple, always delighted with everything.” I fancy nevertheless that, on this same morning, and then probably…",
+    "passage_len": 629,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "alone",
+        "aunt",
+        "time"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 3254,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Place-Names: The Place",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What was Saint-Loup's reaction to his uncle's opinion about two famous playwrights?",
+    "passage_preview": "Saint-Loup asked his uncle in a faintly contemptuous tone. “There is more truth in a single tragedy of Racine than in all the dramatic works of Monsieur Victor Hugo,” replied M. de Charlus. “People really are overwhelming,” Saint-Loup murmured in my ear. “Preferring Racine to Victor, you may say what you like, it’s epoch-making!” He was genuinely distressed by his uncle’s words, but the satisfaction of saying “you may say what you like” and, better still, “epoch-making” consoled him.",
+    "passage_len": 488,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "loup",
+        "saint",
+        "uncle"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 1265,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Swann in Love",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What location did Swann think might be where he first met Odette, based on someone else's winter habits?",
+    "passage_preview": "He regretted this rupture all the more because he had hoped, if he had met my uncle Adolphe again sometimes and had contrived to talk things over with him in strict confidence, to be able to get him to throw a light on certain rumours with regard to the life that Odette had led, in the old days, at Nice. For my uncle Adolphe used to spend the winter there, and Swann thought that it might indeed have been there, perhaps, that he had first known Odette. The few words which someone had let fall, in his hearing, about a man who, it appeared, had been Odette’s lover, had left Swann dumbfounded.",
+    "passage_len": 596,
+    "leakage": {
+      "max_shared_ngram": 0,
+      "shared_content_tokens": [
+        "first",
+        "odette",
+        "someone",
+        "swann",
+        "winter"
+      ],
+      "num_shared_tokens": 5
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 7308,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 2",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What might have changed in her perception of reality if she had been drinking like the narrator?",
+    "passage_preview": "You wouldn’t care to go along the cliff, we shan’t be disturbed behind the little wood that keeps the wind off the wooden bungalow that is empty just now?” All the difficulties of life were smoothed away, there was no longer any obstacle to the conjunction of our two bodies. No obstacle for me, at least. For they had not been volatilised for her, who had not been drinking port wine. Had she done so, had the outer world lost some of its reality in her eyes, the long cherished dream that would then have appeared to her to be suddenly realisable might perhaps have been not at all that of falling …",
+    "passage_len": 613,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "drinking",
+        "reality"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 8431,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 4",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What country had previously fascinated the narrator due to its connection to someone they knew, but now evokes a different emotional response?",
+    "passage_preview": "But every impulse of jealousy is individual and bears the imprint of the creature⁠—in this instance Mlle. Vinteuil’s friend⁠—who has aroused it. It was Mlle. Vinteuil’s friend who remained my chief preoccupation. The mysterious passion with which I had thought in the past about Austria because it was the country from which Albertine came (her uncle had been a Counsellor of Embassy there), because its geographical peculiarities, the race that inhabited it, its historical buildings, its scenery, I could study, as in an atlas, as in an album of photographs, in Albertine’s smile, her ways; this my…",
+    "passage_len": 686,
+    "leakage": {
+      "max_shared_ngram": 0,
+      "shared_content_tokens": [
+        "country"
+      ],
+      "num_shared_tokens": 1
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 7845,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 2",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What is the reason Mme Verdurin gives for not socializing with certain high-society women?",
+    "passage_preview": "One got to the end of him very soon. I was always bored to death by him.” (Which may be interpreted: “He went to the La Trémoïlles and the Guermantes and knew that I didn’t.”) “And I can put up with anything, except being bored. That, I cannot and will not stand!” Her horror of boredom was now the reason upon which Mme. Verdurin relied to explain the composition of the little group. She did not yet entertain duchesses because she was incapable of enduring boredom, just as she was unable to go for a cruise, because of seasickness. I thought to myself that what Mme. Verdurin said was not entirel…",
+    "passage_len": 1219,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "reason",
+        "verdurin"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 1500,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Swann in Love",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What social event was taking place on the day Forcheville visited her, according to the conversation?",
+    "passage_preview": "She spoke to him once of a visit that Forcheville had paid her on the day of the Paris-Murcie Fête. “What! you knew him as long ago as that? Oh, yes, of course you did,” he corrected himself, so as not to show that he had been ignorant of the fact. And suddenly he began to tremble at the thought that, on the day of the Paris-Murcie Fête, when he had received that letter which he had so carefully preserved, she had been having luncheon, perhaps, with Forcheville at the Maison d’Or. She swore that she had not.",
+    "passage_len": 513,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "forcheville"
+      ],
+      "num_shared_tokens": 1
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 11557,
+    "volume": 7,
+    "book": "Time Regained",
+    "chapter": "Chapter 2 — M. de Charlus During the War, His Opinions, His Pleasures",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What were the people fleeing to their cellars trying to hide along with themselves?",
+    "passage_preview": "When asphyxiating gases analogous to those emitted by\nVesuvius and earthquakes like those which buried Pompeii will\npreserve intact all the remaining imprudent women who have not\nfled to Bayonne with their pictures and their statues. Moreover,\nhas it not been Pompeii, a bit at a time every evening, for more\nthan a year? These people flying to their cellars, not to bring\nout an old bottle of Mouton-Rothschild or of St. Emilion, but to\nhide themselves and their most precious possessions like the\npriests of Herculaneum surprised by death at the moment when they\nwere carrying off the sacred vessel…",
+    "passage_len": 664,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "cellars",
+        "hide",
+        "people",
+        "themselves"
+      ],
+      "num_shared_tokens": 4
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 7129,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 2",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "Why was the lift-boy's leave stopped that afternoon?",
+    "passage_preview": "“When will you be back?” “Haven’t any too much time,” said the lift-boy, who, carrying to extremes the grammatical rule that forbids the repetition of personal pronouns before coordinate verbs, omitted the pronoun altogether. “Can go there all right. Leave was stopped this afternoon, because there was a dinner for twenty at luncheon. And it was my turn off duty today. So it’s all right if I go out a bit this evening.",
+    "passage_len": 420,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "afternoon",
+        "leave",
+        "lift",
+        "stopped"
+      ],
+      "num_shared_tokens": 4
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 7444,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 2",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What typically happened when Saniette started telling a story and people initially gave him their attention?",
+    "passage_preview": "Saniette, whose friends had always told him that he was wanting in self-confidence, and who had indeed seen men whom he rightly considered greatly inferior to himself, attain with ease to the success that was denied to him, never began telling a story without smiling at its drollery, fearing lest a serious air might make his hearers underestimate the value of his wares. Sometimes, giving him credit for the comic element which he himself appeared to find in what he was about to say, people would do him the honour of a general silence. But the story would fall flat.",
+    "passage_len": 570,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "people",
+        "saniette",
+        "story",
+        "telling"
+      ],
+      "num_shared_tokens": 4
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 10698,
+    "volume": 6,
+    "book": "The Sweet Cheat Gone",
+    "chapter": "Chapter 2 — Mademoiselle De Forcheville",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What would a person likely want to eat when feeling cold, according to the described circumstances?",
+    "passage_preview": "Besides even if we include an obstinate refusal to seem to have desired to act in vain, it is probable that the effect of the sunlight would not be repeated, that feeling cold at the moment we would long for a bowl of soup by the chimney-corner and not for a trout in the open air, that our carriage would leave the cashier unmoved who perhaps for wholly different reasons had a great regard for us and in whom this sudden opulence would arouse suspicion.",
+    "passage_len": 455,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "cold",
+        "feeling"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 8818,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 1 — Life with Albertine",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What activity or relationship was the narrator uncertain whether Albertine shared with other men besides him?",
+    "passage_preview": "Albertine alarmed me further when she said that I was quite right to say, out of regard for her reputation, that I was not her lover, since “for that matter,” she went on, “it’s perfectly true that you aren’t.” I was not her lover perhaps in the full sense of the word, but then, was I to suppose that all the things that we did together she did also with all the other men whose mistress she swore to me that she had never been? The desire to know at all costs what Albertine was thinking, whom she was seeing, with whom she was in love, how strange it was that I should be sacrificing everything to…",
+    "passage_len": 727,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "albertine"
+      ],
+      "num_shared_tokens": 1
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 11807,
+    "volume": 7,
+    "book": "Time Regained",
+    "chapter": "Chapter 3 — An Afternoon Party at the House of the Princesse de Guermantes",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What instructions had the Princesse given regarding the doors during the musical performance?",
+    "passage_preview": "But how was it that these visions of Combray\nand of Venice at one and at another moment had caused me a joyous\ncertainty sufficient without other proofs to make death\nindifferent to me? Asking myself this and resolved to find the\nanswer this very day, I entered the Guermantes' mansion, because\nwe always allow our inner needs to give way to the part we are\napparently called upon to play and that day mine was to be a\nguest. On reaching the first floor a footman requested me to\nenter a small boudoir-library adjoining a buffet until the piece\nthen being played had come to an end, the Princesse hav…",
+    "passage_len": 676,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "doors",
+        "given",
+        "performance",
+        "princesse"
+      ],
+      "num_shared_tokens": 4
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 1951,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Madame Swann at Home",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What task had my mother initially assigned to Françoise when she started working for the family?",
+    "passage_preview": "“Just wait till you see,” said Françoise, filled with contempt for my ignorance, “if rabbits don’t cry every bit as much as chickens. Why, they are far noisier.” She received the compliments of M. de Norpois with the proud simplicity, the joyful and (if but for the moment) intelligent expression of an artist when someone speaks to him of his art. My mother had sent her when she first came to us to several of the big restaurants to see how the cooking there was done.",
+    "passage_len": 470,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "fran",
+        "mother",
+        "oise"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 5687,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Troisième partie",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What values did the daughter's mother teach her to adopt in relation to people of lower social status?",
+    "passage_preview": "Her mother (not merely allied by blood to all the royal families of Europe but furthermore⁠—in contrast to the Ducal House of Parma⁠—richer than any reigning Princess) had instilled into her from her earliest childhood the arrogantly humble precepts of an evangelical snobbery; and today every line of the daughter’s face, the curve of her shoulders, the movements of her arms seemed to repeat the lesson: “Remember that if God has caused you to be born on the steps of a throne you ought not to make that a reason for looking down upon those to whom Divine Providence has willed (wherefore His Name …",
+    "passage_len": 711,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "daughter",
+        "mother"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 1617,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Place-Names: The Name",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What disturbing thought crossed the narrator's mind when his grandmother was late for dinner?",
+    "passage_preview": "This day, which I had begun with so many misgivings, was, as it happened, one of the few on which I was not unduly wretched. For, although I no longer thought, now, of anything save not to let a single day pass without seeing Gilberte (so much so that once, when my grandmother had not come home by dinnertime, I could not resist the instinctive reflection that, if she had been run over in the street and killed, I should not for some time be allowed to play in the Champs-Élysées; when one is in love one has no love left for anyone),",
+    "passage_len": 536,
+    "leakage": {
+      "max_shared_ngram": 0,
+      "shared_content_tokens": [
+        "grandmother",
+        "thought"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 10213,
+    "volume": 6,
+    "book": "The Sweet Cheat Gone",
+    "chapter": "Chapter 1 — Grief and Oblivion",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What items had the speaker previously ordered in someone else's name, but now wants that person to cancel to avoid unnecessary expense?",
+    "passage_preview": "But now that we are never to meet again, as I have no hope of persuading you to accept either the vessel or the car (to me they would be quite useless), I had thought⁠—as I had ordered them through an agent, but in your name⁠—that you might perhaps by countermanding them, yourself, save me the expense of the yacht and the car which are no longer required. But this, and many other matters, would need to be discussed.",
+    "passage_len": 419,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "expense",
+        "name",
+        "ordered"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 708,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Overture",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What happened to the narrator's thought process when they tried to think of book subjects with deep philosophical meaning?",
+    "passage_preview": "And these dreams reminded me that, since I wished, some day, to become a writer, it was high time to decide what sort of books I was going to write. But as soon as I asked myself the question, and tried to discover some subjects to which I could impart a philosophical significance of infinite value, my mind would stop like a clock, I would see before me vacuity, nothing, would feel either that I was wholly devoid of talent, or that, perhaps, a malady of the brain was hindering its development. Sometimes I would depend upon my father’s arranging everything for me. He was so powerful, in such fa…",
+    "passage_len": 699,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "philosophical",
+        "subjects",
+        "tried"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 11195,
+    "volume": 7,
+    "book": "Time Regained",
+    "chapter": "Chapter 1 — Tansonville",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What is the setting that the mistress of the house describes as being more appealing to her husband than their current surroundings?",
+    "passage_preview": "As I speak to Verdurin of the delicate satisfaction it must be\nfor him to have this refined repast amidst a collection which no\nprince possesses at the present time, the mistress of the house\nthrows me the melancholy remark: 'One sees how little you know\nhim,' and she speaks of her husband as a whimsical oddity, indifferent to all these beauties, 'an oddity' she repeats, 'that's the word, who has more gusto for a bottle of cider drunk\nin the rough coolness of a Norman farm.' And the charming woman, in a tone which is really in love with the colours of the\ncountry, speaks to us with overflowing…",
+    "passage_len": 651,
+    "leakage": {
+      "max_shared_ngram": 5,
+      "shared_content_tokens": [
+        "house",
+        "husband",
+        "mistress"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 11937,
+    "volume": 7,
+    "book": "Time Regained",
+    "chapter": "Chapter 3 — An Afternoon Party at the House of the Princesse de Guermantes",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What is lacking in the actions of people who frequently express virtuous sentiments?",
+    "passage_preview": "of the depth of a work. (For that\ndepth is not inherent in certain subjects as is believed by\nmaterialist-spiritual novelists, since they cannot penetrate\nbeneath the world of appearances and their lofty intentions, like\nthose virtuous tirades habitual to people who are incapable of\nthe smallest kindly effort, must not prevent our observing that\nthey have not even the mental power to throw off the ordinary\nbanalities acquired by imitation.)",
+    "passage_len": 444,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "people",
+        "virtuous"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 8297,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 3",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What unusual task did he perform with great solemnity, surrounded by a group of onlookers, on a particular occasion?",
+    "passage_preview": "This was not to say that he was not qualified, though he concealed his early struggles, to lend a hand like anyone else. It required some exceptional circumstance nevertheless to induce him one day to carve the turkey-poults himself. I was out, but I heard afterwards that he carved them with a sacerdotal majesty, surrounded, at a respectful distance from the service-table, by a ring of waiters who were endeavouring thereby not so much to learn the art as to make themselves conspicuously visible, and stood gaping in open-mouthed admiration.",
+    "passage_len": 545,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "surrounded"
+      ],
+      "num_shared_tokens": 1
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 693,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Overture",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What unusual comparison is made between a struggling water plant and certain people known to the narrator's family?",
+    "passage_preview": "Thrust towards the bank, its stalk would be straightened out, lengthened, strained almost to breaking-point until the current again caught it, its green moorings swung back over their anchorage and brought the unhappy plant to what might fitly be called its starting-point, since it was fated not to rest there a moment before moving off once again. I would still find it there, on one walk after another, always in the same helpless state, suggesting certain victims of neurasthenia, among whom my grandfather would have included my aunt Léonie, who present without modification, year after year, th…",
+    "passage_len": 982,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "certain",
+        "plant"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 9050,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 1 — Life with Albertine",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What was the mother's reaction when she heard the narrator speaking the dialect that she was familiar with?",
+    "passage_preview": "The mother was greatly put out that I understood their dialect, then delighted to hear me speak it. I am bound to admit that her delight was a mocking delight, for albeit I came in time to pronounce the words more or less as she herself did, she found between our two ways of pronunciation an abyss of difference which gave her infinite joy, and she began to regret that she no longer saw people to whom she had not given a thought for years but who, it appeared, would have rocked with a laughter which it would have done her good to hear, if they could have heard me speaking their dialect so badly…",
+    "passage_len": 601,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "dialect",
+        "heard",
+        "mother",
+        "speaking"
+      ],
+      "num_shared_tokens": 4
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 2335,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Madame Swann at Home",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What activity was the narrator engaged in, which although quiet, felt like a discussion with others and brought a particular kind of pleasure?",
+    "passage_preview": "Though conducted in silence, this exercise was none the less a conversation and not a meditation, my solitude a mental society in which it was not I myself but other imaginary speakers who controlled my choice of words, and in which I felt as I formulated, in place of the thoughts that I believed to be true, those that came easily to my mind, and involved no introspection from without, that kind of pleasure, entirely passive, which sitting still affords to anyone who is burdened with a sluggish digestion. Had I been less firmly resolved upon setting myself definitely to work, I should perhaps …",
+    "passage_len": 637,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "felt",
+        "kind",
+        "pleasure"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 4797,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Deuxième partie",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What relation is the Princesse de Poix to the lady with the distinctive hairstyle, according to the passage?",
+    "passage_preview": "Furthermore, the lady with the Marie-Antoinette hair, whenever she set eyes on Mme. de Villeparisis, could not help being reminded of the fact that the Duchesse de Guermantes did not come to her Fridays. Her consolation was that at these same Fridays she could always count on having, blood being thicker than water, the Princesse de Poix, who was her own personal Guermantes, and who never went near Mme. de Villeparisis, albeit Mme. de Poix was an intimate friend of the Duchess. Nevertheless from the mansion on the Quai Malaquais to the drawing-rooms of the Rue de Tournon, the Rue de la Chaise a…",
+    "passage_len": 1189,
+    "leakage": {
+      "max_shared_ngram": 4,
+      "shared_content_tokens": [
+        "lady",
+        "poix",
+        "princesse"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 6181,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Troisième partie",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What action did Charlus typically take after keeping his guests standing for a few minutes?",
+    "passage_preview": "Charlus’s face. I was not aware, as it happened, that at home, in the country, at the Château de Charlus, he was in the habit, after dinner (so much did he love to play the king) of sprawling in an armchair in the smoking-room, letting his guests remain standing round him. He would ask for a light from one, offer a cigar to another and then, after a few minutes’ interval, would say: “But Argencourt, why don’t you sit down? Take a chair, my dear fellow,” and so forth, having made a point of keeping them standing simply to remind them that it was from himself that permission came to them to be s…",
+    "passage_len": 826,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "charlus",
+        "guests",
+        "keeping",
+        "minutes",
+        "standing",
+        "take"
+      ],
+      "num_shared_tokens": 6
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 6319,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Troisième partie",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What social event is Mme de Guermantes planning to attend that evening where she will see a particular noblewoman?",
+    "passage_preview": "They were a present from the Grand Duchess. They’re a little too large for my liking, a little too like claret glasses filled to the brim, but I’ve put them on because we shall be seeing the Grand Duchess this evening at Marie-Gilbert’s,” added Mme. de Guermantes, never suspecting that this assertion destroyed the force of those previously made by the Duke. “What’s on at the Princess’s?” inquired Swann. “Practically nothing,” the Duke hastened to reply, the question having made him think that Swann was not invited.",
+    "passage_len": 520,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "evening",
+        "guermantes"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 12320,
+    "volume": 7,
+    "book": "Time Regained",
+    "chapter": "Chapter 3 — An Afternoon Party at the House of the Princesse de Guermantes",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What was the effect of hearing a particular name on the narrator's ability to identify the horrible old woman?",
+    "passage_preview": "Of this I was glad as it prevented her from noticing a\ngroup seated not far from us, the sight of which would not have\nbeen agreeable to her. The Duchesse de Guermantes was engaged in\nan animated conversation with a horrible old woman whom I stared\nat without having the slightest idea who she was. \"How\nextraordinary to see Rachel here,\" Bloch passing at that moment,\nwhispered in my ear. The magic name instantly broke the spell\nwhich had laid the disguise of this unknown and foul old woman\nupon Saint-Loup's mistress and I recognised her at once.",
+    "passage_len": 550,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "horrible",
+        "name",
+        "woman"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 3822,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Seascape, with Frieze of Girls",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What event or events will the narrator have to wait until the next year to experience again in Balbec?",
+    "passage_preview": "Bloch was so fond: “Gone are the Kings, gone are their towering prows, Vanished upon the raging deep, alas, The long-haired warrior heroes of Hellas.” I could no longer despise the milliners, now that Elstir had told me that the delicate touches by which they give a last refinement, a supreme caress to the ribbons or feathers of a hat after it is finished would be as interesting to him to paint as the muscular action of the jockeys themselves (a statement which had delighted Albertine). But I must wait until I had returned⁠—for milliners, to Paris⁠—for regattas and races to Balbec, where there…",
+    "passage_len": 707,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "balbec",
+        "next",
+        "until",
+        "wait",
+        "year"
+      ],
+      "num_shared_tokens": 5
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 10500,
+    "volume": 6,
+    "book": "The Sweet Cheat Gone",
+    "chapter": "Chapter 1 — Grief and Oblivion",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What effect did learning about Albertine's hidden tastes have on the narrator's perception of her as a person?",
+    "passage_preview": "Those tastes which she had denied but which were hers, those tastes the discovery of which had come to me not by a cold process of reasoning but in the burning anguish that I had felt on reading the words: “Oh, it’s just heavenly,” a suffering which gave them a special quality of their own, those tastes were not merely added to the image of Albertine as is added to the hermit-crab the new shell which it drags after it, but, rather, like a salt which comes in contact with another salt, alters its colour, and, what is more, its nature. When the young laundress must have said to her young friends…",
+    "passage_len": 1515,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "albertine",
+        "person",
+        "tastes"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 8622,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 1 — Life with Albertine",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What change in behavior occurred in the tailor's shop as a result of the Baron's criticism being conveyed to the girl?",
+    "passage_preview": "We may be certain that Morel, relying on the influence which his personal attractions give him over the girl, communicated to her, as coming from himself, the Baron’s criticism, for the expression “stand you a tea” disappeared as completely from the tailor’s shop as disappears from a drawing-room some intimate friend who used to call daily, and with whom, for one reason or another, we have quarrelled, or whom we are trying to keep out of sight and meet only outside the house. M. de Charlus was satisfied by the cessation of “stand you a tea.” He saw in it a proof of his own ascendancy over More…",
+    "passage_len": 732,
+    "leakage": {
+      "max_shared_ngram": 5,
+      "shared_content_tokens": [
+        "baron",
+        "criticism",
+        "girl",
+        "shop",
+        "tailor"
+      ],
+      "num_shared_tokens": 5
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 2451,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Madame Swann at Home",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What did the speaker ask Odette for her opinion on, sparking a conversation about fashion and leading to Odette's comments about her own life and marriage to Swann?",
+    "passage_preview": "Bontemps, “but I will just sit down again for a moment; you know, I adore talking to a clever woman like you.” “You will think me highly indiscreet, Odette, but I should so like to know what you thought of the hat Mme. Trombert had on. I know, of course, that big hats are the fashion just now. All the same, wasn’t it just the least little bit exaggerated? And compared to the hat she came to see me in the other day, the one she had on just now was microscopic!” “Oh no, I am not at all clever,” said Odette, thinking that this sounded well. “I am a perfect simpleton, I believe everything people s…",
+    "passage_len": 833,
+    "leakage": {
+      "max_shared_ngram": 0,
+      "shared_content_tokens": [
+        "fashion",
+        "life",
+        "odette",
+        "swann"
+      ],
+      "num_shared_tokens": 4
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 9965,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 3 — Flight of Albertine",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What sound did the pigeons make that led Albertine to comment about the arrival of a new season?",
+    "passage_preview": "Once indeed, we heard all of a sudden the regular cadence of a plaintive appeal. It was the pigeons beginning to coo. “That proves that day has come already,” said Albertine; and, her brows almost knitted, as though she missed, by living with me, the joys of the fine weather, “Spring has begun, if the pigeons have returned.” The resemblance between their cooing and the crow of the cock was as profound and as obscure as, in Vinteuil’s septet, the resemblance between the theme of the adagio and that of the closing piece, which is based upon the same key-theme as the other but so transformed by d…",
+    "passage_len": 905,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "albertine",
+        "pigeons"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 1917,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Madame Swann at Home",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What activity does the narrator undertake in a particular location with the hope of catching a glimpse of a specific person?",
+    "passage_preview": "“I prefer Mlle. Swann’s face, but I admire her mother, too, enormously; I go for walks in the Bois simply in the hope of seeing her pass.” “Ah! But I must tell them that; they will be highly flattered.” While he was uttering these words, and for a few seconds after he had uttered them, M. de Norpois was still in the same position as anyone else who, hearing me speak of Swann as an intelligent man, of his family as respectable stockbrokers, of his house as a fine house, imagined that I would speak just as readily of another man equally intelligent, of other stockbrokers equally respectable, of …",
+    "passage_len": 1084,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "hope"
+      ],
+      "num_shared_tokens": 1
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 8108,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 3",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What natural elements entered the train carriage when the door was opened at the station?",
+    "passage_preview": "Albertine, in which a glimmer of lamplight on the window showed, at certain halts of the panting little train, that we had arrived at a station. So that there should be no risk of Cottard’s missing us, and not having heard the name of the station, I opened the door, but what burst headlong into the carriage was not any of the faithful, but the wind, the rain, the cold. In the darkness I could make out fields, I could hear the sea, we were in the open country.",
+    "passage_len": 463,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "carriage",
+        "door",
+        "opened",
+        "station",
+        "train"
+      ],
+      "num_shared_tokens": 5
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 8227,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 3",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What is the speaker's reaction when someone suggests that a letter might contain something serious?",
+    "passage_preview": "I’m not going to open his letter. You can tell him that you couldn’t find me.” “Wouldn’t it be better to open it, I fancy it contains something serious.” “No, certainly not, you don’t know all the lies, the infernal tricks that old scoundrel’s up to. It’s a dodge to make me go and see him. Very well! I’m not going, I want to have an evening in peace.” “But isn’t there going to be a duel tomorrow?” I asked Morel, whom I supposed to be equally well informed. “A duel?” he repeated with an air of stupefaction. “I never heard a word about it. After all, it doesn’t matter a damn to me, the dirty old…",
+    "passage_len": 654,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "letter",
+        "serious",
+        "something"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 11590,
+    "volume": 7,
+    "book": "Time Regained",
+    "chapter": "Chapter 2 — M. de Charlus During the War, His Opinions, His Pleasures",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What task did the patron instruct someone named Pierrot to perform after the narrator requested a drink to be sent to their room?",
+    "passage_preview": "Where did you steal that? All my congratulations!\" and\nthe second \"Don't say anything. We don't know this chap, so look\nout.\" Suddenly the *patron* came in sweating, carrying\nseveral yards of heavy chains, strong enough to chain up several\nprisoners and said: \"I've got a nice load here. If all of you\nwere not so lazy, I shouldn't be obliged to go myself.\" I told\nhim I wanted a room for some hours only, \"I could not find a\ncarriage and I am not very well, but I should like to have\nsomething taken up to my room to drink.\" \"Pierrot, go to the\ncellar and fetch some cassis and tell them to prepare …",
+    "passage_len": 652,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "drink",
+        "patron",
+        "pierrot",
+        "room"
+      ],
+      "num_shared_tokens": 4
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 6581,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 1",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What action did certain people take after being drawn to the scene by curiosity and encountering the speaker's behavior?",
+    "passage_preview": "“It is nice,” he repeated, “but it is, really, very odd.” And he broke into peals of laughter which appeared to be indicative at once of his joy and of the inadequacy of human speech to express it. Certain persons, meanwhile, who knew both how difficult he was of access and how prone to insolent retorts, had been drawn towards us by curiosity, and, with an almost indecent haste, took to their heels. “Come, now, don’t be cross,” he said to me, patting me gently on the shoulder, “you know that I am your friend. Good evening, Antioche, good evening, Louis-René. Have you been to look at the founta…",
+    "passage_len": 703,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "certain",
+        "curiosity",
+        "drawn"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 2603,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Madame Swann at Home",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What object was Mme Swann holding in her hands during the scene that evoked memories of the narrator's walks in Combray?",
+    "passage_preview": "That Mme. Swann was content with the consignments furnished by her Combray gardener, that she did not, by the intervention of her own “special” florist, fill up the gaps left by an insufficiently powerful magic with subsidies borrowed from a precocious Mediterranean shore, I do not for a moment suggest, nor did it worry me at the time. It was enough to fill me with longing for country scenes that, overhanging the loose snowdrifts of the muff in which Mme. Swann kept her hands, the guelder-rose snowballs (which served very possibly in the mind of my hostess no other purpose than to compose, on …",
+    "passage_len": 1068,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "combray",
+        "hands",
+        "swann",
+        "walks"
+      ],
+      "num_shared_tokens": 4
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 5435,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Deuxième partie",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What part of the face does a person use as a substitute for a missing body part when showing affection?",
+    "passage_preview": "The place of this absent organ he supplies with his lips, and thereby arrives perhaps at a slightly more satisfying result than if he were reduced to caressing the beloved with a horny tusk. But a pair of lips, designed to convey to the palate the taste of whatever whets the appetite, must be content, without ever realising their mistake or admitting their disappointment, with roaming over the surface and with coming to a halt at the barrier of the impenetrable but irresistible cheek.",
+    "passage_len": 489,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [],
+      "num_shared_tokens": 0
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 3354,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Place-Names: The Place",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What activity was the narrator's grandmother frequently doing with Françoise that the narrator was not allowed to join?",
+    "passage_preview": "My ill-humour arose more particularly from the fact that, during the last week, my grandmother had appeared to be avoiding me, and I had not been able to have her to myself for a moment, either by night or day. When I came back in the afternoon to be alone with her for a little I was told that she was not in the hotel; or else she would shut herself up with Françoise for endless confabulations which I was not permitted to interrupt.",
+    "passage_len": 436,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "fran",
+        "grandmother",
+        "oise"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 2046,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Madame Swann at Home",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What action does Gilberte take to make her gathering feel less formal after some of her guests decline her offer?",
+    "passage_preview": "Gilberte’s girl friends were not all plunged in that state of intoxication in which it is impossible to make up one’s mind. Some of them refused tea! Then Gilberte would say, using a phrase highly fashionable that I year: “I can see I’m not having much of a success with my tea!” And to destroy more completely any idea of ceremony, she would disarrange the chairs that were drawn up round the table, with: “We look just like a wedding breakfast. Good lord, what fools servants are!”",
+    "passage_len": 483,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "gilberte",
+        "make"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 7896,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 3",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What effect does the narrator claim to experience after sleeping for a couple of hours, compared to using a certain type of medication?",
+    "passage_preview": "I have always said⁠—and have proved by experiment⁠—that the most powerful soporific is sleep itself. After having slept profoundly for two hours, having fought against so many giants, and formed so many lifelong friendships, it is far more difficult to awake than after taking several grams of veronal. And so, reasoning from one thing to the other, I was surprised to hear from the Norwegian philosopher, who had it from M. Boutroux, “my eminent colleague⁠—pardon me, my brother,” what M. Bergson thought of the peculiar effects upon the memory of soporific drugs. “Naturally,” M.",
+    "passage_len": 581,
+    "leakage": {
+      "max_shared_ngram": 0,
+      "shared_content_tokens": [
+        "hours"
+      ],
+      "num_shared_tokens": 1
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 8596,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 1 — Life with Albertine",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What phrase did the Duc de Guermantes start using frequently in discussions about a certain controversial event?",
+    "passage_preview": "One curious thing was that nobody had ever before heard the Duc de Guermantes make use of the quite commonplace expression “out and out,” but ever since the Jockey election, whenever anybody referred to the Dreyfus case, pat would come “out and out.” “Dreyfus case, Dreyfus case, that’s soon said, and it’s a misuse of the term. It is not a question of religion, it’s *out and out* a political matter.” Five years might go by without your hearing him say “out and out” again, if during that time nobody mentioned the Dreyfus case, but if, at the end of five years, the name Dreyfus cropped up, “out a…",
+    "passage_len": 643,
+    "leakage": {
+      "max_shared_ngram": 4,
+      "shared_content_tokens": [
+        "guermantes"
+      ],
+      "num_shared_tokens": 1
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 9899,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 3 — Flight of Albertine",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "How did Albertine appear to be feeling despite thanking the narrator for a gift?",
+    "passage_preview": "Albertine one evening. Surely, to her who had long desired them, who chose them deliberately with me, who had a place reserved for them beforehand not only in her wardrobe but in her imagination, the possession of these gowns, every detail of which, before deciding among so many, she carefully examined, was something more than it would have been to an overwealthy woman who has more dresses than she knows what to do with and never even looks at them. And yet, notwithstanding the smile with which Albertine thanked me, saying: “You are too kind,” I noticed how weary, and even wretched, she was lo…",
+    "passage_len": 606,
+    "leakage": {
+      "max_shared_ngram": 0,
+      "shared_content_tokens": [
+        "albertine"
+      ],
+      "num_shared_tokens": 1
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 7731,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 2",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What was Mme Verdurin's opinion of Elstir's behavior when he spent time with certain women?",
+    "passage_preview": "Verdurin, “even at the time when he had talent, for he had it, the wretch, and to spare, what was tiresome about him was that he had not a spark of intelligence.” Mme. Verdurin, in passing this judgment upon Elstir, had not waited for their quarrel, or until she had ceased to care for his painting. The fact was that, even at the time when he formed part of the little group, it would happen that Elstir spent the whole day in the company of some woman whom, rightly or wrongly, Mme. Verdurin considered a goose, which, in her opinion, was not the conduct of an intelligent man. “No,” she observed w…",
+    "passage_len": 682,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "elstir",
+        "opinion",
+        "spent",
+        "time",
+        "verdurin"
+      ],
+      "num_shared_tokens": 5
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 4714,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Première partie",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What ability had the person's body been trained to perform in various social situations?",
+    "passage_preview": "Balbec that, side by side with that childlike sincerity of his face, the skin of which by its transparence rendered visible the sudden tide of certain emotions, his body had been admirably trained to perform a certain number of well-bred dissimulations, and that, like a consummate actor, he could, in his regimental and in his social life, play alternately quite different parts.",
+    "passage_len": 380,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "body",
+        "perform",
+        "social",
+        "trained"
+      ],
+      "num_shared_tokens": 4
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 4772,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Deuxième partie",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What type of artwork is mentioned as depicting the faces of ancient Greeks?",
+    "passage_preview": "Charlus inquired whether his first name was Jewish, whereas it was simply from aesthetic interest and love of local colour.) But, to revert for a moment, when we speak of racial persistence we do not accurately convey the impression we receive from Jews, Greeks, Persians, all those peoples whom it is better to leave with their differences. We know from classical paintings the faces of the ancient Greeks, we have seen Assyrians on the walls of a palace at Susa.",
+    "passage_len": 464,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "ancient",
+        "faces",
+        "greeks"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 1910,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Madame Swann at Home",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What emotional state did the narrator experience after receiving feedback from M. de Norpois on their writing?",
+    "passage_preview": "Paralysed by what M. de Norpois had just said to me with regard to the fragment which I had submitted to him, and remembering at the same time the difficulties that I experienced when I attempted to write an essay or merely to devote myself to serious thought, I felt conscious once again of my intellectual nullity and that I was not born for a literary life. Doubtless in the old days at",
+    "passage_len": 389,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "norpois"
+      ],
+      "num_shared_tokens": 1
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 9394,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 2 — The Verdurins Quarrel with M. De Charlus",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What was Mme Verdurin's concern about her husband's potential reaction to a failed attempt at something?",
+    "passage_preview": "It would be better to postpone this performance until after the other. Perhaps even until a later occasion. For however Mme. Verdurin might look forward to the delicious emotion that she would feel when she knew that her husband was engaged in enlightening Charlie in the next room, she was afraid, if the shot missed fire, that he would lose his temper and would fail to reappear on the sixteenth. What ruined M. de",
+    "passage_len": 416,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "husband",
+        "verdurin"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 3104,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Place-Names: The Place",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What unusual article of clothing kept falling from one of the eyes of the young nobleman as he walked?",
+    "passage_preview": "Dressed in a clinging, almost white material such as I could never have believed that any man would have the audacity to wear, the thinness of which suggested no less vividly than the coolness of the dining-room the heat and brightness of the glorious day outside, he was walking fast. His eyes, from one of which a monocle kept dropping, were of the colour of the sea. Everyone looked at him with interest as he passed, knowing that this young Marquis de Saint-Loup-en-Bray was famed for the smartness of his clothes. All the newspapers had described the suit in which he had recently acted as secon…",
+    "passage_len": 636,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "eyes",
+        "kept",
+        "young"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 6117,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Troisième partie",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What unusual event or circumstance prompted the Duc de Guermantes to be asked to send mail to a particular location?",
+    "passage_preview": "In this one, especially, survive side by side memories of the Margravine of Bayreuth, of this other somewhat fantastic Princess (the Duc d’Orléans’s sister), to whom it was said that the name of her husband’s castle made a distinct appeal, of the King of Bavaria, and finally of Prince Von, to whom it was simply his own postal address, at which he had just asked the Duc de Guermantes to write to him, for he had succeeded to it, and let it only during the Wagner festivals, to the Prince de Polignac, another delightful “fantasist.” When M. de Guermantes, to explain how he was related to Mme. d’Ar…",
+    "passage_len": 877,
+    "leakage": {
+      "max_shared_ngram": 5,
+      "shared_content_tokens": [
+        "asked",
+        "event",
+        "guermantes"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 1202,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Swann in Love",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What would Odette often claim to have done at the moment she contacted someone after a short trip, even if it wasn't true?",
+    "passage_preview": "Sometimes, when she had been away on a short visit somewhere, several days would elapse before she thought of letting him know that she had returned to Paris. And then she would say quite simply, without taking (as she would once have taken) the precaution of covering herself, at all costs, with a little fragment borrowed from the truth, that she had just, at that very moment, arrived by the morning train. What she said was a falsehood; at least for Odette it was a falsehood, inconsistent, lacking (what it would have had, if true) the support of her memory of her actual arrival at the station;…",
+    "passage_len": 871,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "even",
+        "moment",
+        "odette",
+        "short",
+        "true"
+      ],
+      "num_shared_tokens": 5
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 1472,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Swann in Love",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What response does Odette give when asked to confirm or deny a certain past behavior on the medal she wears?",
+    "passage_preview": "How can you expect that I shall continue to love you, when I see you maintain, when I hear you swear to me a thing which I know to be false? Odette, do not prolong this moment which is torturing us both. If you are willing to end it at once, you shall be free of it forever. Tell me, upon your medal, yes or no, whether you have ever done those things.” “How on earth can I tell?” she was furious. “Perhaps I have, ever so long ago, when I didn’t know what I was doing, perhaps two or three times.”",
+    "passage_len": 498,
+    "leakage": {
+      "max_shared_ngram": 0,
+      "shared_content_tokens": [
+        "medal",
+        "odette"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 7049,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 1",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What unusual action did the Abbess of Fontevrault take when visiting a particular royal mistress?",
+    "passage_preview": "He had gone with a Polish countess who had taken him as her secretary, following the example of his two elder brothers and their typist sister, torn from the hotel by persons of different race and sex who had been attracted by their charm. The only one remaining was the youngest, whom nobody wanted, because he squinted. He was highly delighted when the Polish countess or the protectors of the other two brothers came on a visit to the hotel at Balbec. For, albeit he was jealous of his brothers, he was fond of them and could in this way cultivate his family affections for a few weeks in the year…",
+    "passage_len": 807,
+    "leakage": {
+      "max_shared_ngram": 4,
+      "shared_content_tokens": [
+        "abbess",
+        "fontevrault",
+        "mistress"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 1858,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Madame Swann at Home",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What literary device did M. de Norpois often use to embellish his writing in the magazine?",
+    "passage_preview": "It had taken the place, that year, among people who “really counted,” of “He who sows the wind shall reap the whirlwind,” which was sorely in need of a rest, not having the perennial freshness of “Working for the King of Prussia.” For the culture of these eminent men was an alternate, if not a tripartite and triennial culture. Of course, the use of quotations such as these, with which M. de Norpois excelled in jewelling his articles in the *Revue*, was in no way essential to their appearing solid and well-informed. Even without the ornament which the quotations supplied, it sufficed that M. de…",
+    "passage_len": 687,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "norpois"
+      ],
+      "num_shared_tokens": 1
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 10784,
+    "volume": 6,
+    "book": "The Sweet Cheat Gone",
+    "chapter": "Chapter 2 — Mademoiselle De Forcheville",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What was Andrée's concern about the possibility of the narrator joining her and Gisèle for dinner?",
+    "passage_preview": "Well, the next day, which was my mother’s at-home day, as I have said, Andrée came to see me. She had not much time, for she had to go and call for Gisèle with whom she was very anxious to dine. “I know her faults, but she is after all my best friend and the person for whom I feel most affection,” she told me. And she even appeared to feel some alarm at the thought that I might ask her to let me dine with them. She was hungry for people, and a third person who knew her too well, such as myself, would, by preventing her from letting herself go, at once prevent her from enjoying complete satisfa…",
+    "passage_len": 623,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "andr"
+      ],
+      "num_shared_tokens": 1
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 12253,
+    "volume": 7,
+    "book": "Time Regained",
+    "chapter": "Chapter 3 — An Afternoon Party at the House of the Princesse de Guermantes",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What happens to memories of past conflicts or unpleasant interactions with someone over time?",
+    "passage_preview": "Apart from these substitutions one forgets the bad\nturns people have done us, their unpleasantness, one forgets that\nlast time we parted without shaking hands and, in contrast, we\nremember an earlier period when we were on good terms. Legrandin's affability with Bloch was referable to that earlier\nperiod, whether because he had forgotten a phase of his past or\nthat he judged it better to ignore it, a mixture, in fact, of\nforgiveness, forgetfulness and indifference which is also an\neffect of Time. Moreover, even in love, the memories we have of\neach other are not the same.",
+    "passage_len": 578,
+    "leakage": {
+      "max_shared_ngram": 0,
+      "shared_content_tokens": [
+        "memories",
+        "past",
+        "time"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 661,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Overture",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What activity is Mlle Vinteuil concerned will be observed by others?",
+    "passage_preview": "“But it’s too dreadful! People will see us,” Mlle. Vinteuil answered. And then she guessed, probably, that her friend would think that she had uttered these words simply in order to provoke a reply in certain other words, which she seemed, indeed, to wish to hear spoken, but, from prudence, would let her friend be the first to speak. And so, although I could not see her face clearly enough, I am sure that the expression must have appeared on it which my grandmother had once found so delightful, when she hastily went on: “When I say ‘see us’ I mean, of course, see us reading. It’s so dreadful t…",
+    "passage_len": 682,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "mlle",
+        "vinteuil"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 7527,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 2",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What action does Cottard suggest taking after realizing the Princess is likely on their train?",
+    "passage_preview": "We must have failed to notice it while we were talking about the Cambremers. Listen to me, Ski, pay attention, I am going to tell you ‘a good one,’ ” said Cottard, who had taken a fancy to this expression, in common use in certain medical circles. “The Princess must be on the train, she can’t have seen us, and will have got into another compartment. Come along and find her. Let’s hope this won’t land us in trouble!” And he led us all off in search of Princess Sherbatoff.",
+    "passage_len": 475,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "cottard",
+        "princess",
+        "train"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 6646,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 1",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What was the reaction of M. de Charlus to the smile given to him by M. de Vaugoubert in response to seeing a particular young diplomat?",
+    "passage_preview": "Colonel de Froberville (the General of that name was his uncle) came and sat down beside us, as did M. de Bréauté, while M. de Vaugoubert, after hovering about us (by an excess of politeness which he maintained even when playing tennis when, by dint of asking leave of the eminent personages present before hitting the ball, he invariably lost the game for his partner) returned to M. de Charlus (until that moment almost concealed by the huge skirt of the Comtesse Molé, whom he professed to admire above all other women), and, as it happened, at the moment when several members of the latest diplom…",
+    "passage_len": 1031,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "charlus",
+        "smile",
+        "vaugoubert",
+        "young"
+      ],
+      "num_shared_tokens": 4
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 7152,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 2",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What social engagement is Albertine prioritizing over spending time with the narrator, despite the narrator's poor health?",
+    "passage_preview": "It was impossible (and indeed she could wait only five minutes longer) because it would annoy the lady who was far from hospitable, highly susceptible and, said Albertine, a perfect nuisance. “But one can easily cut a call.” “No, my aunt has always told me that the chief thing is politeness.” “But I have so often seen you being impolite.” “It’s not the same thing, the lady would be angry with me and would say nasty things about me to my aunt. I’m pretty well in her bad books already. She expects me to go and see her.” “But if she’s at home every day?” Here Albertine, feeling that she was caugh…",
+    "passage_len": 1033,
+    "leakage": {
+      "max_shared_ngram": 0,
+      "shared_content_tokens": [
+        "albertine"
+      ],
+      "num_shared_tokens": 1
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 9436,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 2 — The Verdurins Quarrel with M. De Charlus",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What was the underlying sentiment or message that remained consistent throughout the different musical compositions of Vinteuil, despite their varying styles and structures?",
+    "passage_preview": "And yet these so widely different phrases were composed of the same elements, for just as there was a certain universe, perceptible by us in those fragments scattered here and there, in private houses, in public galleries, which were Elstir’s universe, the universe which he saw, in which he lived, so to the music of Vinteuil extended, note by note, key by key, the unknown colourings of an inestimable, unsuspected universe, made fragmentary by the gaps that occurred between the different occasions of hearing his work performed; those two so dissimilar questions which commanded the so different …",
+    "passage_len": 2735,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "different",
+        "vinteuil"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 9862,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 3 — Flight of Albertine",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What was the French Government's stance regarding the possibility of war with another country if certain conditions were not met?",
+    "passage_preview": "So that the French Government had admitted the hypothesis of an intention to make war upon us if we did not yield. But others thought that it was all a mere “bluff” and that if France had stood firm Germany would not have drawn the sword. No doubt the scenario was not merely different but almost opposite, since the threat of a rupture had not been put forward by",
+    "passage_len": 364,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "french",
+        "government"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 10592,
+    "volume": 6,
+    "book": "The Sweet Cheat Gone",
+    "chapter": "Chapter 1 — Grief and Oblivion",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What motivated Andrée to make a statement about Albertine's personal life to the narrator after she left him?",
+    "passage_preview": "Andrée had never had any carnal relations with Albertine and had never been aware that Albertine had those tastes, this meant that Albertine did not have them, and had never enjoyed with anyone those relations which, rather than with anyone else, she would have enjoyed with Andrée. And so when Andrée had left me, I realised that so definite a statement had brought me peace of mind. But perhaps it had been dictated by a sense of the obligation, which Andrée felt that she owed to the dead girl whose memory still survived in her, not to let me believe what Albertine had doubtless, while she was a…",
+    "passage_len": 625,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "albertine",
+        "andr",
+        "left",
+        "statement"
+      ],
+      "num_shared_tokens": 4
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 7566,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 2",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What person's departure from the world is being discussed by the characters in this scene?",
+    "passage_preview": "Besides, M. Verdurin is right, what is the use of lamentations,” he went on, for, being capable of assimilating forms of speech and the ideas which they suggested to him, but having no finer perception, he had admired in M. Verdurin’s remarks the most courageous stoicism. “All the same, it is a great talent that has gone from the world.” “What, are you still talking about Dechambre,” said M. Verdurin, who had gone on ahead of us, and, seeing that we were not following him, had turned back. “Listen,” he said to Brichot, “nothing is gained by exaggeration.",
+    "passage_len": 560,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "world"
+      ],
+      "num_shared_tokens": 1
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 10786,
+    "volume": 6,
+    "book": "The Sweet Cheat Gone",
+    "chapter": "Chapter 2 — Mademoiselle De Forcheville",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What was the speaker's reaction to the idea of someone having a romantic connection with a person they once loved?",
+    "passage_preview": "Albertine’s memory, I was happier at having Andrée in my company than I would have been at having an Albertine miraculously restored to life. For Andrée could tell me more things about Albertine than Albertine herself had ever told me. Now the problems concerning Albertine still remained in my mind when my affection for her, both physical and moral, had already vanished. And my desire to know about her life, because it had diminished less, was now relatively greater than my need of her presence. On the other hand, the thought that a woman had perhaps had relations with Albertine no longer prov…",
+    "passage_len": 682,
+    "leakage": {
+      "max_shared_ngram": 0,
+      "shared_content_tokens": [],
+      "num_shared_tokens": 0
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 4654,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Première partie",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What did the narrator imagine his mistress's life might be like when she was with other people who seemed to know her very well?",
+    "passage_preview": "He did not know them, or their names even, and seeing that they appeared to be extremely intimate with his mistress he could not help wondering whether she too might not once have had, had not still perhaps her place in a life of which he had never dreamed, utterly different from the life she led with him, a life in which one had women for a louis apiece, whereas he was giving more than a hundred thousand francs a year to Rachel. He caught only a fleeting glimpse of that life, but saw also in the thick of it a Rachel other than her whom he knew, a Rachel like the two little “tarts” in the trai…",
+    "passage_len": 625,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "know",
+        "life",
+        "like",
+        "mistress"
+      ],
+      "num_shared_tokens": 4
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 12321,
+    "volume": 7,
+    "book": "Time Regained",
+    "chapter": "Chapter 3 — An Afternoon Party at the House of the Princesse de Guermantes",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What physical change had the man undergone that made him unrecognizable to the narrator, despite knowing his name?",
+    "passage_preview": "In this\ncase as in others, as soon as names were supplied to faces I\ncould not recognise, the spell was broken and I knew them. All\nthe same, there was a man there I could not recognise even when I\nwas supplied with his name and I believed it must be a homonym\nfor he bore no sort of likeness to the one I had formerly known\nand come across afterwards. It was the same man, after all, only\ngreyer and fatter but he had removed his moustache and with it,\nhis personality. It was indeed Rachel, now a celebrated actress,\nwho was to recite verses of Musset and La Fontaine during the\nreception, with who…",
+    "passage_len": 601,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "name"
+      ],
+      "num_shared_tokens": 1
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 11122,
+    "volume": 6,
+    "book": "The Sweet Cheat Gone",
+    "chapter": "Chapter 4 — A Fresh Light Upon Robert De Saint-Loup",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What was the speaker's immediate response to Gilberte when she expressed a sentiment that made him feel special to her?",
+    "passage_preview": "Gilberte then uttered, perhaps simply out of the politeness of a hostess who is sorry that you are going away so soon and would have liked to show you more of a country which you seem to appreciate, a speech of the sort in which her practice as a woman of the world skilled in putting to the best advantage silence, simplicity, sobriety in the expression of her feelings, makes you believe that you occupy a place in her life which no one else could fill. Showering abruptly over her the sentiment with which I was filled by the delicious air, the breeze that was wafted to my nostrils, I said to her…",
+    "passage_len": 719,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "gilberte",
+        "sentiment"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 5783,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Troisième partie",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What criteria did the Guermantes family use to determine whether to consider someone charming or intelligent?",
+    "passage_preview": "When she said of a woman: “It appears, she’s quite charming!” or of a man that he was the “cleverest person in the world,” she imagined herself to have no other reason for consenting to receive them than this charm or cleverness, the familiar spirit not interposing itself at this last moment; more deeply-rooted, stationed at the obscure entry of the region in which the Guermantes exercised their judgment, this vigilant spirit precluded them from finding the man clever or the woman charming if they had no social value, actual or potential. The man was pronounced learned, but like a dictionary, …",
+    "passage_len": 935,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "charming",
+        "guermantes"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 8299,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 3",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What was the narrator's response when someone expressed disappointment that they had not seen him perform a particular task at a meal?",
+    "passage_preview": "When he heard of it, he was distressed: “What, you didn’t see me carving the turkey-poults myself?” I replied that having failed, so far, to see Rome, Venice, Siena, the Prado, the Dresden gallery, the Indies, Sarah in *Phèdre*, I had learned to resign myself, and that I would add his carving of turkey-poults to my list. The comparison with the dramatic art (Sarah in *Phèdre*) was the only one that he seemed to understand, for he had already been told by me that on days of gala performances the elder Coquelin had accepted a beginner’s parts, even that of a character who says but a single line …",
+    "passage_len": 664,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [],
+      "num_shared_tokens": 0
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 9679,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 2 — The Verdurins Quarrel with M. De Charlus",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What honor or award does Charlus mention that Morel will soon be able to display?",
+    "passage_preview": "Charlus when he saw that Morel was in the room, advancing upon him with the alacrity of the man who has skillfully organised a whole evening’s entertainment with a view to an assignation with a woman, and in his excitement never imagines that he has with his own hands set the snare in which he will presently be caught and publicly thrashed by bravoes stationed in readiness by her husband. “Well, after all it is none too soon; are you satisfied, young glory, and presently young knight of the Legion of Honour? For very soon you will be able to sport your Cross,” M. de Charlus said to Morel with …",
+    "passage_len": 684,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "able",
+        "charlus",
+        "mention",
+        "morel",
+        "soon"
+      ],
+      "num_shared_tokens": 5
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 7710,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 2",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What effect did M Verdurin's comment about a particular piece have on Saniette?",
+    "passage_preview": "Mme. Verdurin could not contain herself. “Yes, indeed!” she cried with a titter. “You may be quite sure that nobody would ever have guessed that you meant the *Chercheuse d’Esprit*.” M. Verdurin went on in a gentler tone, addressing both Saniette and Brichot: “It is quite a pretty piece, all the same, the *Chercheuse d’Esprit*.” Uttered in a serious tone, this simple phrase, in which one could detect no trace of malice, did Saniette as much good and aroused in him as much gratitude as a deliberate compliment. He was unable to utter a single word and preserved a happy silence.",
+    "passage_len": 582,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "piece",
+        "saniette",
+        "verdurin"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 9597,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 2 — The Verdurins Quarrel with M. De Charlus",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "How did the man respond when someone mentioned the attractiveness of a male to him?",
+    "passage_preview": "“Quote me a single reputation that is undeserved. Mention names. Oh yes, I know the whole story,” was his brutal retort to a timid interruption by Brichot, “the people who tried it once long ago out of curiosity, or out of affection for a dead friend, and the man who, afraid he has gone too far, if you speak to him of the beauty of a man, replies that that is Chinese to him, that he can no more distinguish between a beautiful man and an ugly one than between the engines of two motorcars, mechanics not being in his line.",
+    "passage_len": 525,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [],
+      "num_shared_tokens": 0
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 3299,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Place-Names: The Place",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What was a significant factor that M. Bloch considered when deciding how to treat his uncle?",
+    "passage_preview": "But M. Bloch never stopped insulting his uncle, whether it was that he was excited by the unresisting good-humour of his butt, or that the rent of the villa being paid by M. Nissim Bernard, the beneficiary wished to show that he kept his independence, and, more important still, that he was not seeking by flattery to make sure of the rich inheritance to come. What most hurt the old man was being treated so rudely in front of the manservant.",
+    "passage_len": 443,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "bloch",
+        "uncle"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 7758,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 2",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What did William II achieve for his country that Louis XIV did not?",
+    "passage_preview": "But Louis XIV did not appreciate the Dutch Masters, he had the same fondness for display, and yet he was, when all is said, a great Monarch. Besides, William II has armed his country from the military and naval point of view in a way that Louis XIV failed to do, and I hope that his reign will never know the reverses that darkened the closing days of him who is fatuously styled the Roi Soleil. The Republic made a great mistake, to my mind, in rejecting the overtures of the Hohenzollern, or responding to them only in driblets. He is very well aware of it himself and says, with that gift that he …",
+    "passage_len": 852,
+    "leakage": {
+      "max_shared_ngram": 4,
+      "shared_content_tokens": [
+        "country",
+        "louis",
+        "william"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 5413,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Deuxième partie",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What effect did hearing a certain word have on the narrator when it was spoken by Albertine, despite its normally unpleasant connotation?",
+    "passage_preview": "It was probable that, had things followed their normal course, she would never have learned it, and for my part I should have seen no cause for regret in that, for there is no more horrible word in the language. The mere sound of it makes one’s teeth ache as they do when one has put too large a spoonful of ice in one’s mouth. But coming from Albertine, as she sat there looking so pretty, not even “*mousmé*” could strike me as unpleasant. On the contrary, I felt it to be a revelation, if not of an outward initiation, at any rate of an inward evolution.",
+    "passage_len": 557,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "albertine",
+        "unpleasant",
+        "word"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 9577,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 2 — The Verdurins Quarrel with M. De Charlus",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What action would the narrator have liked to take regarding M. de Charlus's impending troubles?",
+    "passage_preview": "What was more, the sense of justice was so far lacking in me as to amount to an entire want of moral sense. I was in my heart of hearts entirely won over to the side of the weaker party, and of anyone who was in trouble. I had no opinion as to the proportion in which good and evil might be blended in the relations between Morel and M. de Charlus, but the thought of the sufferings that were being prepared for M. de Charlus was intolerable to me. I would have liked to warn him, but did not know how to do it.",
+    "passage_len": 511,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "charlus",
+        "liked"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 3032,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Place-Names: The Place",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What type of things did the narrator feel made the world more beautiful as a result of their encounters during drives through the countryside?",
+    "passage_preview": "To suppose that philosophy could refer to the desire for wealth would be too silly.) At the same time I was inclined to regard this wisdom as incomplete, for I said to myself that these encounters made me find even more beautiful a world which thus caused to grow along all the country roads flowers at once rare and common, fleeting treasures of the day, windfalls of the drive, of which the contingent circumstances that would never, perhaps, recur had alone prevented me from taking advantage, and which gave a new zest to life.",
+    "passage_len": 531,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "beautiful",
+        "encounters",
+        "made",
+        "world"
+      ],
+      "num_shared_tokens": 4
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 536,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Overture",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What image does Legrandin use to describe the places he knows in the area his mother-in-law is staying?",
+    "passage_preview": "“That is not quite what I meant,” interrupted my father, obstinate as a tree and merciless as the sky. “I asked you, in case anything should happen to my mother-in-law and she wanted to feel that she was not all alone down there, at the ends of the earth, whether you knew any of the people.” “There as elsewhere, I know everyone and I know no one,” replied Legrandin, who was by no means ready yet to surrender; “places I know well, people very slightly. But, down there, the places themselves seem to me just like people, rare and wonderful people, of a delicate quality which would have been corru…",
+    "passage_len": 1000,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "legrandin",
+        "mother",
+        "places"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 5673,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Troisième partie",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What was the Duke's attitude towards his other guests compared to his attitude towards the narrator?",
+    "passage_preview": "One pretended not to know that the body of one’s hostess was at the disposal of all comers, provided that her visiting list showed no gaps. As the Duke put himself out not at all for his other guests (of whom he had long known everything that there was to know, and they of him) but quite markedly for me, whose kind of superiority, being outside his experience, inspired in him something akin to the respect which the great noblemen of the court of Louis XIV used to feel for his plebeian Ministers, he evidently considered that the fact of my not knowing his other guests mattered not at all⁠—to me…",
+    "passage_len": 788,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "duke",
+        "guests"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 5500,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Deuxième partie",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What was the Duchess's reaction when she was told that someone had apparently failed to catch the speaker's name, supposedly referring to her brother-in-law?",
+    "passage_preview": "Why are you so offensive?” only everyone seemed to have tacitly agreed that it was all right. And one took one’s place in the circle which applauded his outbursts. But certainly, at certain moments, a stranger might have thought that he was listening to the ravings of a maniac. “But are you sure you’re not thinking of someone else? Do you really mean my brother-in-law Palamède?” went on the Duchess, a trace of impertinence grafted upon her natural simplicity. I replied that I was absolutely sure, and that M. de Charlus must have failed to catch my name.",
+    "passage_len": 559,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "brother",
+        "catch",
+        "duchess",
+        "failed",
+        "name",
+        "someone"
+      ],
+      "num_shared_tokens": 6
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 12450,
+    "volume": 7,
+    "book": "Time Regained",
+    "chapter": "Chapter 3 — An Afternoon Party at the House of the Princesse de Guermantes",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What change occurred in her opinion of Ingres as she grew older?",
+    "passage_preview": "Guermantes declared\nthat she had always detested Empire style; that meant, she\ndetested it now, which was true, because she followed the\nfashions though not closely. Without complicating the matter by\nalluding to David of whose work she knew something, when she was\na girl she considered Ingres the most boring of draughtsmen, then\nsuddenly the most beguiling of new masters, so much so that she\ndetested Delacroix. By what process she had returned to this\ncreed of reprobation matters little, since such shades of taste\nare reflected by art-critics ten years before these superior\nwomen talk about t…",
+    "passage_len": 604,
+    "leakage": {
+      "max_shared_ngram": 0,
+      "shared_content_tokens": [
+        "ingres"
+      ],
+      "num_shared_tokens": 1
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 10707,
+    "volume": 6,
+    "book": "The Sweet Cheat Gone",
+    "chapter": "Chapter 2 — Mademoiselle De Forcheville",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "How did the Duchess's feelings towards someone change after that person had passed away?",
+    "passage_preview": "No doubt⁠—for in every grade of society a worldly and frivolous life paralyses our sensibility and robs us of the power to resuscitate the dead⁠—the Duchess was one of those people who require a personal presence⁠—that presence which, like a true Guermantes, she excelled in protracting⁠—in order to love truly, but also, and this is less common, in order to hate a little. So that often her friendly feeling for people, suspended during their lifetime by the irritation that some action or other on their part caused her, revived after their death. She then felt almost a longing to make reparation,…",
+    "passage_len": 804,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "duchess"
+      ],
+      "num_shared_tokens": 1
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 5208,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Deuxième partie",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What activity does the doctor want the narrator's grandmother to do that she has trouble doing according to her own statement?",
+    "passage_preview": "“You see, Madame, I didn’t know that, and yet I could have told you.” “But, Sir, I am not in the least like her; on the contrary, my doctor complains that he cannot get me to stay in bed,” said my grandmother, whether because she was a little annoyed by the doctor’s theories, or was anxious to submit to him any objections that might be raised to them, in the hope that he would refute these and that, after he had gone, she would no longer find any doubt lurking in her own mind as to the accuracy of his encouraging diagnosis.",
+    "passage_len": 529,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "doctor",
+        "grandmother"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 4009,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Seascape, with Frieze of Girls",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What benefit does the approach of demystifying things that initially seem beautiful and mysterious bring to one's life and eventual death?",
+    "passage_preview": "And it is, after all, as good a way as any of solving the problem of existence to approach near enough to the things that have appeared to us from a distance to be beautiful and mysterious, to be able to satisfy ourselves that they have neither mystery nor beauty. It is one of the systems of hygiene among which we are at liberty to choose our own, a system which is perhaps not to be recommended too strongly, but it gives us a certain tranquillity with which to spend what remains of life, and also⁠—since it enables us to regret nothing, by assuring us that we have attained to the best, and that…",
+    "passage_len": 681,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "approach",
+        "beautiful",
+        "death",
+        "life",
+        "mysterious",
+        "things"
+      ],
+      "num_shared_tokens": 6
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 3999,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Seascape, with Frieze of Girls",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What happened to the appearance of her skin when happiness was particularly evident on her face?",
+    "passage_preview": "At other times happiness bathed her cheeks with a clarity so mobile that the skin, grown fluid and vague, gave passage to a sort of stealthy and subcutaneous gaze, which made it appear to be of another colour but not of another substance than her eyes; sometimes, instinctively, when one looked at her face punctuated with tiny brown marks among which floated what were simply two larger,",
+    "passage_len": 388,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "face",
+        "happiness",
+        "skin"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 2081,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Madame Swann at Home",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What kind of society was typically unwelcoming to Republicans during the narrator's early childhood?",
+    "passage_preview": "Mme. Swann had, however, met with no success outside what was called the “official world.” Smart women did not go to her house. It was not the presence there of Republican “notables” that frightened them away. In the days of my early childhood, conservative society was to the last degree worldly, and no “good” house would ever have opened its doors to a Republican.",
+    "passage_len": 367,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "childhood",
+        "early",
+        "society"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 9162,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 1 — Life with Albertine",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What unusual way does Bergotte justify to himself the large amount of money he spends on women?",
+    "passage_preview": "Bergotte said to himself: “I am spending more than a multimillionaire would spend upon girls, but the pleasures or disappointments that they give me make me write a book which brings me money.” Economically, this argument was absurd, but no doubt he found some charm in thus transmuting gold into caresses and caresses into gold. We saw, at the time of my grandmother’s death, how a weary old age loves repose. Now in society, there is nothing but conversation. It may be stupid, but it has the faculty of suppressing women who are nothing more than questions and answers.",
+    "passage_len": 572,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "bergotte",
+        "himself",
+        "money",
+        "women"
+      ],
+      "num_shared_tokens": 4
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 8725,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 1 — Life with Albertine",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What activity could the narrator have done for hours, similar to how they felt about listening to a particular person's breathing?",
+    "passage_preview": "I had not to answer her as when we were engaged in conversation, and even if I could have remained silent, as for that matter I did when it was she that was talking, still while listening to her voice I did not penetrate so far into herself. As I continued to hear, to gather from moment to moment the murmur, soothing as a barely perceptible breeze, of her breath, it was a whole physiological existence that was spread out before me, for me; as I used to remain for hours lying on the beach, in the moonlight, so long could I have remained there gazing at her, listening to her.",
+    "passage_len": 580,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "hours",
+        "listening"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 148,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Overture",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What article of clothing did the narrator's father wear on his head due to his health issue?",
+    "passage_preview": "Françoise to make up the big one for you, and stay beside him for the rest of the night. I’m off to bed, anyhow; I’m not nervous like you. Good night.” It was impossible for me to thank my father; what he called my sentimentality would have exasperated him. I stood there, not daring to move; he was still confronting us, an immense figure in his white nightshirt, crowned with the pink and violet scarf of Indian cashmere in which, since he had begun to suffer from neuralgia, he used to tie up his head, standing like Abraham in the engraving after Benozzo Gozzoli which M. Swann had given me, tell…",
+    "passage_len": 653,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "father",
+        "head"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 1811,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Madame Swann at Home",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What happened to the speaker's perception of the actress's performance when the audience started applauding?",
+    "passage_preview": "when reading the play at home, I had contrived to imagine; but she did not attain to the heights which Œnone or Aricie would naturally have reached, she planed down into a uniform flow of melody the whole of a passage in which there were mingled together contradictions so striking that the least intelligent of tragic actresses, even the pupils of an academy could not have missed their effect; besides which, she ran through the speech so rapidly that it was only when she had come to the last line that my mind became aware of the deliberate monotony which she had imposed on it throughout. Then, …",
+    "passage_len": 697,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "audience"
+      ],
+      "num_shared_tokens": 1
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 5474,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Deuxième partie",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What actions can sometimes be more helpful in winning someone's heart than trying to impress them with one's appearance or charming behavior?",
+    "passage_preview": "So long as I was in love with Mme. de Guermantes, the marks of politeness that I received from others, their compliments actually distressed me, not only because they did not come from her but because she would never hear of them. And yet even if she had known of them it would not have been of the slightest use to me. Indeed, among the lesser auxiliaries to success in love, an absence, the declining of an invitation to dinner, an unintentional, unconscious harshness are of more service than all the cosmetics and fine clothes in the world. There would be plenty of social success, were people ta…",
+    "passage_len": 644,
+    "leakage": {
+      "max_shared_ngram": 0,
+      "shared_content_tokens": [],
+      "num_shared_tokens": 0
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 9478,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 2 — The Verdurins Quarrel with M. De Charlus",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What two words written below an invitation seemed unrelated to the message above it?",
+    "passage_preview": "Above the questionably authentic name of ‘Montmorency’ was the following kind invitation: ‘My dear cousin, will you please remember me next Friday at half-past nine.’ Beneath were written two less gratifying words: ‘Czech Quartet.’ These seemed to me incomprehensible, and in any case to have no more connection with the sentence above than the words ‘My dear ⸻,’ which you find on the back of a letter, with nothing else after them, when the writer has already begun again on the other side, and has not taken a fresh sheet, either from carelessness or in order to save paper.",
+    "passage_len": 577,
+    "leakage": {
+      "max_shared_ngram": 0,
+      "shared_content_tokens": [
+        "invitation",
+        "seemed",
+        "words",
+        "written"
+      ],
+      "num_shared_tokens": 4
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 1406,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Swann in Love",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What action does the man take with the glass of his monocle after it falls from his eye?",
+    "passage_preview": "And then, his anguish becoming too keen, he passed his hand over his forehead, let the monocle drop from his eye, and wiped its glass. And doubtless, if he had caught sight of himself at that moment, he would have added to the collection of the monocles which he had already identified, this one which he removed, like an importunate, worrying thought, from his head, while from its misty surface, with his handkerchief, he sought to obliterate his cares.",
+    "passage_len": 455,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "glass",
+        "monocle"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 4805,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Deuxième partie",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What is Mme. de Villeparisis going to show to the historian of the Fronde?",
+    "passage_preview": "“I understand, sir, that you are thinkin’ of writin’ somethin’ about Mme. la Duchesse de Montmorency,” said Mme. de Villeparisis to the historian of the Fronde in that grudging tone which she allowed, quite unconsciously, to spoil the effect of her great and genuine kindness, a tone due to the shrivelling crossness, the sense of grievance that is a physiological accompaniment of age, as well as to the affectation of imitating the almost rustic speech of the old nobility: “I’m goin’ to let you see her portrait, the original of the copy they have in the Louvre.”",
+    "passage_len": 566,
+    "leakage": {
+      "max_shared_ngram": 6,
+      "shared_content_tokens": [
+        "fronde",
+        "historian",
+        "villeparisis"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 4908,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Deuxième partie",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What unusual method did a doctor from Brazil claim could cure the narrator's choking fits?",
+    "passage_preview": "Suddenly I remembered having seen the same expression in the eyes of a Brazilian doctor who claimed to be able to cure choking fits of the kind from which I suffered by some absurd inhalation of the essential oils of plants. When, in the hope that he would pay more attention to my case, I had told him that I knew Professor Cottard, he had replied, as though speaking in Cottard’s interest: “Now this treatment of mine, if you were to tell him about it, would give him the material for a most sensational paper for the Academy of Medicine!” He had not ventured to press the matter but had stood gazi…",
+    "passage_len": 751,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "choking",
+        "cure",
+        "doctor",
+        "fits"
+      ],
+      "num_shared_tokens": 4
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 596,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Overture",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What was happening to the narrator's hair and hat as they said goodbye to the hawthorns on the hillside?",
+    "passage_preview": "On the morning of our departure I had had my hair curled, to be ready to face the photographer, had had a new hat carefully set upon my head, and had been buttoned into a velvet jacket; a little later my mother, after searching everywhere for me, found me standing in tears on that steep little hillside close to Tansonville, bidding a long farewell to my hawthorns, clasping their sharp branches to my bosom, and (like a princess in a tragedy, oppressed by the weight of all her senseless jewellery) with no gratitude towards the officious hand which had, in curling those ringlets, been at pains to…",
+    "passage_len": 731,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "hair",
+        "hawthorns",
+        "hillside"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 3861,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Seascape, with Frieze of Girls",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What secret message did Albertine write and pass to the narrator?",
+    "passage_preview": "Now and then a pretty attention from one or another of them would stir in me vibrations which dissipated for a time my desire for the rest. Thus one day Albertine had suddenly asked: “Who has a pencil?” Andrée had provided one, Rosemonde the paper; Albertine had warned them: “Now, young ladies, you are not to look at what I write.” After carefully tracing each letter, supporting the paper on her knee, she had passed it to me with: “Take care no one sees.” Whereupon I had unfolded it and read her message, which was: “I love you.”",
+    "passage_len": 534,
+    "leakage": {
+      "max_shared_ngram": 0,
+      "shared_content_tokens": [
+        "albertine",
+        "message",
+        "write"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 10537,
+    "volume": 6,
+    "book": "The Sweet Cheat Gone",
+    "chapter": "Chapter 1 — Grief and Oblivion",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What happens to the speaker's perception of Albertine's guilt as the idea becomes more familiar to them?",
+    "passage_preview": "Moreover, between now and then, as in the course of an attack launched from both flanks at once, in this action by habit two allies would mutually lend a hand. It was because this idea of Albertine’s guilt would become for me an idea more probable, more habitual, that it would become less painful. But on the other hand, because it would be less painful, the objections raised to my certainty of her guilt, which were inspired in my mind only by my desire not to suffer too acutely, would collapse one by one, and as each action precipitates the next, I should pass quickly enough from the certainty…",
+    "passage_len": 656,
+    "leakage": {
+      "max_shared_ngram": 4,
+      "shared_content_tokens": [
+        "albertine",
+        "guilt",
+        "idea"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 1200,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Swann in Love",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What did Swann compare leaving Odette to go out alone in Paris to, in terms of the risk of loss or theft?",
+    "passage_preview": "And he did not have (as I had, afterwards, at Combray in my childhood) happy days in which to forget the sufferings that would return with the night. For his days, Swann must pass them without Odette; and as he told himself, now and then, to allow so pretty a woman to go out by herself in Paris was just as rash as to leave a case filled with jewels in the middle of the street. In this mood he would scowl furiously at the passersby, as though they were so many pickpockets.",
+    "passage_len": 476,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "odette",
+        "paris",
+        "swann"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 297,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Overture",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What activity did the narrator eagerly perform at the start of each day to learn about upcoming theatrical performances?",
+    "passage_preview": "Every morning I would hasten to the Moriss column to see what new plays it announced. Nothing could be more disinterested or happier than the dreams with which these announcements filled my mind, dreams which took their form from the inevitable associations of the words forming the title of the play, and also from the colour of the bills, still damp and wrinkled with paste, on which those words stood out.",
+    "passage_len": 408,
+    "leakage": {
+      "max_shared_ngram": 0,
+      "shared_content_tokens": [],
+      "num_shared_tokens": 0
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 3069,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Place-Names: The Place",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What is the attitude of the hotel staff towards the narrator upon their late arrival, now that they have become familiar with them?",
+    "passage_preview": "We had now come in sight of the hotel, with its lights, so hostile that first evening, on our arrival, now protecting and kind, speaking to us of home. And when the carriage drew up outside the door, the porter, the pages, the lift-boy, attentive, clumsy, vaguely uneasy at our lateness, were numbered, now that they had grown familiar, among those beings who change so many times in the course of our life, as we ourself change, but by whom, when they are for the time being the mirror of our habits, we find something attractive in the feeling that we are being faithfully reflected and in a friend…",
+    "passage_len": 720,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "arrival",
+        "familiar",
+        "hotel"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 3747,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Seascape, with Frieze of Girls",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What unusual article of clothing do young girls wear to play a particular outdoor sport, according to the narrator?",
+    "passage_preview": "There may be something in that, of course. If little white rabbits are what appeals to you, they may supply a long-felt want. It seems, there must be some attraction, because one of them has got engaged already to the Marquis de Saint-Loup. Which is a cruel blow to the younger one, who is madly in love with that young man. I’m sure, the way they speak to you with their lips shut is quite enough for me. And then they dress in the most absurd way. Fancy going to play golf in silk frocks! At their age, they dress more showily than grown-up women who really know about clothes. Look at Mme.",
+    "passage_len": 592,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "play",
+        "young"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 4074,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Première partie",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What privileges and small pleasures did Françoise have in her daily life while living with the family?",
+    "passage_preview": "These “you” who might have had more horses than the Guermantes were ourselves, but Jupien was right in saying “you” since, except for a few purely personal gratifications, such as, when she coughed all day long without ceasing and everyone in the house was afraid of catching her cold, that of pretending, with an irritating little titter, that she had not got a cold, like those plants that an animal to which they are wholly attached keeps alive with food which it catches, eats and digests for them and of which it offers them the ultimate and easily assimilable residue, Françoise lived with us i…",
+    "passage_len": 1193,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "fran",
+        "living",
+        "oise"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 7950,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 3",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What was the gardener's son doing as the car arrived at the destination?",
+    "passage_preview": "Coming to the foot of the cliff road, the car took it in its stride, with a continuous sound like that of a knife being ground, while the sea falling away grew broader beneath us. The old rustic houses of Montsurvent ran towards us, clasping to their bosoms vine or rosebush; the firs of la Raspelière, more agitated than when the evening breeze was rising, ran in every direction to escape from us and a new servant whom I had never seen before came to open the door for us on the terrace, while the gardener’s son, betraying a precocious bent, devoured the machine with his gaze. As it was not a Mo…",
+    "passage_len": 648,
+    "leakage": {
+      "max_shared_ngram": 4,
+      "shared_content_tokens": [
+        "gardener"
+      ],
+      "num_shared_tokens": 1
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 569,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Overture",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What action did the narrator take in an attempt to better focus on the hawthorns, but which ultimately proved unsuccessful?",
+    "passage_preview": "And then I returned to my hawthorns, and stood before them as one stands before those masterpieces of painting which, one imagines, one will be better able to “take in” when one has looked away, for a moment, at something else; but in vain did I shape my fingers into a frame, so as to have nothing but the hawthorns before my eyes; the sentiment which they aroused in me remained obscure and vague, struggling and failing to free itself, to float across and become one with the flowers. They themselves offered me no enlightenment, and I could not call upon any other flowers to satisfy this mysteri…",
+    "passage_len": 612,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "better",
+        "hawthorns",
+        "take"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 1150,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Swann in Love",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What information did Swann unexpectedly learn from the envelope Odette gave him, which reignited his feelings of unease about her activities?",
+    "passage_preview": "For a time Swann stood still there, heartbroken, bewildered, and yet happy; gazing at this envelope which Odette had handed to him without a scruple, so absolute was her trust in his honour; through its transparent window there had been disclosed to him, with the secret history of an incident which he had despaired of ever being able to learn, a fragment of the life of Odette, seen as through a narrow, luminous incision, cut into its surface without her knowledge. Then his jealousy rejoiced at the discovery, as though that jealousy had had an independent existence, fiercely egotistical, glutto…",
+    "passage_len": 1388,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "envelope",
+        "learn",
+        "odette",
+        "swann"
+      ],
+      "num_shared_tokens": 4
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 669,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Overture",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What action did Mlle. Vinteuil take at the window after appearing weary and preoccupied?",
+    "passage_preview": "I heard no more, for Mlle. Vinteuil, who now seemed weary, awkward, preoccupied, sincere, and rather sad, came back to the window and drew the shutters close; but I knew now what was the reward that M. Vinteuil, in return for all the suffering that he had endured in his lifetime, on account of his daughter, had received from her after his death. And yet I have since reflected that if M.",
+    "passage_len": 389,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "mlle",
+        "preoccupied",
+        "vinteuil",
+        "weary",
+        "window"
+      ],
+      "num_shared_tokens": 5
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 8161,
+    "volume": 4,
+    "book": "Cities of the Plain",
+    "chapter": "Chapter 3",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What condition allowed M. de Charlus to freely discuss certain topics with his audience?",
+    "passage_preview": "With the same freedom, always between Saint-Martin du Châne and Doncières-Ouest⁠—or conversely on the return journey⁠—M. de Charlus would readily speak of men who had, it appeared, very strange morals, and would even add: “After all, I say strange, I don’t know why, for there’s nothing so very strange about that,” to prove to himself how thoroughly he was at his ease with his audience. And so indeed he was, provided that it was he who retained the initiative, and that he knew his gallery to be mute and smiling, disarmed by credulity or good manners.",
+    "passage_len": 555,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "audience",
+        "charlus"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 2627,
+    "volume": 2,
+    "book": "Within a Budding Grove",
+    "chapter": "Madame Swann at Home",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What mode of transportation does the narrator think would allow travelers to experience the journey to Balbec in a more authentic way?",
+    "passage_preview": "At Balbec, a strange bed, to the side of which a tray was brought in the morning that differed from my Paris breakfast tray, could not, obviously, sustain the fancies upon which my love for Gilberte had fed: there are cases (though not, I admit, commonly) in which, one’s days being paralysed by a sedentary life, the best way to save time is to change one’s place of residence. My journey to Balbec was like the first outing of a convalescent who needed only that to convince him that he was cured. The journey was one that would now be made, probably, in a motorcar, which would be supposed to rend…",
+    "passage_len": 7995,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "balbec",
+        "journey",
+        "think"
+      ],
+      "num_shared_tokens": 3
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 9112,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 1 — Life with Albertine",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What happens to a person's appeal when their perceived status or identity is revealed to be false?",
+    "passage_preview": "We know that the little ray which colours them or the diamond dust that makes them sparkle is all that we can see of a mind, a will, a memory in which is contained the home life that we do not know, the intimate friends whom we envy. The enterprise of taking possession of all this, which is so difficult, so stubborn, is what gives its value to the gaze far more than its merely physical beauty (which may serve to explain why the same young man can awaken a whole romance in the imagination of a woman who has heard somebody say that he is the Prince of Wales, whereas she pays no more attention to…",
+    "passage_len": 944,
+    "leakage": {
+      "max_shared_ngram": 0,
+      "shared_content_tokens": [],
+      "num_shared_tokens": 0
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 1630,
+    "volume": 1,
+    "book": "Swann’s Way",
+    "chapter": "Place-Names: The Name",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What gift did Gilberte give to the narrator after purchasing it and what was the significance of the gift?",
+    "passage_preview": "I should have liked her to be able to buy them, to liberate them all. Still, I pointed out one that had the same colour as her eyes. Gilberte took it, turned it about until it shone with a ray of gold, fondled it, paid its ransom, but at once handed me her captive, saying: “Take it; it is for you, I give it to you, keep it to remind yourself of me.” Another time, being still obsessed by the desire to hear Berma in classic drama, I had asked her whether she had not a copy of a pamphlet in which Bergotte spoke of Racine, and which was now out of print. She had told me to let her know the exact t…",
+    "passage_len": 762,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [
+        "gilberte",
+        "give"
+      ],
+      "num_shared_tokens": 2
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 11616,
+    "volume": 7,
+    "book": "Time Regained",
+    "chapter": "Chapter 2 — M. de Charlus During the War, His Opinions, His Pleasures",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What motivated Maurice to inflict harm on the Baron despite not seeming to take pleasure in it?",
+    "passage_preview": "\"All the same there are good people\namongst the rich. I would have got killed with pleasure for such\na man as that!\" exclaimed Maurice who evidently only managed to\ninflict his ghastly flagellations on the Baron from mechanical\nhabit, ignorance, need of money and preference for making it\nwithout working although, perhaps, it gave him more trouble. And\nas M. de",
+    "passage_len": 362,
+    "leakage": {
+      "max_shared_ngram": 3,
+      "shared_content_tokens": [
+        "baron",
+        "inflict",
+        "maurice",
+        "pleasure"
+      ],
+      "num_shared_tokens": 4
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 8788,
+    "volume": 5,
+    "book": "The Captive",
+    "chapter": "Chapter 1 — Life with Albertine",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What change has occurred in the way the speaker's companion looks at them, and how has this affected their interactions?",
+    "passage_preview": "I should so love to be rude to them.” And now, for some time past, doubtless since she had succeeded in reading my character, no request to me to invite anyone, not a word, never even a sidelong glance from her eyes, which had become objectless and mute, and as revealing, with the vague and vacant expression of the rest of her face, as had been their magnetic swerve before. Now it was impossible for me to reproach her, or to ply her with questions about things which she would have declared to be so petty, so trivial, things that I had stored up in my mind simply for the pleasure of making moun…",
+    "passage_len": 623,
+    "leakage": {
+      "max_shared_ngram": 2,
+      "shared_content_tokens": [],
+      "num_shared_tokens": 0
+    },
+    "review_status": "pending"
+  },
+  {
+    "gold_chunk_id": 5118,
+    "volume": 3,
+    "book": "The Guermantes Way",
+    "chapter": "Deuxième partie",
+    "source": "synthetic",
+    "split": "dev",
+    "question": "What action did the mother consider taking if she had been able to catch up to her son before he left?",
+    "passage_preview": "“Poor boy,” she began, “I am sure I must have hurt him dreadfully. You see, Sir, mothers are such selfish creatures, after all he hasn’t many pleasures, he comes so little to Paris. Oh, dear, if he hadn’t gone already I should have liked to stop him, not to keep him of course, but just to tell him that I’m not vexed with him, that I think he was quite right. Will you excuse me if I go and look over the staircase?” I accompanied her there. “Robert! Robert!” she called. “No; he’s gone; we are too late.”",
+    "passage_len": 506,
+    "leakage": {
+      "max_shared_ngram": 0,
+      "shared_content_tokens": [],
+      "num_shared_tokens": 0
+    },
+    "review_status": "pending"
+  }
+]

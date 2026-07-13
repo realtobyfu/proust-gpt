@@ -1,0 +1,84 @@
+[
+  {
+    "question": "Where does the madeleine scene happen and what exactly triggers the flood of involuntary memory?",
+    "gold_chunk_id": null,
+    "source": "hand",
+    "split": "test",
+    "note": "The famous cake-dipped-in-tea passage; gold should be the moment of recognition, not just any Combray mention."
+  },
+  {
+    "question": "What does the narrator overhear or witness at Montjouvain that shapes his sense of sadism and desecration?",
+    "gold_chunk_id": null,
+    "source": "hand",
+    "split": "test",
+    "note": "Mlle Vinteuil scene."
+  },
+  {
+    "question": "How does the goodnight kiss the narrator waits for as a child become a source of anguish rather than comfort?",
+    "gold_chunk_id": null,
+    "source": "hand",
+    "split": "test"
+  },
+  {
+    "question": "What do the moving steeples seen from a carriage prompt the young narrator to do for the first time?",
+    "gold_chunk_id": null,
+    "source": "hand",
+    "split": "test",
+    "note": "Martinville steeples -> first attempt at writing."
+  },
+  {
+    "question": "What flowers along a hedge does the narrator become almost ecstatically fixated on during his walks?",
+    "gold_chunk_id": null,
+    "source": "hand",
+    "split": "test",
+    "note": "Hawthorns."
+  },
+  {
+    "question": "How does Swann come to realize the woman he obsessively loves was never really his type?",
+    "gold_chunk_id": null,
+    "source": "hand",
+    "split": "test",
+    "note": "Swann/Odette; the closing line of Swann in Love."
+  },
+  {
+    "question": "What musical phrase becomes a private emblem of Swann's love affair?",
+    "gold_chunk_id": null,
+    "source": "hand",
+    "split": "test",
+    "note": "The 'little phrase' of the Vinteuil sonata."
+  },
+  {
+    "question": "How does the narrator's grandmother behave during their walks in a way that worries the family about her health?",
+    "gold_chunk_id": null,
+    "source": "hand",
+    "split": "test"
+  },
+  {
+    "question": "What childhood magic-lantern figures are projected onto the narrator's bedroom walls at night?",
+    "gold_chunk_id": null,
+    "source": "hand",
+    "split": "test",
+    "note": "Golo and Geneviève de Brabant."
+  },
+  {
+    "question": "How does uneven paving underfoot at a grand reception suddenly resurrect Venice for the aging narrator?",
+    "gold_chunk_id": null,
+    "source": "hand",
+    "split": "test",
+    "note": "Guermantes matinee, Time Regained; the paving-stones involuntary memory."
+  },
+  {
+    "question": "What does the narrator feel when he sees how age has disfigured the guests at the final party, like living puppets?",
+    "gold_chunk_id": null,
+    "source": "hand",
+    "split": "test",
+    "note": "'Bal de têtes' in Time Regained."
+  },
+  {
+    "question": "How does the narrator describe the disorientation of waking in the dark, unsure which room or which period of his life he is in?",
+    "gold_chunk_id": null,
+    "source": "hand",
+    "split": "test",
+    "note": "Opening pages, the sleeper's shifting sense of place."
+  }
+]

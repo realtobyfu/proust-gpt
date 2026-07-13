@@ -1,0 +1,26 @@
+[
+  {
+    "label": "baseline",
+    "mode": "rerank",
+    "depth": 10,
+    "candidates": 30,
+    "_note": "Deployed config: proust-index-v3 + embed-v4.0 + rerank-v3.5."
+  },
+  {
+    "label": "embed-english-v3",
+    "mode": "rerank",
+    "depth": 10,
+    "candidates": 30,
+    "index_name": "proust-index-v3-en3",
+    "embed_model": "embed-english-v3.0",
+    "_note": "EMBEDDING-MODEL swap. Gold-compatible ONLY if this index holds the SAME chunks/ids as v3. Build it first: re-run ingest_pinecone.py with COHERE_EMBED_MODEL=embed-english-v3.0 into --index proust-index-v3-en3 (dimension 1024)."
+  },
+  {
+    "label": "chunk-small-v4",
+    "mode": "rerank",
+    "depth": 10,
+    "candidates": 30,
+    "index_name": "proust-index-v4-smallchunks",
+    "_note": "CHUNK-SIZE swap. NOT gold-compatible out of the box: new chunk boundaries -> new index ids -> v3 gold_chunk_id is invalid here. You must re-map gold to the v4 chunks by text overlap (see README) and run against that remapped gold set. Listed to show the shape; do not trust its numbers with v3 gold."
+  }
+]
