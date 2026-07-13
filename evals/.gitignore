@@ -1,6 +1,6 @@
 # Scratch / logs — commit reviewed gold + dated results, not build noise.
 _smoketest*.json
-results/build_gold.log
 results/*.log
+results/review_sheet.txt
 __pycache__/
 .pytest_cache/

@@ -1,0 +1,92 @@
+{
+  "run_at": "2026-07-13T01:38:09",
+  "git_commit": "9848df2",
+  "gold_set": "evals/gold.json",
+  "split": "dev",
+  "depth": 10,
+  "config": {
+    "index": "proust-index-v3",
+    "embed_model": "embed-v4.0",
+    "rerank_model": "rerank-v3.5",
+    "retrieval_candidates": 30
+  },
+  "variants": [
+    {
+      "label": "vector-only",
+      "n": 77,
+      "recall": {
+        "1": 0.6234,
+        "5": 0.7922,
+        "10": 0.8182
+      },
+      "mrr": 0.684,
+      "latency_p50_ms": 305.9,
+      "latency_p95_ms": 378.6,
+      "latency_mean_ms": 335.0,
+      "num_misses": 14
+    },
+    {
+      "label": "rerank (baseline)",
+      "n": 77,
+      "recall": {
+        "1": 0.8052,
+        "5": 0.8961,
+        "10": 0.8961
+      },
+      "mrr": 0.8403,
+      "latency_p50_ms": 520.5,
+      "latency_p95_ms": 637.9,
+      "latency_mean_ms": 537.1,
+      "num_misses": 8
+    },
+    {
+      "label": "rerank-pool50",
+      "n": 77,
+      "recall": {
+        "1": 0.8312,
+        "5": 0.9351,
+        "10": 0.9351
+      },
+      "mrr": 0.8684,
+      "latency_p50_ms": 598.9,
+      "latency_p95_ms": 1043.8,
+      "latency_mean_ms": 658.4,
+      "num_misses": 5
+    }
+  ],
+  "misses": {
+    "vector-only": [
+      "What was the source of light that was shining while the narrator was with Albertine, and which she admired?",
+      "What is the reason Mme Verdurin gives for not socializing with certain high-society women?",
+      "What disturbing thought crossed the narrator's mind when his grandmother was late for dinner?",
+      "What social event is Mme de Guermantes planning to attend that evening where she will see a particular noblewoman?",
+      "What event or events will the narrator have to wait until the next year to experience again in Balbec?",
+      "What activity does the narrator undertake in a particular location with the hope of catching a glimpse of a specific person?",
+      "What action did certain people take after being drawn to the scene by curiosity and encountering the speaker's behavior?",
+      "How did Albertine appear to be feeling despite thanking the narrator for a gift?",
+      "What literary device did M. de Norpois often use to embellish his writing in the magazine?",
+      "What motivated Andrée to make a statement about Albertine's personal life to the narrator after she left him?",
+      "What person's departure from the world is being discussed by the characters in this scene?",
+      "What action would the narrator have liked to take regarding M. de Charlus's impending troubles?",
+      "What secret message did Albertine write and pass to the narrator?",
+      "What unusual article of clothing do young girls wear to play a particular outdoor sport, according to the narrator?"
+    ],
+    "rerank (baseline)": [
+      "What was the source of light that was shining while the narrator was with Albertine, and which she admired?",
+      "What disturbing thought crossed the narrator's mind when his grandmother was late for dinner?",
+      "What social event is Mme de Guermantes planning to attend that evening where she will see a particular noblewoman?",
+      "What event or events will the narrator have to wait until the next year to experience again in Balbec?",
+      "What activity does the narrator undertake in a particular location with the hope of catching a glimpse of a specific person?",
+      "What action did certain people take after being drawn to the scene by curiosity and encountering the speaker's behavior?",
+      "What person's departure from the world is being discussed by the characters in this scene?",
+      "What unusual article of clothing do young girls wear to play a particular outdoor sport, according to the narrator?"
+    ],
+    "rerank-pool50": [
+      "What disturbing thought crossed the narrator's mind when his grandmother was late for dinner?",
+      "What social event is Mme de Guermantes planning to attend that evening where she will see a particular noblewoman?",
+      "What event or events will the narrator have to wait until the next year to experience again in Balbec?",
+      "What activity does the narrator undertake in a particular location with the hope of catching a glimpse of a specific person?",
+      "What action did certain people take after being drawn to the scene by curiosity and encountering the speaker's behavior?"
+    ]
+  }
+}

@@ -5,7 +5,7 @@
     "book": "The Guermantes Way",
     "chapter": "Troisième partie",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "What was one way M. de Guermantes demonstrated his activity to the people who elected him?",
     "passage_preview": "For instance in the days when M. de Guermantes, Prince des Laumes, sat in the Chamber, one used to read now and then in the Paris newspapers, albeit it was intended primarily for the Méséglise division, to show the electors there that they had not given their votes to an inactive or voiceless mandatory: (Monsieur de Guermantes-Bouillon, Prince des Laumes:",
     "passage_len": 357,
@@ -16,7 +16,14 @@
       ],
       "num_shared_tokens": 1
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear reference"
+    }
   },
   {
     "gold_chunk_id": 6056,
@@ -24,7 +31,7 @@
     "book": "The Guermantes Way",
     "chapter": "Troisième partie",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "What artwork did the narrator and the Grand Duchess encounter during their visit to the museum?",
     "passage_preview": "But really, the other day I was with the Grand Duchess in the Louvre and we happened to pass before Manet’s *Olympia*. Nowadays nobody is in the least surprised by it. It looks just like an Ingres! And yet, heaven only knows how many spears I’ve had to break for that picture, which I don’t altogether like but which is unquestionably the work of *somebody*.” “And is the Grand Duchess well?” inquired the Princesse de Parme, to whom the Tsar’s aunt was infinitely more familiar than Manet’s model.",
     "passage_len": 498,
@@ -36,7 +43,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear question"
+    }
   },
   {
     "gold_chunk_id": 10049,
@@ -57,7 +71,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear query"
+    }
   },
   {
     "gold_chunk_id": 4651,
@@ -78,7 +99,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear context"
+    }
   },
   {
     "gold_chunk_id": 3254,
@@ -86,7 +114,7 @@
     "book": "Within a Budding Grove",
     "chapter": "Place-Names: The Place",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "What was Saint-Loup's reaction to his uncle's opinion about two famous playwrights?",
     "passage_preview": "Saint-Loup asked his uncle in a faintly contemptuous tone. “There is more truth in a single tragedy of Racine than in all the dramatic works of Monsieur Victor Hugo,” replied M. de Charlus. “People really are overwhelming,” Saint-Loup murmured in my ear. “Preferring Racine to Victor, you may say what you like, it’s epoch-making!” He was genuinely distressed by his uncle’s words, but the satisfaction of saying “you may say what you like” and, better still, “epoch-making” consoled him.",
     "passage_len": 488,
@@ -99,7 +127,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear context"
+    }
   },
   {
     "gold_chunk_id": 1265,
@@ -122,7 +157,14 @@
       ],
       "num_shared_tokens": 5
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear context"
+    }
   },
   {
     "gold_chunk_id": 7308,
@@ -130,7 +172,7 @@
     "book": "Cities of the Plain",
     "chapter": "Chapter 2",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "What might have changed in her perception of reality if she had been drinking like the narrator?",
     "passage_preview": "You wouldn’t care to go along the cliff, we shan’t be disturbed behind the little wood that keeps the wind off the wooden bungalow that is empty just now?” All the difficulties of life were smoothed away, there was no longer any obstacle to the conjunction of our two bodies. No obstacle for me, at least. For they had not been volatilised for her, who had not been drinking port wine. Had she done so, had the outer world lost some of its reality in her eyes, the long cherished dream that would then have appeared to her to be suddenly realisable might perhaps have been not at all that of falling …",
     "passage_len": 613,
@@ -142,7 +184,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear context"
+    }
   },
   {
     "gold_chunk_id": 8431,
@@ -161,7 +210,14 @@
       ],
       "num_shared_tokens": 1
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear context"
+    }
   },
   {
     "gold_chunk_id": 7845,
@@ -181,7 +237,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear question"
+    }
   },
   {
     "gold_chunk_id": 1500,
@@ -200,7 +263,14 @@
       ],
       "num_shared_tokens": 1
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear context"
+    }
   },
   {
     "gold_chunk_id": 11557,
@@ -222,7 +292,14 @@
       ],
       "num_shared_tokens": 4
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear query"
+    }
   },
   {
     "gold_chunk_id": 7129,
@@ -244,7 +321,14 @@
       ],
       "num_shared_tokens": 4
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear context"
+    }
   },
   {
     "gold_chunk_id": 7444,
@@ -266,7 +350,14 @@
       ],
       "num_shared_tokens": 4
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Meets criteria"
+    }
   },
   {
     "gold_chunk_id": 10698,
@@ -286,7 +377,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "reject",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear context"
+    }
   },
   {
     "gold_chunk_id": 8818,
@@ -294,7 +392,7 @@
     "book": "The Captive",
     "chapter": "Chapter 1 — Life with Albertine",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "What activity or relationship was the narrator uncertain whether Albertine shared with other men besides him?",
     "passage_preview": "Albertine alarmed me further when she said that I was quite right to say, out of regard for her reputation, that I was not her lover, since “for that matter,” she went on, “it’s perfectly true that you aren’t.” I was not her lover perhaps in the full sense of the word, but then, was I to suppose that all the things that we did together she did also with all the other men whose mistress she swore to me that she had never been? The desire to know at all costs what Albertine was thinking, whom she was seeing, with whom she was in love, how strange it was that I should be sacrificing everything to…",
     "passage_len": 727,
@@ -305,7 +403,14 @@
       ],
       "num_shared_tokens": 1
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear query"
+    }
   },
   {
     "gold_chunk_id": 11807,
@@ -327,7 +432,14 @@
       ],
       "num_shared_tokens": 4
     },
-    "review_status": "pending"
+    "review_status": "reject",
+    "triage": {
+      "answerable": false,
+      "specific": true,
+      "leaks": false,
+      "verdict": "reject",
+      "reason": "info not present"
+    }
   },
   {
     "gold_chunk_id": 1951,
@@ -335,7 +447,7 @@
     "book": "Within a Budding Grove",
     "chapter": "Madame Swann at Home",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "What task had my mother initially assigned to Françoise when she started working for the family?",
     "passage_preview": "“Just wait till you see,” said Françoise, filled with contempt for my ignorance, “if rabbits don’t cry every bit as much as chickens. Why, they are far noisier.” She received the compliments of M. de Norpois with the proud simplicity, the joyful and (if but for the moment) intelligent expression of an artist when someone speaks to him of his art. My mother had sent her when she first came to us to several of the big restaurants to see how the cooking there was done.",
     "passage_len": 470,
@@ -348,7 +460,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear task"
+    }
   },
   {
     "gold_chunk_id": 5687,
@@ -368,7 +487,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear values"
+    }
   },
   {
     "gold_chunk_id": 1617,
@@ -388,7 +514,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear context"
+    }
   },
   {
     "gold_chunk_id": 10213,
@@ -409,7 +542,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear query"
+    }
   },
   {
     "gold_chunk_id": 708,
@@ -430,7 +570,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear question"
+    }
   },
   {
     "gold_chunk_id": 11195,
@@ -451,7 +598,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "reject",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear context"
+    }
   },
   {
     "gold_chunk_id": 11937,
@@ -471,7 +625,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "reject",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Meets criteria"
+    }
   },
   {
     "gold_chunk_id": 8297,
@@ -490,7 +651,14 @@
       ],
       "num_shared_tokens": 1
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Meets criteria"
+    }
   },
   {
     "gold_chunk_id": 693,
@@ -510,7 +678,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Valid comparison"
+    }
   },
   {
     "gold_chunk_id": 9050,
@@ -518,7 +693,7 @@
     "book": "The Captive",
     "chapter": "Chapter 1 — Life with Albertine",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "What was the mother's reaction when she heard the narrator speaking the dialect that she was familiar with?",
     "passage_preview": "The mother was greatly put out that I understood their dialect, then delighted to hear me speak it. I am bound to admit that her delight was a mocking delight, for albeit I came in time to pronounce the words more or less as she herself did, she found between our two ways of pronunciation an abyss of difference which gave her infinite joy, and she began to regret that she no longer saw people to whom she had not given a thought for years but who, it appeared, would have rocked with a laughter which it would have done her good to hear, if they could have heard me speaking their dialect so badly…",
     "passage_len": 601,
@@ -532,7 +707,14 @@
       ],
       "num_shared_tokens": 4
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear query"
+    }
   },
   {
     "gold_chunk_id": 2335,
@@ -553,7 +735,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Well-phrased"
+    }
   },
   {
     "gold_chunk_id": 4797,
@@ -574,7 +763,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear relation"
+    }
   },
   {
     "gold_chunk_id": 6181,
@@ -598,7 +794,14 @@
       ],
       "num_shared_tokens": 6
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear query"
+    }
   },
   {
     "gold_chunk_id": 6319,
@@ -618,7 +821,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear event"
+    }
   },
   {
     "gold_chunk_id": 12320,
@@ -626,7 +836,7 @@
     "book": "Time Regained",
     "chapter": "Chapter 3 — An Afternoon Party at the House of the Princesse de Guermantes",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "What was the effect of hearing a particular name on the narrator's ability to identify the horrible old woman?",
     "passage_preview": "Of this I was glad as it prevented her from noticing a\ngroup seated not far from us, the sight of which would not have\nbeen agreeable to her. The Duchesse de Guermantes was engaged in\nan animated conversation with a horrible old woman whom I stared\nat without having the slightest idea who she was. \"How\nextraordinary to see Rachel here,\" Bloch passing at that moment,\nwhispered in my ear. The magic name instantly broke the spell\nwhich had laid the disguise of this unknown and foul old woman\nupon Saint-Loup's mistress and I recognised her at once.",
     "passage_len": 550,
@@ -639,7 +849,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear effect"
+    }
   },
   {
     "gold_chunk_id": 3822,
@@ -662,7 +879,14 @@
       ],
       "num_shared_tokens": 5
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear context"
+    }
   },
   {
     "gold_chunk_id": 10500,
@@ -683,7 +907,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear question"
+    }
   },
   {
     "gold_chunk_id": 8622,
@@ -706,7 +937,14 @@
       ],
       "num_shared_tokens": 5
     },
-    "review_status": "pending"
+    "review_status": "reject",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear question"
+    }
   },
   {
     "gold_chunk_id": 2451,
@@ -728,7 +966,14 @@
       ],
       "num_shared_tokens": 4
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear context"
+    }
   },
   {
     "gold_chunk_id": 9965,
@@ -748,7 +993,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear question"
+    }
   },
   {
     "gold_chunk_id": 1917,
@@ -767,7 +1019,14 @@
       ],
       "num_shared_tokens": 1
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Meets criteria"
+    }
   },
   {
     "gold_chunk_id": 8108,
@@ -790,7 +1049,14 @@
       ],
       "num_shared_tokens": 5
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear question"
+    }
   },
   {
     "gold_chunk_id": 8227,
@@ -811,7 +1077,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear context"
+    }
   },
   {
     "gold_chunk_id": 11590,
@@ -833,7 +1106,14 @@
       ],
       "num_shared_tokens": 4
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear task"
+    }
   },
   {
     "gold_chunk_id": 6581,
@@ -854,7 +1134,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear query"
+    }
   },
   {
     "gold_chunk_id": 2603,
@@ -876,7 +1163,14 @@
       ],
       "num_shared_tokens": 4
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear context"
+    }
   },
   {
     "gold_chunk_id": 5435,
@@ -893,7 +1187,14 @@
       "shared_content_tokens": [],
       "num_shared_tokens": 0
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear query"
+    }
   },
   {
     "gold_chunk_id": 3354,
@@ -914,7 +1215,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Meets criteria"
+    }
   },
   {
     "gold_chunk_id": 2046,
@@ -934,7 +1242,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Meets criteria"
+    }
   },
   {
     "gold_chunk_id": 7896,
@@ -953,7 +1268,14 @@
       ],
       "num_shared_tokens": 1
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear comparison"
+    }
   },
   {
     "gold_chunk_id": 8596,
@@ -972,7 +1294,14 @@
       ],
       "num_shared_tokens": 1
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear context"
+    }
   },
   {
     "gold_chunk_id": 9899,
@@ -991,7 +1320,14 @@
       ],
       "num_shared_tokens": 1
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear emotional state"
+    }
   },
   {
     "gold_chunk_id": 7731,
@@ -999,7 +1335,7 @@
     "book": "Cities of the Plain",
     "chapter": "Chapter 2",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "What was Mme Verdurin's opinion of Elstir's behavior when he spent time with certain women?",
     "passage_preview": "Verdurin, “even at the time when he had talent, for he had it, the wretch, and to spare, what was tiresome about him was that he had not a spark of intelligence.” Mme. Verdurin, in passing this judgment upon Elstir, had not waited for their quarrel, or until she had ceased to care for his painting. The fact was that, even at the time when he formed part of the little group, it would happen that Elstir spent the whole day in the company of some woman whom, rightly or wrongly, Mme. Verdurin considered a goose, which, in her opinion, was not the conduct of an intelligent man. “No,” she observed w…",
     "passage_len": 682,
@@ -1014,7 +1350,14 @@
       ],
       "num_shared_tokens": 5
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear opinion stated"
+    }
   },
   {
     "gold_chunk_id": 4714,
@@ -1036,7 +1379,14 @@
       ],
       "num_shared_tokens": 4
     },
-    "review_status": "pending"
+    "review_status": "reject",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear query"
+    }
   },
   {
     "gold_chunk_id": 4772,
@@ -1057,7 +1407,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear reference"
+    }
   },
   {
     "gold_chunk_id": 1910,
@@ -1076,7 +1433,14 @@
       ],
       "num_shared_tokens": 1
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear context"
+    }
   },
   {
     "gold_chunk_id": 9394,
@@ -1096,7 +1460,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear concern"
+    }
   },
   {
     "gold_chunk_id": 3104,
@@ -1117,7 +1488,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Meets criteria"
+    }
   },
   {
     "gold_chunk_id": 6117,
@@ -1138,7 +1516,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "reject",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Unique event"
+    }
   },
   {
     "gold_chunk_id": 1202,
@@ -1161,7 +1546,14 @@
       ],
       "num_shared_tokens": 5
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "accurate summary"
+    }
   },
   {
     "gold_chunk_id": 1472,
@@ -1181,7 +1573,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear context"
+    }
   },
   {
     "gold_chunk_id": 7049,
@@ -1202,7 +1601,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "reject",
+    "triage": {
+      "answerable": false,
+      "specific": true,
+      "leaks": false,
+      "verdict": "reject",
+      "reason": "out of scope"
+    }
   },
   {
     "gold_chunk_id": 1858,
@@ -1221,7 +1627,14 @@
       ],
       "num_shared_tokens": 1
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear question"
+    }
   },
   {
     "gold_chunk_id": 10784,
@@ -1240,7 +1653,14 @@
       ],
       "num_shared_tokens": 1
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear concern"
+    }
   },
   {
     "gold_chunk_id": 12253,
@@ -1261,7 +1681,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "reject",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear query"
+    }
   },
   {
     "gold_chunk_id": 661,
@@ -1269,7 +1696,7 @@
     "book": "Swann’s Way",
     "chapter": "Overture",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "What activity is Mlle Vinteuil concerned will be observed by others?",
     "passage_preview": "“But it’s too dreadful! People will see us,” Mlle. Vinteuil answered. And then she guessed, probably, that her friend would think that she had uttered these words simply in order to provoke a reply in certain other words, which she seemed, indeed, to wish to hear spoken, but, from prudence, would let her friend be the first to speak. And so, although I could not see her face clearly enough, I am sure that the expression must have appeared on it which my grandmother had once found so delightful, when she hastily went on: “When I say ‘see us’ I mean, of course, see us reading. It’s so dreadful t…",
     "passage_len": 682,
@@ -1281,7 +1708,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear activity"
+    }
   },
   {
     "gold_chunk_id": 7527,
@@ -1302,7 +1736,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear action stated"
+    }
   },
   {
     "gold_chunk_id": 6646,
@@ -1324,7 +1765,14 @@
       ],
       "num_shared_tokens": 4
     },
-    "review_status": "pending"
+    "review_status": "reject",
+    "triage": {
+      "answerable": false,
+      "specific": true,
+      "leaks": false,
+      "verdict": "reject",
+      "reason": "Not in passage"
+    }
   },
   {
     "gold_chunk_id": 7152,
@@ -1343,7 +1791,14 @@
       ],
       "num_shared_tokens": 1
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear context"
+    }
   },
   {
     "gold_chunk_id": 9436,
@@ -1363,7 +1818,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "reject",
+    "triage": {
+      "answerable": false,
+      "specific": true,
+      "leaks": false,
+      "verdict": "reject",
+      "reason": "Not in passage"
+    }
   },
   {
     "gold_chunk_id": 9862,
@@ -1383,7 +1845,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear question"
+    }
   },
   {
     "gold_chunk_id": 10592,
@@ -1405,7 +1874,14 @@
       ],
       "num_shared_tokens": 4
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear motivation"
+    }
   },
   {
     "gold_chunk_id": 7566,
@@ -1424,7 +1900,14 @@
       ],
       "num_shared_tokens": 1
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear reference"
+    }
   },
   {
     "gold_chunk_id": 10786,
@@ -1441,7 +1924,14 @@
       "shared_content_tokens": [],
       "num_shared_tokens": 0
     },
-    "review_status": "pending"
+    "review_status": "reject",
+    "triage": {
+      "answerable": true,
+      "specific": false,
+      "leaks": false,
+      "verdict": "reject",
+      "reason": "Too broad"
+    }
   },
   {
     "gold_chunk_id": 4654,
@@ -1463,7 +1953,14 @@
       ],
       "num_shared_tokens": 4
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Good question"
+    }
   },
   {
     "gold_chunk_id": 12321,
@@ -1482,7 +1979,14 @@
       ],
       "num_shared_tokens": 1
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear question"
+    }
   },
   {
     "gold_chunk_id": 11122,
@@ -1490,7 +1994,7 @@
     "book": "The Sweet Cheat Gone",
     "chapter": "Chapter 4 — A Fresh Light Upon Robert De Saint-Loup",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "What was the speaker's immediate response to Gilberte when she expressed a sentiment that made him feel special to her?",
     "passage_preview": "Gilberte then uttered, perhaps simply out of the politeness of a hostess who is sorry that you are going away so soon and would have liked to show you more of a country which you seem to appreciate, a speech of the sort in which her practice as a woman of the world skilled in putting to the best advantage silence, simplicity, sobriety in the expression of her feelings, makes you believe that you occupy a place in her life which no one else could fill. Showering abruptly over her the sentiment with which I was filled by the delicious air, the breeze that was wafted to my nostrils, I said to her…",
     "passage_len": 719,
@@ -1502,7 +2006,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear context"
+    }
   },
   {
     "gold_chunk_id": 5783,
@@ -1522,7 +2033,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear criteria"
+    }
   },
   {
     "gold_chunk_id": 8299,
@@ -1530,7 +2048,7 @@
     "book": "Cities of the Plain",
     "chapter": "Chapter 3",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "What was the narrator's response when someone expressed disappointment that they had not seen him perform a particular task at a meal?",
     "passage_preview": "When he heard of it, he was distressed: “What, you didn’t see me carving the turkey-poults myself?” I replied that having failed, so far, to see Rome, Venice, Siena, the Prado, the Dresden gallery, the Indies, Sarah in *Phèdre*, I had learned to resign myself, and that I would add his carving of turkey-poults to my list. The comparison with the dramatic art (Sarah in *Phèdre*) was the only one that he seemed to understand, for he had already been told by me that on days of gala performances the elder Coquelin had accepted a beginner’s parts, even that of a character who says but a single line …",
     "passage_len": 664,
@@ -1539,7 +2057,14 @@
       "shared_content_tokens": [],
       "num_shared_tokens": 0
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear context"
+    }
   },
   {
     "gold_chunk_id": 9679,
@@ -1562,7 +2087,14 @@
       ],
       "num_shared_tokens": 5
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear question"
+    }
   },
   {
     "gold_chunk_id": 7710,
@@ -1570,7 +2102,7 @@
     "book": "Cities of the Plain",
     "chapter": "Chapter 2",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "What effect did M Verdurin's comment about a particular piece have on Saniette?",
     "passage_preview": "Mme. Verdurin could not contain herself. “Yes, indeed!” she cried with a titter. “You may be quite sure that nobody would ever have guessed that you meant the *Chercheuse d’Esprit*.” M. Verdurin went on in a gentler tone, addressing both Saniette and Brichot: “It is quite a pretty piece, all the same, the *Chercheuse d’Esprit*.” Uttered in a serious tone, this simple phrase, in which one could detect no trace of malice, did Saniette as much good and aroused in him as much gratitude as a deliberate compliment. He was unable to utter a single word and preserved a happy silence.",
     "passage_len": 582,
@@ -1583,7 +2115,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear effect described"
+    }
   },
   {
     "gold_chunk_id": 9597,
@@ -1600,7 +2139,14 @@
       "shared_content_tokens": [],
       "num_shared_tokens": 0
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear context"
+    }
   },
   {
     "gold_chunk_id": 3299,
@@ -1608,7 +2154,7 @@
     "book": "Within a Budding Grove",
     "chapter": "Place-Names: The Place",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "What was a significant factor that M. Bloch considered when deciding how to treat his uncle?",
     "passage_preview": "But M. Bloch never stopped insulting his uncle, whether it was that he was excited by the unresisting good-humour of his butt, or that the rent of the villa being paid by M. Nissim Bernard, the beneficiary wished to show that he kept his independence, and, more important still, that he was not seeking by flattery to make sure of the rich inheritance to come. What most hurt the old man was being treated so rudely in front of the manservant.",
     "passage_len": 443,
@@ -1620,7 +2166,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear context"
+    }
   },
   {
     "gold_chunk_id": 7758,
@@ -1641,7 +2194,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear achievement"
+    }
   },
   {
     "gold_chunk_id": 5413,
@@ -1662,7 +2222,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Well-phrased"
+    }
   },
   {
     "gold_chunk_id": 9577,
@@ -1682,7 +2249,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear intent"
+    }
   },
   {
     "gold_chunk_id": 3032,
@@ -1704,7 +2278,14 @@
       ],
       "num_shared_tokens": 4
     },
-    "review_status": "pending"
+    "review_status": "reject",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Meets criteria"
+    }
   },
   {
     "gold_chunk_id": 536,
@@ -1725,7 +2306,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Unique description"
+    }
   },
   {
     "gold_chunk_id": 5673,
@@ -1745,7 +2333,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear contrast"
+    }
   },
   {
     "gold_chunk_id": 5500,
@@ -1769,7 +2364,14 @@
       ],
       "num_shared_tokens": 6
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear context"
+    }
   },
   {
     "gold_chunk_id": 12450,
@@ -1777,7 +2379,7 @@
     "book": "Time Regained",
     "chapter": "Chapter 3 — An Afternoon Party at the House of the Princesse de Guermantes",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "What change occurred in her opinion of Ingres as she grew older?",
     "passage_preview": "Guermantes declared\nthat she had always detested Empire style; that meant, she\ndetested it now, which was true, because she followed the\nfashions though not closely. Without complicating the matter by\nalluding to David of whose work she knew something, when she was\na girl she considered Ingres the most boring of draughtsmen, then\nsuddenly the most beguiling of new masters, so much so that she\ndetested Delacroix. By what process she had returned to this\ncreed of reprobation matters little, since such shades of taste\nare reflected by art-critics ten years before these superior\nwomen talk about t…",
     "passage_len": 604,
@@ -1788,7 +2390,14 @@
       ],
       "num_shared_tokens": 1
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear opinion change"
+    }
   },
   {
     "gold_chunk_id": 10707,
@@ -1796,7 +2405,7 @@
     "book": "The Sweet Cheat Gone",
     "chapter": "Chapter 2 — Mademoiselle De Forcheville",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "How did the Duchess's feelings towards someone change after that person had passed away?",
     "passage_preview": "No doubt⁠—for in every grade of society a worldly and frivolous life paralyses our sensibility and robs us of the power to resuscitate the dead⁠—the Duchess was one of those people who require a personal presence⁠—that presence which, like a true Guermantes, she excelled in protracting⁠—in order to love truly, but also, and this is less common, in order to hate a little. So that often her friendly feeling for people, suspended during their lifetime by the irritation that some action or other on their part caused her, revived after their death. She then felt almost a longing to make reparation,…",
     "passage_len": 804,
@@ -1807,7 +2416,14 @@
       ],
       "num_shared_tokens": 1
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear question"
+    }
   },
   {
     "gold_chunk_id": 5208,
@@ -1815,7 +2431,7 @@
     "book": "The Guermantes Way",
     "chapter": "Deuxième partie",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "What activity does the doctor want the narrator's grandmother to do that she has trouble doing according to her own statement?",
     "passage_preview": "“You see, Madame, I didn’t know that, and yet I could have told you.” “But, Sir, I am not in the least like her; on the contrary, my doctor complains that he cannot get me to stay in bed,” said my grandmother, whether because she was a little annoyed by the doctor’s theories, or was anxious to submit to him any objections that might be raised to them, in the hope that he would refute these and that, after he had gone, she would no longer find any doubt lurking in her own mind as to the accuracy of his encouraging diagnosis.",
     "passage_len": 529,
@@ -1827,7 +2443,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear question"
+    }
   },
   {
     "gold_chunk_id": 4009,
@@ -1851,7 +2474,14 @@
       ],
       "num_shared_tokens": 6
     },
-    "review_status": "pending"
+    "review_status": "reject",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear benefit"
+    }
   },
   {
     "gold_chunk_id": 3999,
@@ -1872,7 +2502,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear description"
+    }
   },
   {
     "gold_chunk_id": 2081,
@@ -1880,7 +2517,7 @@
     "book": "Within a Budding Grove",
     "chapter": "Madame Swann at Home",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "What kind of society was typically unwelcoming to Republicans during the narrator's early childhood?",
     "passage_preview": "Mme. Swann had, however, met with no success outside what was called the “official world.” Smart women did not go to her house. It was not the presence there of Republican “notables” that frightened them away. In the days of my early childhood, conservative society was to the last degree worldly, and no “good” house would ever have opened its doors to a Republican.",
     "passage_len": 367,
@@ -1893,7 +2530,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear context"
+    }
   },
   {
     "gold_chunk_id": 9162,
@@ -1915,7 +2559,14 @@
       ],
       "num_shared_tokens": 4
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear justification"
+    }
   },
   {
     "gold_chunk_id": 8725,
@@ -1935,7 +2586,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "reject",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear reference"
+    }
   },
   {
     "gold_chunk_id": 148,
@@ -1955,7 +2613,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear question"
+    }
   },
   {
     "gold_chunk_id": 1811,
@@ -1974,7 +2639,14 @@
       ],
       "num_shared_tokens": 1
     },
-    "review_status": "pending"
+    "review_status": "reject",
+    "triage": {
+      "answerable": false,
+      "specific": true,
+      "leaks": false,
+      "verdict": "reject",
+      "reason": "No applause"
+    }
   },
   {
     "gold_chunk_id": 5474,
@@ -1991,7 +2663,14 @@
       "shared_content_tokens": [],
       "num_shared_tokens": 0
     },
-    "review_status": "pending"
+    "review_status": "reject",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Good question"
+    }
   },
   {
     "gold_chunk_id": 9478,
@@ -2013,7 +2692,14 @@
       ],
       "num_shared_tokens": 4
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear reference"
+    }
   },
   {
     "gold_chunk_id": 1406,
@@ -2021,7 +2707,7 @@
     "book": "Swann’s Way",
     "chapter": "Swann in Love",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "What action does the man take with the glass of his monocle after it falls from his eye?",
     "passage_preview": "And then, his anguish becoming too keen, he passed his hand over his forehead, let the monocle drop from his eye, and wiped its glass. And doubtless, if he had caught sight of himself at that moment, he would have added to the collection of the monocles which he had already identified, this one which he removed, like an importunate, worrying thought, from his head, while from its misty surface, with his handkerchief, he sought to obliterate his cares.",
     "passage_len": 455,
@@ -2033,7 +2719,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear action"
+    }
   },
   {
     "gold_chunk_id": 4805,
@@ -2054,7 +2747,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "reject",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear query"
+    }
   },
   {
     "gold_chunk_id": 4908,
@@ -2076,7 +2776,14 @@
       ],
       "num_shared_tokens": 4
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Meets criteria"
+    }
   },
   {
     "gold_chunk_id": 596,
@@ -2097,7 +2804,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear context"
+    }
   },
   {
     "gold_chunk_id": 3861,
@@ -2118,7 +2832,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear question"
+    }
   },
   {
     "gold_chunk_id": 10537,
@@ -2139,7 +2860,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear question"
+    }
   },
   {
     "gold_chunk_id": 1200,
@@ -2160,7 +2888,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear reference"
+    }
   },
   {
     "gold_chunk_id": 297,
@@ -2177,7 +2912,14 @@
       "shared_content_tokens": [],
       "num_shared_tokens": 0
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear question"
+    }
   },
   {
     "gold_chunk_id": 3069,
@@ -2198,7 +2940,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear context"
+    }
   },
   {
     "gold_chunk_id": 3747,
@@ -2218,7 +2967,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear question"
+    }
   },
   {
     "gold_chunk_id": 4074,
@@ -2239,7 +2995,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Passage answers"
+    }
   },
   {
     "gold_chunk_id": 7950,
@@ -2258,7 +3021,14 @@
       ],
       "num_shared_tokens": 1
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear action"
+    }
   },
   {
     "gold_chunk_id": 569,
@@ -2279,7 +3049,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear action described"
+    }
   },
   {
     "gold_chunk_id": 1150,
@@ -2287,7 +3064,7 @@
     "book": "Swann’s Way",
     "chapter": "Swann in Love",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "What information did Swann unexpectedly learn from the envelope Odette gave him, which reignited his feelings of unease about her activities?",
     "passage_preview": "For a time Swann stood still there, heartbroken, bewildered, and yet happy; gazing at this envelope which Odette had handed to him without a scruple, so absolute was her trust in his honour; through its transparent window there had been disclosed to him, with the secret history of an incident which he had despaired of ever being able to learn, a fragment of the life of Odette, seen as through a narrow, luminous incision, cut into its surface without her knowledge. Then his jealousy rejoiced at the discovery, as though that jealousy had had an independent existence, fiercely egotistical, glutto…",
     "passage_len": 1388,
@@ -2301,7 +3078,14 @@
       ],
       "num_shared_tokens": 4
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear query"
+    }
   },
   {
     "gold_chunk_id": 669,
@@ -2309,7 +3093,7 @@
     "book": "Swann’s Way",
     "chapter": "Overture",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "What action did Mlle. Vinteuil take at the window after appearing weary and preoccupied?",
     "passage_preview": "I heard no more, for Mlle. Vinteuil, who now seemed weary, awkward, preoccupied, sincere, and rather sad, came back to the window and drew the shutters close; but I knew now what was the reward that M. Vinteuil, in return for all the suffering that he had endured in his lifetime, on account of his daughter, had received from her after his death. And yet I have since reflected that if M.",
     "passage_len": 389,
@@ -2324,7 +3108,14 @@
       ],
       "num_shared_tokens": 5
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear action described"
+    }
   },
   {
     "gold_chunk_id": 8161,
@@ -2344,7 +3135,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear condition"
+    }
   },
   {
     "gold_chunk_id": 2627,
@@ -2365,7 +3163,14 @@
       ],
       "num_shared_tokens": 3
     },
-    "review_status": "pending"
+    "review_status": "reject",
+    "triage": {
+      "answerable": false,
+      "specific": true,
+      "leaks": false,
+      "verdict": "reject",
+      "reason": "not discussed"
+    }
   },
   {
     "gold_chunk_id": 9112,
@@ -2382,7 +3187,14 @@
       "shared_content_tokens": [],
       "num_shared_tokens": 0
     },
-    "review_status": "pending"
+    "review_status": "reject",
+    "triage": {
+      "answerable": false,
+      "specific": true,
+      "leaks": false,
+      "verdict": "reject",
+      "reason": "Not discussed"
+    }
   },
   {
     "gold_chunk_id": 1630,
@@ -2402,7 +3214,14 @@
       ],
       "num_shared_tokens": 2
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear context"
+    }
   },
   {
     "gold_chunk_id": 11616,
@@ -2424,7 +3243,14 @@
       ],
       "num_shared_tokens": 4
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "clear motivation"
+    }
   },
   {
     "gold_chunk_id": 8788,
@@ -2432,7 +3258,7 @@
     "book": "The Captive",
     "chapter": "Chapter 1 — Life with Albertine",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "What change has occurred in the way the speaker's companion looks at them, and how has this affected their interactions?",
     "passage_preview": "I should so love to be rude to them.” And now, for some time past, doubtless since she had succeeded in reading my character, no request to me to invite anyone, not a word, never even a sidelong glance from her eyes, which had become objectless and mute, and as revealing, with the vague and vacant expression of the rest of her face, as had been their magnetic swerve before. Now it was impossible for me to reproach her, or to ply her with questions about things which she would have declared to be so petty, so trivial, things that I had stored up in my mind simply for the pleasure of making moun…",
     "passage_len": 623,
@@ -2441,7 +3267,14 @@
       "shared_content_tokens": [],
       "num_shared_tokens": 0
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear change described"
+    }
   },
   {
     "gold_chunk_id": 5118,
@@ -2449,7 +3282,7 @@
     "book": "The Guermantes Way",
     "chapter": "Deuxième partie",
     "source": "synthetic",
-    "split": "dev",
+    "split": "test",
     "question": "What action did the mother consider taking if she had been able to catch up to her son before he left?",
     "passage_preview": "“Poor boy,” she began, “I am sure I must have hurt him dreadfully. You see, Sir, mothers are such selfish creatures, after all he hasn’t many pleasures, he comes so little to Paris. Oh, dear, if he hadn’t gone already I should have liked to stop him, not to keep him of course, but just to tell him that I’m not vexed with him, that I think he was quite right. Will you excuse me if I go and look over the staircase?” I accompanied her there. “Robert! Robert!” she called. “No; he’s gone; we are too late.”",
     "passage_len": 506,
@@ -2458,6 +3291,13 @@
       "shared_content_tokens": [],
       "num_shared_tokens": 0
     },
-    "review_status": "pending"
+    "review_status": "keep",
+    "triage": {
+      "answerable": true,
+      "specific": true,
+      "leaks": false,
+      "verdict": "keep",
+      "reason": "Clear action stated"
+    }
   }
 ]
