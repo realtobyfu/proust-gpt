@@ -14,9 +14,15 @@ dist-ssr
 *.local
 
 # Backend
-backend/__pycache__/
+__pycache__/
+*.pyc
 backend/.env
+backend/.env.bak
+backend/.env.local
 backend/venv/
+
+# Claude local settings (machine-specific)
+.claude/settings.local.json
 
 # Large source/data files (not needed at runtime)
 backend/in_search_of_lost_time.html

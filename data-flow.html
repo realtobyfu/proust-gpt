@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>How a Passage Gets to the Screen — A React Tutorial</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #faf8f5;
+    color: #333;
+    line-height: 1.7;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 4rem;
+  }
+  h1 { color: #8b4513; font-size: 1.6rem; margin-bottom: 0.3rem; }
+  .subtitle { color: #888; margin-bottom: 2.5rem; font-size: 0.95rem; }
+
+  /* ── Chapters ── */
+  .chapter {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #e0d8cf;
+  }
+  .chapter:last-child { border-bottom: none; }
+
+  .chapter-num {
+    font-family: 'Georgia', serif;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #8b4513;
+    margin-bottom: 0.2rem;
+  }
+  .chapter h2 {
+    font-family: 'Georgia', serif;
+    font-size: 1.25rem;
+    color: #333;
+    margin-bottom: 1rem;
+  }
+  .chapter p { margin-bottom: 0.8rem; font-size: 0.92rem; }
+
+  /* ── Concept boxes ── */
+  .concept {
+    background: #f0ebe4;
+    border-left: 4px solid #8b4513;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    border-radius: 0 6px 6px 0;
+  }
+  .concept h4 {
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #8b4513;
+    margin-bottom: 0.3rem;
+  }
+  .concept p { font-size: 0.85rem; margin-bottom: 0.4rem; }
+
+  /* ── Code blocks ── */
+  pre {
+    background: #2d2d2d;
+    color: #f8f8f2;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    overflow-x: auto;
+    margin: 0.8rem 0;
+    line-height: 1.6;
+  }
+  pre .comment { color: #6a9955; }
+  pre .keyword { color: #c586c0; }
+  pre .fn { color: #dcdcaa; }
+  pre .string { color: #ce9178; }
+  pre .type { color: #4ec9b0; }
+  pre .param { color: #9cdcfe; }
+  pre .highlight-line {
+    background: rgba(255,85,85,0.2);
+    display: inline-block;
+    width: 100%;
+    margin: 0 -1.25rem;
+    padding: 0 1.25rem;
+  }
+  pre .good-line {
+    background: rgba(80,250,123,0.12);
+    display: inline-block;
+    width: 100%;
+    margin: 0 -1.25rem;
+    padding: 0 1.25rem;
+  }
+
+  code {
+    background: rgba(139,69,19,0.08);
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.85em;
+    color: #8b4513;
+  }
+
+  /* ── Diagram ── */
+  .diagram {
+    background: #fff;
+    border: 1px solid #e0d8cf;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 1.2rem 0;
+    font-family: 'Courier New', monospace;
+    font-size: 0.78rem;
+    line-height: 1.8;
+    overflow-x: auto;
+    white-space: pre;
+    color: #555;
+  }
+  .diagram .label { color: #8b4513; font-weight: bold; }
+  .diagram .data { color: #2d7d46; }
+  .diagram .danger { color: #cc3333; font-weight: bold; }
+  .diagram .arrow { color: #999; }
+
+  /* ── Analogy callouts ── */
+  .analogy {
+    background: #fdf6ec;
+    border: 1px solid #e8d5b0;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    font-size: 0.88rem;
+  }
+  .analogy::before {
+    content: 'Analogy';
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #b8860b;
+    margin-bottom: 0.3rem;
+    font-weight: bold;
+  }
+
+  /* ── Bug spotlight ── */
+  .bug {
+    background: #fff5f5;
+    border: 1px solid #e8aaaa;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+  }
+  .bug::before {
+    content: 'The Bug';
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #cc3333;
+    margin-bottom: 0.3rem;
+    font-weight: bold;
+  }
+  .bug p { font-size: 0.88rem; }
+
+  .file-ref {
+    font-size: 0.72rem;
+    color: #999;
+    font-family: monospace;
+  }
+
+  /* ── Timeline / interactive ── */
+  .timeline {
+    position: relative;
+    padding-left: 2rem;
+    margin: 1rem 0;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.5rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #d4ccc3;
+  }
+  .timeline .step {
+    position: relative;
+    margin-bottom: 1.2rem;
+    font-size: 0.88rem;
+  }
+  .timeline .step::before {
+    content: '';
+    position: absolute;
+    left: -1.65rem;
+    top: 0.4rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #8b4513;
+    border: 2px solid #faf8f5;
+  }
+  .timeline .step.danger::before { background: #cc3333; }
+  .timeline .step.good::before { background: #2d7d46; }
+  .timeline .step strong { color: #8b4513; }
+  .timeline .step.danger strong { color: #cc3333; }
+
+  .side-by-side {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  @media (max-width: 700px) {
+    .side-by-side { grid-template-columns: 1fr; }
+  }
+  .side-by-side > div {
+    background: #fff;
+    border: 1px solid #e0d8cf;
+    border-radius: 8px;
+    padding: 1rem;
+  }
+  .side-by-side h4 { font-size: 0.85rem; margin-bottom: 0.5rem; }
+</style>
+</head>
+<body>
+
+<h1>How a Proust Passage Gets to the Screen</h1>
+<p class="subtitle">A step-by-step walkthrough of React data flow, using our actual code</p>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-num">Chapter 1</div>
+  <h2>The Big Picture</h2>
+
+  <p>When you type a question and hit enter, here's what happens at a very high level:</p>
+
+  <div class="diagram"><span class="label">You type a question</span>
+       <span class="arrow">│</span>
+       <span class="arrow">▼</span>
+<span class="label">Backend</span>: searches Pinecone, finds passages, sends them over HTTP
+       <span class="arrow">│</span>
+       <span class="arrow">▼</span>
+<span class="label">Hook</span>: useStreamingQuery receives the data, stores it in React <span class="data">state</span>
+       <span class="arrow">│</span>
+       <span class="arrow">▼</span>
+<span class="label">ChatPage</span>: reads from state, passes data down as <span class="data">props</span>
+       <span class="arrow">│</span>
+       <span class="arrow">├──▶</span> <span class="label">PassageCard</span> (the collapsed card in the chat)
+       <span class="arrow">└──▶</span> <span class="label">ReaderPanel</span> (the side panel on desktop)</div>
+
+  <p>The key question is: <strong>at which step does the passage text go from full-length to truncated?</strong></p>
+
+  <div class="concept">
+    <h4>React Concept: State and Props</h4>
+    <p><strong>State</strong> is data that a component <em>owns</em> and can change. When state changes, React re-renders that component.</p>
+    <p><strong>Props</strong> are data passed <em>from a parent to a child</em>. The child can read them but can't change them.</p>
+    <p>Think of it like a chain of post offices. State is the letter being written at one office. Props are copies of that letter forwarded to the next office down the line. If the original letter is wrong, every copy downstream is also wrong.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-num">Chapter 2</div>
+  <h2>The Backend Prepares the Data</h2>
+
+  <p>The backend does three things in sequence:</p>
+
+  <div class="timeline">
+    <div class="step">
+      <strong>retrieve_passages()</strong> — searches Pinecone (30 candidates), reranks with Cohere (keeps top 5), stitches adjacent passages together. Returns full text — could be thousands of characters.
+      <br><span class="file-ref">retrieval.py:322</span>
+    </div>
+    <div class="step">
+      <strong>_format_passages()</strong> — converts internal Document objects into plain dictionaries:
+      <code>{book, chapter, text, text_fr, volume, index}</code>. Still full text here.
+      <br><span class="file-ref">retrieval.py:302</span>
+    </div>
+    <div class="step danger">
+      <strong>Branching point!</strong> — the server decides which streaming function to use.
+      <br><span class="file-ref">server.py:243</span>
+    </div>
+  </div>
+
+  <p>This branching point is the crux of the issue. Let's look at the server code:</p>
+
+<pre>
+<span class="comment">// server.py — the /api/explore_lost_time/stream endpoint</span>
+
+<span class="keyword">if</span> <span class="fn">needs_agent</span>(query, history):          <span class="comment"># complex or follow-up query?</span>
+    <span class="keyword">return</span> StreamingResponse(
+        <span class="fn">async_sse_generator</span>(<span class="param">stream_agent_response</span>, ...)   <span class="comment"># ← PATH B</span>
+    )
+
+<span class="keyword">return</span> StreamingResponse(
+    <span class="fn">async_sse_generator</span>(<span class="param">stream_rag_response</span>, ...)       <span class="comment"># ← PATH A</span>
+)</pre>
+
+  <div class="side-by-side">
+    <div>
+      <h4 style="color: #2d7d46;">Path A: stream_rag_response</h4>
+      <p style="font-size:0.85rem">Simple, first-time queries. Yields each passage directly:</p>
+<pre style="font-size:0.76rem">
+<span class="keyword">for</span> p <span class="keyword">in</span> passages:
+    <span class="keyword">yield</span> {<span class="string">"type"</span>: <span class="string">"sources"</span>,
+           <span class="string">"passages"</span>: [<span class="good-line">p</span>]}
+<span class="comment"># ↑ Full text! No truncation.</span></pre>
+    </div>
+    <div>
+      <h4 style="color: #cc3333;">Path B: stream_agent_response</h4>
+      <p style="font-size:0.85rem">Complex/follow-up queries. Wraps each passage in <code>_preview_passage()</code>:</p>
+<pre style="font-size:0.76rem">
+<span class="keyword">return</span> [{<span class="string">"type"</span>: <span class="string">"sources"</span>,
+  <span class="string">"passages"</span>: [<span class="highlight-line"><span class="fn">_preview_passage</span>(p)</span>]}
+  <span class="keyword">for</span> p <span class="keyword">in</span> unique]
+<span class="comment"># ↑ Truncated to 200 chars!</span></pre>
+    </div>
+  </div>
+
+  <p>So what does <code>_preview_passage</code> do? It's simple — it chops the text:</p>
+
+<pre>
+<span class="keyword">def</span> <span class="fn">_preview_passage</span>(p: dict) -> dict:
+    preview = dict(p)                      <span class="comment"># shallow copy</span>
+    <span class="keyword">for</span> key <span class="keyword">in</span> (<span class="string">"text"</span>, <span class="string">"text_fr"</span>):
+        val = preview.get(key, <span class="string">""</span>)
+        <span class="keyword">if</span> len(val) > <span class="param">200</span>:
+<span class="highlight-line">            preview[key] = val[:200] + <span class="string">"…"</span>    <span class="comment"># chop + ellipsis</span></span>
+<span class="highlight-line">            preview[<span class="string">"_truncated"</span>] = True       <span class="comment"># flag it</span></span>
+    <span class="keyword">return</span> preview</pre>
+
+  <div class="analogy">
+    Imagine you're sending a book by mail. Path A sends the whole book. Path B rips out page 1, writes "..." at the bottom, sticks a Post-It note on it saying "_truncated: true", and sends only that. The idea is: the recipient can request the full book later if they want it.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-num">Chapter 3</div>
+  <h2>SSE Transport — Just a Pipe</h2>
+
+  <p>Server-Sent Events (SSE) is the protocol used to stream data from backend to frontend. For our purposes it's just a pipe — it doesn't modify the passage text at all. It:</p>
+
+  <ol style="margin: 0.5rem 0 0.5rem 1.5rem; font-size: 0.9rem;">
+    <li>JSON-serializes the dict: <code>json.dumps(data)</code></li>
+    <li>Splits long payloads across multiple <code>data:</code> lines (for proxy safety)</li>
+    <li>Sends keepalive comments every 15 seconds</li>
+  </ol>
+
+  <p>Whatever text the backend put in the dict — full or truncated — goes through unchanged.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-num">Chapter 4</div>
+  <h2>The React Hook Receives the Data</h2>
+
+  <p>Now we're in the browser. The <code>useStreamingQuery</code> custom hook is responsible for receiving the SSE stream and turning it into React state that components can use.</p>
+
+  <div class="concept">
+    <h4>React Concept: Custom Hooks</h4>
+    <p>A hook is a function that starts with <code>use</code> and lets you "hook into" React features like state. A <strong>custom hook</strong> bundles together related state and logic so components don't have to deal with the messy details.</p>
+    <p><code>useStreamingQuery</code> encapsulates all the SSE connection, parsing, and state management. Components just call <code>query("madeleine memory", "explore")</code> and read <code>passages</code> and <code>response</code>.</p>
+  </div>
+
+  <p>Here's the relevant part — what happens when a <code>"sources"</code> event arrives:</p>
+
+<pre>
+<span class="comment">// useStreamingQuery.ts — inside processSSEBlock()</span>
+
+<span class="keyword">case</span> <span class="string">'sources'</span>:
+  <span class="keyword">if</span> (event.passages) {
+    <span class="fn">setPassages</span>(prev => {
+      <span class="keyword">const</span> updated = [...prev, ...event.passages!];
+      passagesRef.current = updated;
+      <span class="keyword">return</span> updated;
+    });
+  }
+  <span class="keyword">break</span>;</pre>
+
+  <div class="concept">
+    <h4>React Concept: useState and the Updater Pattern</h4>
+    <p><code>setPassages(prev => [...])</code> is the "updater function" form of <code>useState</code>. Instead of saying "set passages to X", you say "take the previous value and compute the new value from it."</p>
+    <p>Why? Because SSE events arrive one at a time. Each event adds one passage. If we wrote <code>setPassages([...passages, ...event.passages])</code>, we'd use a stale <code>passages</code> value (a closure over an old render). The updater ensures we always build on the latest state.</p>
+  </div>
+
+  <p>The critical thing here: <strong>the hook stores exactly what the backend sent</strong>. It doesn't modify the text. If Path B truncated it, the hook stores truncated text. If Path A sent full text, the hook stores full text.</p>
+
+  <p>After all events arrive, the hook's state looks like:</p>
+
+<pre>
+<span class="comment">// What the hook's state contains:</span>
+passages = [
+  {
+    book: <span class="string">"Swann's Way"</span>,
+    chapter: <span class="string">"Overture"</span>,
+    text: <span class="string">"For a long time I used to go to bed early. Sometimes, when I had put out my candle, my eyes would close so quickly that I had not even time to say «I'm going to sleep.» And half …"</span>,  <span class="comment">// ← 200 chars + "…" (from agent path)</span>
+    <span class="highlight-line">_truncated: true,              <span class="comment">// ← the flag</span></span>
+    index: 42,
+  },
+  <span class="comment">// ... more passages</span>
+]</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-num">Chapter 5</div>
+  <h2>ChatPage — The Middleman</h2>
+
+  <p><code>ChatPage</code> is the main page component. It calls the hook and stores the results in its own state to build a chat history. Then it passes passages down to child components via props.</p>
+
+<pre>
+<span class="comment">// ChatPage.tsx — state for the reader panel</span>
+
+<span class="keyword">const</span> [<span class="param">selectedPassage</span>, <span class="fn">setSelectedPassage</span>] = <span class="fn">useState</span>&lt;Passage | null&gt;(null);
+<span class="keyword">const</span> [<span class="param">selectedPassageGroup</span>, <span class="fn">setSelectedPassageGroup</span>] = <span class="fn">useState</span>&lt;Passage[]&gt;([]);
+
+<span class="comment">// When user clicks a passage card on desktop:</span>
+<span class="keyword">const</span> <span class="fn">handleSelectPassageForReader</span> = (passage, allPassages) => {
+  <span class="fn">setSelectedPassage</span>(passage);          <span class="comment">// ← same object from the hook</span>
+  <span class="fn">setSelectedPassageGroup</span>(allPassages);
+};</pre>
+
+  <div class="concept">
+    <h4>React Concept: Props Drilling</h4>
+    <p>Data flows <strong>one way</strong> in React: parent → child. ChatPage passes the passage object as a prop to both PassageCard and ReaderPanel. This is sometimes called "props drilling" — data drilling down through layers.</p>
+    <p>The key insight: <strong>it's the same JavaScript object</strong>. ChatPage doesn't copy or modify it. Whatever the hook stored (full or truncated), that exact object reaches the child components.</p>
+  </div>
+
+  <p>So ChatPage renders both components with the same data:</p>
+
+<pre>
+<span class="comment">// Simplified ChatPage render</span>
+
+<span class="comment">// The card in the chat stream:</span>
+&lt;<span class="type">PassageCard</span>
+  <span class="param">passages</span>={displayPassages}        <span class="comment">// ← from hook state</span>
+  <span class="param">onSelectPassage</span>={(p) => <span class="fn">handleSelectPassageForReader</span>(p, displayPassages)}
+/&gt;
+
+<span class="comment">// The side panel (desktop only):</span>
+&lt;<span class="type">ReaderPanel</span>
+  <span class="param">passage</span>={selectedPassage}          <span class="comment">// ← same object that was clicked</span>
+  <span class="param">allPassages</span>={selectedPassageGroup}
+/&gt;</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-num">Chapter 6</div>
+  <h2>The Two Components — Where the Bug Lives</h2>
+
+  <p>Both components receive the same (possibly truncated) passage. The question is: <strong>does each component know how to fetch the full text?</strong></p>
+
+  <div class="side-by-side">
+    <div style="border-color: #2d7d46;">
+      <h4 style="color: #2d7d46;">PassageCard (works correctly)</h4>
+      <p style="font-size:0.82rem">Has three pieces of logic that work together:</p>
+      <ol style="font-size: 0.82rem; margin-left: 1.2rem; line-height: 1.6;">
+        <li>State: <code>fullTexts</code> — a cache of fetched texts</li>
+        <li>Function: <code>fetchFullText(index)</code> — calls the API</li>
+        <li>Effect: when expanded + truncated → auto-fetch</li>
+        <li>Display: <code>full?.text ?? passage.text</code></li>
+      </ol>
+    </div>
+    <div style="border-color: #cc3333;">
+      <h4 style="color: #cc3333;">ReaderPanel (had the bug)</h4>
+      <p style="font-size:0.82rem">Was missing all of that! Just did:</p>
+      <ol style="font-size: 0.82rem; margin-left: 1.2rem; line-height: 1.6;">
+        <li>No <code>fullTexts</code> state</li>
+        <li>No <code>fetchFullText</code> function</li>
+        <li>No effect to trigger the fetch</li>
+        <li>Display: <code>passage.text</code> directly</li>
+      </ol>
+    </div>
+  </div>
+
+  <p>Let's look at the PassageCard's working logic in detail:</p>
+
+  <div class="concept">
+    <h4>React Concept: useEffect</h4>
+    <p><code>useEffect</code> lets you run code <em>after</em> a render, in response to some data changing. You give it a function and a list of dependencies:</p>
+    <p><code>useEffect(() => { /* do something */ }, [dep1, dep2])</code></p>
+    <p>React watches the dependencies. When any of them changes, it runs the function again. It's how you say: "whenever X changes, do Y."</p>
+  </div>
+
+<pre>
+<span class="comment">// PassageCard.tsx — the working pattern</span>
+
+<span class="comment">// 1. State to cache fetched full texts</span>
+<span class="keyword">const</span> [<span class="param">fullTexts</span>, <span class="fn">setFullTexts</span>] = <span class="fn">useState</span>&lt;Record&lt;number, {text, text_fr?}&gt;&gt;({});
+
+<span class="comment">// 2. Function to fetch from the backend</span>
+<span class="keyword">const</span> <span class="fn">fetchFullText</span> = <span class="keyword">async</span> (passageIndex) => {
+  <span class="keyword">const</span> res = <span class="keyword">await</span> <span class="fn">fetch</span>(<span class="string">`/api/read/passage_text?index=${passageIndex}&lang=both`</span>);
+  <span class="keyword">const</span> data = <span class="keyword">await</span> res.<span class="fn">json</span>();
+  <span class="fn">setFullTexts</span>(prev => ({...prev, [passageIndex]: data}));
+};
+
+<span class="comment">// 3. Effect: "when this card expands AND text is truncated → fetch"</span>
+<span class="fn">useEffect</span>(() => {
+  <span class="keyword">if</span> (expanded && passage.index != null && <span class="fn">isTruncated</span>(passage)) {
+    <span class="fn">fetchFullText</span>(passage.index);
+  }
+}, [expanded, passage]);
+
+<span class="comment">// 4. Display: prefer full text, fall back to truncated preview</span>
+<span class="keyword">const</span> full = passage.index != null ? fullTexts[passage.index] : undefined;
+<span class="good-line"><span class="keyword">const</span> enText = full?.text ?? passage.text;   <span class="comment">// ← "use full if available, else preview"</span></span></pre>
+
+  <div class="concept">
+    <h4>React Concept: The ?? Operator (Nullish Coalescing)</h4>
+    <p><code>full?.text ?? passage.text</code> means: "if <code>full</code> exists AND has a <code>text</code> property, use it. Otherwise, use <code>passage.text</code>."</p>
+    <p>This is the fallback chain: try the good data first, fall back to whatever we have.</p>
+  </div>
+
+  <div class="bug">
+    <p><strong>ReaderPanel was just doing <code>displayText = passage.text</code></strong> — with no fallback to a lazy-loaded full version. Since the passage object from the hook still has the 200-char truncated text (from the agent path), that's all the panel ever showed.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-num">Chapter 7</div>
+  <h2>The Complete Journey, Traced End to End</h2>
+
+  <p>Let's follow one passage from backend to screen, for a <strong>complex query that uses the agent path</strong>:</p>
+
+  <div class="timeline">
+    <div class="step">
+      <strong>Pinecone returns</strong> a passage with 2,000 characters of Proust text.
+    </div>
+    <div class="step">
+      <strong>_format_passages()</strong> puts it in a dict: <code>{text: "For a long time I used to go... [2000 chars]", index: 42, ...}</code>
+    </div>
+    <div class="step danger">
+      <strong>_preview_passage()</strong> chops it: <code>{text: "For a long time... [200 chars]…", _truncated: true, index: 42}</code>
+    </div>
+    <div class="step">
+      <strong>SSE pipe</strong> sends the JSON. No changes.
+    </div>
+    <div class="step">
+      <strong>useStreamingQuery</strong> parses it, stores in <code>passages</code> state. Still 200 chars.
+    </div>
+    <div class="step">
+      <strong>ChatPage</strong> receives <code>passages</code> from hook. Passes the same objects to children.
+    </div>
+    <div class="step good">
+      <strong>PassageCard</strong> — user clicks to expand → <code>useEffect</code> fires → fetches <code>/api/read/passage_text?index=42&lang=both</code> → gets full 2,000 chars → displays full text.
+    </div>
+    <div class="step danger">
+      <strong>ReaderPanel</strong> — user clicks card on desktop → panel opens → displays <code>passage.text</code> directly → only shows 200 chars + "…". <em>Never fetches the full text.</em>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-num">Chapter 8</div>
+  <h2>The Fix</h2>
+
+  <p>The fix adds the same three ingredients to ReaderPanel that PassageCard already had:</p>
+
+<pre>
+<span class="comment">// ReaderPanel.tsx — added code</span>
+
+<span class="comment">// 1. State for caching full texts</span>
+<span class="good-line"><span class="keyword">const</span> [fullTexts, setFullTexts] = useState({});</span>
+
+<span class="comment">// 2. Fetch function</span>
+<span class="good-line"><span class="keyword">const</span> fetchFullText = async (index) => { ... };</span>
+
+<span class="comment">// 3. Effect: auto-fetch when panel opens with truncated text</span>
+<span class="good-line"><span class="fn">useEffect</span>(() => {</span>
+<span class="good-line">  <span class="keyword">if</span> (passage && passage.index != null && isTruncated(passage)) {</span>
+<span class="good-line">    fetchFullText(passage.index);</span>
+<span class="good-line">  }</span>
+<span class="good-line">}, [passage]);  <span class="comment">// ← runs whenever a new passage is selected</span></span>
+
+<span class="comment">// 4. Display: prefer full text</span>
+<span class="keyword">const</span> full = passage.index != null ? fullTexts[passage.index] : undefined;
+<span class="good-line"><span class="keyword">const</span> enText = full?.text ?? passage.text;</span></pre>
+
+  <div class="concept">
+    <h4>React Concept: Why [passage] as the Dependency?</h4>
+    <p>In the PassageCard, the dependency is <code>[expanded, passage]</code> — it fetches when the card is expanded. But the ReaderPanel is <em>always</em> expanded (it's a side panel). So the trigger is just <code>[passage]</code> — "whenever a different passage is selected, check if it's truncated and fetch if needed."</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-num">Chapter 9</div>
+  <h2>Why Only Sometimes? The needs_agent() Split</h2>
+
+  <p>One more important detail: <strong>you won't always see this bug</strong>. It only happens when your query goes through the agent path.</p>
+
+  <p><code>needs_agent(query, history)</code> returns <code>true</code> for:</p>
+  <ul style="margin: 0.5rem 0 0.5rem 1.5rem; font-size: 0.9rem;">
+    <li>Follow-up questions (when there's conversation history)</li>
+    <li>Complex multi-step queries</li>
+  </ul>
+
+  <p>For a simple first query like "madeleine memory", it goes through Path A (<code>stream_rag_response</code>) which sends <strong>full text</strong> — no truncation, no bug, everything looks fine.</p>
+
+  <p>That's what makes this bug sneaky: it only appears in certain conditions, making it easy to miss during testing.</p>
+</div>
+
+</body>
+</html>
