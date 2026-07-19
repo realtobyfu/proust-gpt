@@ -2,14 +2,13 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import styled, { css, keyframes } from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { Passage } from '../hooks/useStreamingQuery';
-import { frenchName } from '../utils/frenchNames';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+import { usePassageText, isPassageTruncated } from '../hooks/usePassageText';
+import PassageNav from './PassageNav';
 
 interface PassageCardProps {
   passages: Passage[];
   onBookmark: (passage: Passage) => void;
-  isBookmarked: (text: string) => boolean;
+  isBookmarked: (passage: Passage) => boolean;
   onReadInContext?: (passage: Passage) => void;
   /** Desktop: clicking opens the reader panel instead of expanding inline */
   onSelectPassage?: (passage: Passage) => void;
@@ -170,51 +169,6 @@ const ActionLink = styled.button`
   }
 `;
 
-const NavFooter = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid #eee;
-`;
-
-const NavArrow = styled.button`
-  background: none;
-  border: none;
-  color: #8b4513;
-  cursor: pointer;
-  font-size: 1.2rem;
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-  transition: background 0.15s ease;
-
-  &:hover {
-    background: rgba(139, 69, 19, 0.08);
-  }
-
-  &:disabled {
-    color: #d4ccc3;
-    cursor: default;
-    &:hover { background: none; }
-  }
-`;
-
-const Dot = styled.button<{ $active: boolean }>`
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  border: none;
-  padding: 0;
-  background: ${props => props.$active ? '#8b4513' : '#d4ccc3'};
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
-
-  &:hover { background: #8b4513; }
-  ${props => props.$active && `transform: scale(1.3);`}
-`;
-
 const AnimatedContent = styled.div<{ $dir: 'left' | 'right' | null }>`
   ${props => props.$dir === 'left' && css`animation: ${slideLeft} 250ms ease;`}
   ${props => props.$dir === 'right' && css`animation: ${slideRight} 250ms ease;`}
@@ -254,89 +208,37 @@ const PassageCard: React.FC<PassageCardProps> = ({
   onSelectPassage,
   isDesktop = false,
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [slideDir, setSlideDir] = useState<'left' | 'right' | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [measuredHeight, setMeasuredHeight] = useState<string>('5.6em');
-  const [showOriginal, setShowOriginal] = useState(false);
-  const [frenchTexts, setFrenchTexts] = useState<Record<number, string | null>>({});
-  const [fetchingFr, setFetchingFr] = useState(false);
-  const [fullTexts, setFullTexts] = useState<Record<number, { text: string; text_fr?: string }>>({});
 
   const passage = passages[currentIndex];
-  const hasMultiple = passages.length > 1;
 
-  const isTruncated = (p: Passage) =>
-    p._truncated === true || p.text?.endsWith('\u2026');
-
-  // Fetch full EN+FR text on demand for a truncated passage
-  const fetchFullText = useCallback(async (passageIndex: number) => {
-    if (fullTexts[passageIndex] !== undefined) return;
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/read/passage_text?index=${passageIndex}&lang=both`);
-      const data = await res.json();
-      if (data.text) {
-        setFullTexts(prev => ({
-          ...prev,
-          [passageIndex]: { text: data.text, text_fr: data.text_fr || undefined },
-        }));
-      }
-    } catch {
-      // Silently fail — user sees the preview text
-    }
-  }, [fullTexts]);
+  const {
+    showOriginal,
+    toggleOriginal,
+    displayText,
+    showFrUnavailable,
+    fetchingFr,
+    canShowOriginalToggle,
+    sourceLabel,
+    loadFullText,
+  } = usePassageText(passage, { includeCitation: true });
 
   // Lazy-load full text when a truncated passage is expanded
   useEffect(() => {
-    if (expanded && passage.index != null && isTruncated(passage) && !fullTexts[passage.index]) {
-      fetchFullText(passage.index);
+    if (expanded && passage.index != null && isPassageTruncated(passage)) {
+      loadFullText(passage.index);
     }
-  }, [expanded, passage]);
+  }, [expanded, passage, loadFullText]);
 
-  // Fetch French text on demand for a passage
-  const fetchFrenchText = useCallback(async (passageIndex: number) => {
-    if (frenchTexts[passageIndex] !== undefined) return; // already fetched
-    setFetchingFr(true);
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/read/passage_text?index=${passageIndex}&lang=fr`);
-      const data = await res.json();
-      setFrenchTexts(prev => ({
-        ...prev,
-        [passageIndex]: data.text_unavailable ? null : (data.text || null),
-      }));
-    } catch {
-      setFrenchTexts(prev => ({ ...prev, [passageIndex]: null }));
-    } finally {
-      setFetchingFr(false);
-    }
-  }, [frenchTexts]);
-
-  // Toggle "see original" — fetch on-demand if text_fr not in passage data
   const handleToggleOriginal = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    const next = !showOriginal;
-    setShowOriginal(next);
-    if (next && !passage.text_fr && passage.index != null) {
-      fetchFrenchText(passage.index);
-    }
-  }, [showOriginal, passage, fetchFrenchText]);
-
-  // Determine display text — prefer lazy-loaded full text over SSE preview
-  const isFr = i18n.language === 'fr';
-  const full = passage.index != null ? fullTexts[passage.index] : undefined;
-  const enText = full?.text ?? passage.text;
-  const frText = full?.text_fr ?? passage.text_fr ?? (passage.index != null ? frenchTexts[passage.index] : undefined);
-  let displayText: string;
-  if (isFr) {
-    displayText = frText || enText;
-  } else if (showOriginal && frText) {
-    displayText = frText;
-  } else {
-    displayText = enText;
-  }
-  const showFrUnavailable = showOriginal && !isFr && !frText && passage.index != null && frenchTexts[passage.index] === null;
+    toggleOriginal();
+  }, [toggleOriginal]);
 
   // Measure content for smooth expand
   useEffect(() => {
@@ -377,27 +279,6 @@ const PassageCard: React.FC<PassageCardProps> = ({
     setTimeout(() => setSlideDir(null), 270);
   }, []);
 
-  const goNext = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (currentIndex < passages.length - 1) {
-      goTo(currentIndex + 1, 'left');
-    }
-  }, [currentIndex, passages.length, goTo]);
-
-  const goPrev = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (currentIndex > 0) {
-      goTo(currentIndex - 1, 'right');
-    }
-  }, [currentIndex, goTo]);
-
-  const citationPrefix = passage.citation_index != null ? `[${passage.citation_index}] ` : '';
-  const indexSuffix = passage.index != null ? `, §${passage.index}` : '';
-  const sourceLabel = citationPrefix + [
-    isFr ? frenchName(passage.book || '') || 'À la recherche du temps perdu' : passage.book || 'In Search of Lost Time',
-    isFr && passage.chapter ? frenchName(passage.chapter) : passage.chapter,
-  ].filter(Boolean).join(' — ') + indexSuffix;
-
   return (
     <CardWrapper
       $expanded={expanded}
@@ -414,16 +295,16 @@ const PassageCard: React.FC<PassageCardProps> = ({
     >
       <CardInner>
         <BookmarkIcon
-          $active={isBookmarked(passage.text)}
+          $active={isBookmarked(passage)}
           onClick={handleBookmarkClick}
-          aria-label={isBookmarked(passage.text) ? t('passage.bookmarkRemove') : t('passage.bookmarkAdd')}
+          aria-label={isBookmarked(passage) ? t('passage.bookmarkRemove') : t('passage.bookmarkAdd')}
         >
-          {isBookmarked(passage.text) ? '★' : '☆'}
+          {isBookmarked(passage) ? '★' : '☆'}
         </BookmarkIcon>
 
         <AnimatedContent $dir={slideDir}>
           <SourceChip>{sourceLabel}</SourceChip>
-          {!isFr && (passage.text_fr || passage.index != null) && (
+          {canShowOriginalToggle && (
             <SeeOriginalLink onClick={handleToggleOriginal}>
               {showOriginal ? t('passage.seeTranslation') : t('passage.seeOriginal')}
             </SeeOriginalLink>
@@ -459,24 +340,12 @@ const PassageCard: React.FC<PassageCardProps> = ({
           </ActionRow>
         )}
 
-        {hasMultiple && (
-          <NavFooter onClick={(e) => e.stopPropagation()}>
-            <NavArrow onClick={goPrev} disabled={currentIndex === 0} aria-label="Previous passage">
-              &#8249;
-            </NavArrow>
-            {passages.map((_, i) => (
-              <Dot
-                key={i}
-                $active={i === currentIndex}
-                onClick={(e) => { e.stopPropagation(); goTo(i, i > currentIndex ? 'left' : 'right'); }}
-                aria-label={`Go to passage ${i + 1}`}
-              />
-            ))}
-            <NavArrow onClick={goNext} disabled={currentIndex === passages.length - 1} aria-label="Next passage">
-              &#8250;
-            </NavArrow>
-          </NavFooter>
-        )}
+        <PassageNav
+          count={passages.length}
+          currentIndex={currentIndex}
+          onNavigate={(i, dir) => goTo(i, dir)}
+          stopClickPropagation
+        />
       </CardInner>
     </CardWrapper>
   );

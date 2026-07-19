@@ -207,6 +207,11 @@ const AboutPage: React.FC = () => {
           </Text>
         </Section>
 
+        <Section>
+          <SectionTitle>{t('about.bilingualTitle')}</SectionTitle>
+          <Text>{t('about.bilingualDesc')}</Text>
+        </Section>
+
         {language === 'en' && (
           <Section>
             <SectionTitle>{t('about.translationTitle')}</SectionTitle>

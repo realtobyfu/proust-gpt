@@ -1,15 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-
-interface Bookmark {
-  id: string;
-  text: string;
-  book: string;
-  chapter: string;
-  index?: number;
-  savedAt: string;
-}
+import { Bookmark } from '../types';
 
 interface BookmarkDropdownProps {
   bookmarks: Bookmark[];

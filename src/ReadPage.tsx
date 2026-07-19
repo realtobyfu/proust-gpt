@@ -9,17 +9,9 @@ import LanguageSwitcher from './components/LanguageSwitcher';
 import { useLanguage } from './contexts/LanguageContext';
 import { useReadingProgress } from './hooks/useReadingProgress';
 import { useLocalStorage } from './hooks/useLocalStorage';
+import { Bookmark } from './types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
-
-interface Bookmark {
-  id: string;
-  text: string;
-  book: string;
-  chapter: string;
-  index?: number;
-  savedAt: string;
-}
 
 const PageContainer = styled.div`
   background-color: #f7f4f0;
@@ -166,6 +158,37 @@ const LoadingContainer = styled.div`
   color: #999;
 `;
 
+const BilingualTocNote = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.82rem;
+  color: #6e6459;
+  margin: 0 0 0.5rem;
+  line-height: 1.5;
+`;
+
+const BilingualGlyph = styled.span`
+  display: inline-flex;
+  border: 1px solid #c4a882;
+  border-radius: 4px;
+  overflow: hidden;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+
+  span {
+    padding: 0.1rem 0.3rem;
+    color: #8b4513;
+  }
+  span + span {
+    border-left: 1px solid #c4a882;
+    color: #5f5648;
+  }
+`;
+
 interface Volume {
   volume: number;
   volume_name: string;
@@ -211,18 +234,19 @@ const ReadPage: React.FC = () => {
       });
   }, [language]);
 
-  // Listen for popstate events (from ReadingView chapter navigation)
-  useEffect(() => {
-    const handlePopState = () => {
-      const params = new URLSearchParams(window.location.search);
-      setSearchParams(params, { replace: true });
-    };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [setSearchParams]);
-
   const handleSelectChapter = useCallback((volume: number, chapter: string) => {
     setSearchParams({ volume: volume.toString(), chapter });
+  }, [setSearchParams]);
+
+  // Chapter/page navigation from within the reader (I6 — via react-router,
+  // replacing the previous window.history.pushState + synthetic PopStateEvent).
+  const handleReaderNavigate = useCallback((volume: number, chapter: string, pageNum?: number) => {
+    const params: Record<string, string> = {
+      volume: volume.toString(),
+      chapter,
+    };
+    if (pageNum && pageNum > 0) params.page = pageNum.toString();
+    setSearchParams(params);
   }, [setSearchParams]);
 
   const handleBackToToc = useCallback(() => {
@@ -319,6 +343,7 @@ const ReadPage: React.FC = () => {
           chapter={currentChapter}
           page={currentPage}
           onNavigateToToc={handleBackToToc}
+          onNavigate={handleReaderNavigate}
           highlightPassageIndex={highlightPassageIndex}
         />
       ) : (
@@ -328,6 +353,10 @@ const ReadPage: React.FC = () => {
             <Subtitle>
               {t('readPage.subtitle', { count: volumes.reduce((sum, v) => sum + v.total_passages, 0) })}
             </Subtitle>
+            <BilingualTocNote>
+              <BilingualGlyph aria-hidden="true"><span>FR</span><span>EN</span></BilingualGlyph>
+              {t('readPage.bilingualTocNote')}
+            </BilingualTocNote>
           </TocHeader>
 
           {lastPosition && (

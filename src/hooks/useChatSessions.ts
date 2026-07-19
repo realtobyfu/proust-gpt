@@ -35,10 +35,19 @@ const SESSION_KEY_PREFIX = 'proust-session-';
 const MAX_SESSIONS = 50;
 const MAX_PASSAGE_TEXT = 500;
 
+/**
+ * Migrate the legacy Reflect mode value `refine_prose` → `reflect` (H2) so
+ * sessions created before the rename still load under the current mode identity.
+ */
+function normalizeMode(mode: string): string {
+  return mode === 'refine_prose' ? 'reflect' : mode;
+}
+
 function readIndex(): ChatSessionSummary[] {
   try {
     const raw = localStorage.getItem(INDEX_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const parsed: ChatSessionSummary[] = raw ? JSON.parse(raw) : [];
+    return parsed.map(s => ({ ...s, mode: normalizeMode(s.mode) }));
   } catch {
     return [];
   }
@@ -51,7 +60,9 @@ function writeIndex(index: ChatSessionSummary[]) {
 function readSession(id: string): ChatSession | null {
   try {
     const raw = localStorage.getItem(SESSION_KEY_PREFIX + id);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const session: ChatSession = JSON.parse(raw);
+    return { ...session, mode: normalizeMode(session.mode) };
   } catch {
     return null;
   }

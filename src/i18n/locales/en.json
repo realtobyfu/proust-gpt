@@ -25,6 +25,14 @@
     "divider": "or reflect on your own experience",
     "newToProust": "New to Proust?",
     "guidance": "Begin with <em>Swann's Way</em>, the first volume. Follow young Marcel's memories of childhood in Combray. Discover the famous <1>madeleine scene</1> that unlocks the nature of involuntary memory. Or explore any theme, character, or passage that interests you.",
+    "bilingualNote": "Read every passage side-by-side in Proust's original French and English.",
+    "guidedPathsTitle": "Guided reading paths",
+    "guidedPathsIntro": "New to Proust? Follow a curated journey through the novel, one passage at a time.",
+    "viewPaths": "Explore guided paths",
+    "pathStepsLabel": "{{count}} steps",
+    "pathStartStep": "Explore this passage",
+    "pathsLoadError": "Could not load the reading paths right now.",
+    "pathsEmpty": "No guided paths available yet.",
     "explorePrompts": {
       "madeleine": "The madeleine scene",
       "swannOdette": "Swann and Odette",
@@ -103,6 +111,13 @@
     "deleteConfirm": "Delete this conversation?",
     "toggleSidebar": "Toggle sidebar",
     "resizeReader": "Resize reading panel",
+    "switchModeConfirm": "Switch mode? This starts a new conversation.",
+    "export": "Export",
+    "exportConversation": "Export conversation",
+    "exportBookmarks": "Export",
+    "copied": "Copied to clipboard",
+    "exportFailed": "Copy failed",
+    "nothingToExport": "Nothing to export yet",
     "explorePromptPool": [
       "What is the madeleine scene really about?",
       "How does Swann's love for Odette change over time?",
@@ -162,7 +177,8 @@
     "previousChapter": "Previous chapter",
     "nextChapter": "Next chapter",
     "bilingualHide": "Hide translation",
-    "bilingualShow": "Show side-by-side translation"
+    "bilingualShow": "Show side-by-side translation",
+    "bilingualTocNote": "Open any chapter and toggle EN + FR to read Proust's original French side-by-side."
   },
   "about": {
     "title": "About ProustGPT",
@@ -175,6 +191,8 @@
     "howItWorks": "How It Works",
     "exploreLostTime": "<strong>Explore Lost Time</strong> \u2014 Ask a question or name a theme, and ProustGPT searches through the full text to find relevant passages. It uses retrieval-augmented generation (RAG) to ground every response in Proust's own words.",
     "reflectOnMyDay": "<strong>Reflect on My Day</strong> \u2014 Describe a moment from your life, and ProustGPT responds in the introspective, layered style of Proust himself, drawing connections between your experience and the themes of the novel.",
+    "bilingualTitle": "Bilingual reading",
+    "bilingualDesc": "Every chapter can be read side-by-side in Scott Moncrieff's English and Proust's original French. Open any chapter in the Read view and toggle \u201cEN + FR\u201d.",
     "backToHome": "Back to Home",
     "translationTitle": "Translation",
     "translationWork": "IN SEARCH OF LOST TIME",

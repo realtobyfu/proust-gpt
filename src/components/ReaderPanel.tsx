@@ -1,18 +1,17 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { Passage } from '../hooks/useStreamingQuery';
 import { formatPassageText } from '../utils/formatPassageText';
-import { frenchName } from '../utils/frenchNames';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+import { usePassageText, isPassageTruncated } from '../hooks/usePassageText';
+import PassageNav from './PassageNav';
 
 interface ReaderPanelProps {
   passage: Passage | null;
   allPassages: Passage[];
   onClose: () => void;
   onBookmark: (passage: Passage) => void;
-  isBookmarked: (text: string) => boolean;
+  isBookmarked: (passage: Passage) => boolean;
   onReadInContext?: (passage: Passage) => void;
   onSelectPassage: (passage: Passage) => void;
 }
@@ -164,50 +163,6 @@ const ReadInContextButton = styled.button`
   }
 `;
 
-const NavFooter = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 1rem 0;
-  border-top: 1px solid #eee;
-`;
-
-const NavArrow = styled.button`
-  background: none;
-  border: none;
-  color: #8b4513;
-  cursor: pointer;
-  font-size: 1.2rem;
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-  transition: background 0.15s ease;
-
-  &:hover {
-    background: rgba(139, 69, 19, 0.08);
-  }
-
-  &:disabled {
-    color: #d4ccc3;
-    cursor: default;
-    &:hover { background: none; }
-  }
-`;
-
-const Dot = styled.button<{ $active: boolean }>`
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  border: none;
-  padding: 0;
-  background: ${props => props.$active ? '#8b4513' : '#d4ccc3'};
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
-
-  &:hover { background: #8b4513; }
-  ${props => props.$active && `transform: scale(1.3);`}
-`;
-
 const SeeOriginalLink = styled.button`
   background: none;
   border: none;
@@ -241,66 +196,32 @@ const ReaderPanel: React.FC<ReaderPanelProps> = ({
   onReadInContext,
   onSelectPassage,
 }) => {
-  const { t, i18n } = useTranslation();
-  const [showOriginal, setShowOriginal] = useState(false);
-  const [frenchTexts, setFrenchTexts] = useState<Record<number, string | null>>({});
-  const [fetchingFr, setFetchingFr] = useState(false);
-  const [fullTexts, setFullTexts] = useState<Record<number, { text: string; text_fr?: string }>>({});
+  const { t } = useTranslation();
 
-  const isTruncated = (p: Passage) =>
-    p._truncated === true || p.text?.endsWith('\u2026');
-
-  // Fetch full EN+FR text for truncated passages
-  const fetchFullText = useCallback(async (passageIndex: number) => {
-    if (fullTexts[passageIndex] !== undefined) return;
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/read/passage_text?index=${passageIndex}&lang=both`);
-      const data = await res.json();
-      if (data.text) {
-        setFullTexts(prev => ({
-          ...prev,
-          [passageIndex]: { text: data.text, text_fr: data.text_fr || undefined },
-        }));
-      }
-    } catch {
-      // Silently fail — user sees the preview text
-    }
-  }, [fullTexts]);
+  const {
+    showOriginal,
+    toggleOriginal,
+    displayText,
+    showFrUnavailable,
+    fetchingFr,
+    canShowOriginalToggle,
+    sourceLabel,
+    loadFullText,
+  } = usePassageText(passage, { includeCitation: false });
 
   // Auto-fetch full text when panel opens with a truncated passage
   useEffect(() => {
-    if (passage && passage.index != null && isTruncated(passage) && !fullTexts[passage.index]) {
-      fetchFullText(passage.index);
+    if (passage && passage.index != null && isPassageTruncated(passage)) {
+      loadFullText(passage.index);
     }
-  }, [passage]);
+  }, [passage, loadFullText]);
 
-  const currentIndex = passage ? allPassages.findIndex(p => p.text === passage.text) : -1;
+    const currentIndex = passage ? allPassages.findIndex(p => p.text === passage.text) : -1;
   const hasMultiple = allPassages.length > 1;
 
-  const fetchFrenchText = useCallback(async (passageIndex: number) => {
-    if (frenchTexts[passageIndex] !== undefined) return;
-    setFetchingFr(true);
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/read/passage_text?index=${passageIndex}&lang=fr`);
-      const data = await res.json();
-      setFrenchTexts(prev => ({
-        ...prev,
-        [passageIndex]: data.text_unavailable ? null : (data.text || null),
-      }));
-    } catch {
-      setFrenchTexts(prev => ({ ...prev, [passageIndex]: null }));
-    } finally {
-      setFetchingFr(false);
-    }
-  }, [frenchTexts]);
-
   const handleToggleOriginal = useCallback(() => {
-    const next = !showOriginal;
-    setShowOriginal(next);
-    if (next && !passage?.text_fr && passage?.index != null) {
-      fetchFrenchText(passage.index);
-    }
-  }, [showOriginal, passage, fetchFrenchText]);
+    toggleOriginal();
+  }, [toggleOriginal]);
 
   const goTo = useCallback((index: number) => {
     if (index >= 0 && index < allPassages.length) {
@@ -310,32 +231,12 @@ const ReaderPanel: React.FC<ReaderPanelProps> = ({
 
   if (!passage) return null;
 
-  const isFr = i18n.language === 'fr';
-  const full = passage.index != null ? fullTexts[passage.index] : undefined;
-  const enText = full?.text ?? passage.text;
-  const frText = full?.text_fr ?? passage.text_fr ?? (passage.index != null ? frenchTexts[passage.index] : undefined);
-  let displayText: string;
-  if (isFr) {
-    displayText = frText || enText;
-  } else if (showOriginal && frText) {
-    displayText = frText;
-  } else {
-    displayText = enText;
-  }
-  const showFrUnavailable = showOriginal && !isFr && !frText && passage.index != null && frenchTexts[passage.index] === null;
-
-  const indexSuffix = passage.index != null ? `, §${passage.index}` : '';
-  const sourceLabel = [
-    isFr ? frenchName(passage.book || '') || 'À la recherche du temps perdu' : passage.book || 'In Search of Lost Time',
-    isFr && passage.chapter ? frenchName(passage.chapter) : passage.chapter,
-  ].filter(Boolean).join(' — ') + indexSuffix;
-
   return (
     <PanelContainer>
       <PanelHeader>
         <SourceChip>{sourceLabel}</SourceChip>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {!isFr && (passage.text_fr || passage.index != null) && (
+          {canShowOriginalToggle && (
             <SeeOriginalLink onClick={handleToggleOriginal}>
               {showOriginal ? t('passage.seeTranslation') : t('passage.seeOriginal')}
             </SeeOriginalLink>
@@ -361,10 +262,10 @@ const ReaderPanel: React.FC<ReaderPanelProps> = ({
 
         <ActionRow>
           <BookmarkButton
-            $active={isBookmarked(passage.text)}
+            $active={isBookmarked(passage)}
             onClick={() => onBookmark(passage)}
           >
-            {isBookmarked(passage.text) ? t('common.saved') : t('passage.savePassage')}
+            {isBookmarked(passage) ? t('common.saved') : t('passage.savePassage')}
           </BookmarkButton>
           {onReadInContext && passage.index != null && (
             <ReadInContextButton onClick={() => onReadInContext(passage)}>
@@ -374,30 +275,13 @@ const ReaderPanel: React.FC<ReaderPanelProps> = ({
         </ActionRow>
 
         {hasMultiple && (
-          <NavFooter>
-            <NavArrow
-              onClick={() => goTo(currentIndex - 1)}
-              disabled={currentIndex <= 0}
-              aria-label="Previous passage"
-            >
-              &#8249;
-            </NavArrow>
-            {allPassages.map((_, i) => (
-              <Dot
-                key={i}
-                $active={i === currentIndex}
-                onClick={() => goTo(i)}
-                aria-label={`Go to passage ${i + 1}`}
-              />
-            ))}
-            <NavArrow
-              onClick={() => goTo(currentIndex + 1)}
-              disabled={currentIndex >= allPassages.length - 1}
-              aria-label="Next passage"
-            >
-              &#8250;
-            </NavArrow>
-          </NavFooter>
+          <div style={{ borderTop: '1px solid #eee', paddingTop: '1rem' }}>
+            <PassageNav
+              count={allPassages.length}
+              currentIndex={currentIndex}
+              onNavigate={(i) => goTo(i)}
+            />
+          </div>
         )}
       </PanelBody>
     </PanelContainer>

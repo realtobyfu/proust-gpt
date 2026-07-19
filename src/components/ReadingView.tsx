@@ -6,6 +6,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useReadingProgress } from '../hooks/useReadingProgress';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { formatPassageText } from '../utils/formatPassageText';
+import { Bookmark, bookmarkMatches } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 const PASSAGES_PER_PAGE = 20;
@@ -61,9 +62,13 @@ const ProgressFill = styled.div<{ $percent: number }>`
   transition: width 0.15s ease;
 `;
 
-const PassageBlock = styled.div`
+const PassageBlock = styled.div<{ $highlighted?: boolean }>`
   position: relative;
   margin-bottom: 0.6rem;
+  transition: border-left-color 0.3s ease, background 0.3s ease, padding-left 0.3s ease;
+  border-left: 3px solid ${props => props.$highlighted ? '#8b4513' : 'transparent'};
+  background: ${props => props.$highlighted ? 'rgba(139, 69, 19, 0.06)' : 'transparent'};
+  padding-left: ${props => props.$highlighted ? '0.75rem' : '0'};
 
   &:hover .passage-actions {
     opacity: 1;
@@ -287,20 +292,13 @@ interface ChapterNav {
   chapter: string;
 }
 
-interface Bookmark {
-  id: string;
-  text: string;
-  book: string;
-  chapter: string;
-  index?: number;
-  savedAt: string;
-}
-
 interface ReadingViewProps {
   volume: number;
   chapter: string;
   page: number;
   onNavigateToToc: () => void;
+  /** Navigate to a chapter/page via react-router (I6). */
+  onNavigate: (volume: number, chapter: string, page?: number) => void;
   highlightPassageIndex?: number;
 }
 
@@ -369,7 +367,7 @@ const SecondaryPassageText = styled.p`
   padding: 0.5rem 0;
 `;
 
-const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavigateToToc, highlightPassageIndex }) => {
+const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavigateToToc, onNavigate, highlightPassageIndex }) => {
   const { t } = useTranslation();
   const { textLanguage } = useLanguage();
   const navigate = useNavigate();
@@ -388,8 +386,11 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
   const [initialLoad, setInitialLoad] = useState(true);
   const [atBottom, setAtBottom] = useState(false);
   const [bilingual, setBilingual] = useLocalStorage<boolean>('proust-bilingual', false);
+  // Highlight-on-arrival state (I6 — replaces direct DOM style mutation).
+  const [highlightActive, setHighlightActive] = useState(false);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const highlightRef = useRef<HTMLDivElement | null>(null);
   const totalPages = Math.max(1, Math.ceil(totalInChapter / PASSAGES_PER_PAGE));
   const isFirstPage = page === 0;
   const isLastPage = page >= totalPages - 1;
@@ -446,43 +447,6 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [passages]);
 
-  // Scroll to and highlight the target passage when navigating from chat
-  useEffect(() => {
-    if (highlightPassageIndex == null || passages.length === 0 || !containerRef.current) return;
-
-    const blocks = containerRef.current.querySelectorAll<HTMLElement>('[data-passage-indices]');
-    let targetBlock: HTMLElement | null = null;
-
-    blocks.forEach(block => {
-      const indices = block.dataset.passageIndices?.split(',').map(Number) || [];
-      if (indices.includes(highlightPassageIndex)) {
-        targetBlock = block;
-      }
-    });
-
-    if (targetBlock) {
-      // Scroll to the block
-      setTimeout(() => {
-        targetBlock!.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-        // Apply highlight
-        targetBlock!.style.borderLeft = '3px solid #8b4513';
-        targetBlock!.style.background = 'rgba(139, 69, 19, 0.06)';
-        targetBlock!.style.paddingLeft = '0.75rem';
-        targetBlock!.style.transition = 'all 0.3s ease';
-
-        // Fade out after 3 seconds
-        setTimeout(() => {
-          if (targetBlock) {
-            targetBlock.style.borderLeft = '';
-            targetBlock.style.background = '';
-            targetBlock.style.paddingLeft = '';
-          }
-        }, 3000);
-      }, 100);
-    }
-  }, [highlightPassageIndex, passages]);
-
   // Show navigation arrows only when scrolled near the bottom
   useEffect(() => {
     const handleScroll = () => {
@@ -523,28 +487,53 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
     return groups;
   }, [passages]);
 
+  // Which merged group (if any) contains the passage we arrived to highlight.
+  const highlightGroupIndex = useMemo(() => {
+    if (highlightPassageIndex == null) return -1;
+    return mergedPassages.findIndex(g => g.some(p => p.index === highlightPassageIndex));
+  }, [mergedPassages, highlightPassageIndex]);
+
+  // Scroll to and briefly highlight the target passage (via state + CSS, I6).
+  useEffect(() => {
+    if (highlightGroupIndex < 0) {
+      setHighlightActive(false);
+      return;
+    }
+    const scrollTimer = setTimeout(() => {
+      highlightRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setHighlightActive(true);
+    }, 100);
+    const fadeTimer = setTimeout(() => setHighlightActive(false), 3100);
+    return () => {
+      clearTimeout(scrollTimer);
+      clearTimeout(fadeTimer);
+    };
+  }, [highlightGroupIndex, highlightPassageIndex]);
+
   const progressPercent = () => {
     if (totalPages <= 1) return 100;
     return Math.round(((page + 1) / totalPages) * 100);
   };
 
   const handleBookmark = (text: string, passage: Passage) => {
-    const existing = bookmarks.find(b => b.text === text);
-    if (existing) {
-      setBookmarks(bookmarks.filter(b => b.text !== text));
-    } else {
-      setBookmarks([...bookmarks, {
+    const target = { index: passage.index, text };
+    setBookmarks(prev => {
+      if (prev.some(b => bookmarkMatches(b, target))) {
+        return prev.filter(b => !bookmarkMatches(b, target));
+      }
+      return [...prev, {
         id: Date.now().toString(),
         text,
         book: passage.book,
         chapter: passage.chapter,
         index: passage.index,
         savedAt: new Date().toISOString(),
-      }]);
-    }
+      }];
+    });
   };
 
-  const isBookmarked = (text: string) => bookmarks.some(b => b.text === text);
+  const isBookmarked = (text: string, index?: number) =>
+    bookmarks.some(b => bookmarkMatches(b, { index, text }));
 
   const handleExplore = (text: string, passage: Passage) => {
     const snippet = text.slice(0, 120);
@@ -557,23 +546,12 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
   };
 
   const handlePageNav = (newPage: number) => {
-    const params = new URLSearchParams({
-      volume: volume.toString(),
-      chapter,
-      page: newPage.toString(),
-    });
-    window.history.pushState({}, '', `/read?${params}`);
-    window.dispatchEvent(new PopStateEvent('popstate'));
+    onNavigate(volume, chapter, newPage);
   };
 
   const handleChapterNav = (nav: ChapterNav | null) => {
     if (!nav) return;
-    const params = new URLSearchParams({
-      volume: nav.volume.toString(),
-      chapter: nav.chapter,
-    });
-    window.history.pushState({}, '', `/read?${params}`);
-    window.dispatchEvent(new PopStateEvent('popstate'));
+    onNavigate(nav.volume, nav.chapter);
   };
 
   if (initialLoad) {
@@ -632,7 +610,11 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
 
           return (
             <React.Fragment key={`group-${firstPassage.index}`}>
-              <PassageBlock data-passage-indices={group.map(p => p.index).join(',')}>
+              <PassageBlock
+                data-passage-indices={group.map(p => p.index).join(',')}
+                ref={gi === highlightGroupIndex ? highlightRef : undefined}
+                $highlighted={gi === highlightGroupIndex && highlightActive}
+              >
                 <ParagraphNumber aria-hidden="true">{gi + 1}</ParagraphNumber>
                 {bilingual ? (() => {
                   const frText = group.map(p => (p.text_fr || '').trim()).filter(Boolean).join(' ');
@@ -659,11 +641,11 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
                 )}
                 <PassageActions className="passage-actions">
                   <ActionButton
-                    $active={isBookmarked(mergedText)}
+                    $active={isBookmarked(mergedText, firstPassage.index)}
                     onClick={() => handleBookmark(mergedText, firstPassage)}
-                    title={isBookmarked(mergedText) ? t('passage.bookmarkRemove') : t('passage.bookmarkAdd')}
+                    title={isBookmarked(mergedText, firstPassage.index) ? t('passage.bookmarkRemove') : t('passage.bookmarkAdd')}
                   >
-                    {isBookmarked(mergedText) ? t('common.saved') : t('common.save')}
+                    {isBookmarked(mergedText, firstPassage.index) ? t('common.saved') : t('common.save')}
                   </ActionButton>
                   <ActionButton onClick={() => handleExplore(mergedText, firstPassage)} title={t('common.explore')}>
                     {t('common.explore')}

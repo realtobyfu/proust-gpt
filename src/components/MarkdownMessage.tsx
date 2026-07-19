@@ -111,10 +111,10 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = React.memo(({ content, p
     return new Set(passages.map(p => p.citation_index).filter((n): n is number => n != null));
   }, [passages]);
 
-  // Pre-process content: replace [N] with HTML cite-ref tags (only for valid, single-digit indices)
+  // Pre-process content: replace [N] with HTML cite-ref tags (only for valid indices)
   const processedContent = useMemo(() => {
     if (validIndices.size === 0) return content;
-    return content.replace(/\[(\d)\]/g, (match, digit) => {
+    return content.replace(/\[(\d+)\]/g, (match, digit) => {
       const n = parseInt(digit, 10);
       if (validIndices.has(n)) {
         return `<cite-ref data-n="${n}">[${n}]</cite-ref>`;

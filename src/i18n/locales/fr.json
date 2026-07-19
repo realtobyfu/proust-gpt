@@ -25,6 +25,14 @@
     "divider": "ou r\u00e9fl\u00e9chissez \u00e0 votre propre exp\u00e9rience",
     "newToProust": "Nouveau chez Proust\u00a0?",
     "guidance": "Commencez par <em>Du c\u00f4t\u00e9 de chez Swann</em>, le premier volume. Suivez les souvenirs d'enfance du jeune Marcel \u00e0 Combray. D\u00e9couvrez la c\u00e9l\u00e8bre <1>sc\u00e8ne de la madeleine</1> qui r\u00e9v\u00e8le la nature de la m\u00e9moire involontaire. Ou explorez tout th\u00e8me, personnage ou passage qui vous int\u00e9resse.",
+    "bilingualNote": "Lisez chaque passage c\u00f4te \u00e0 c\u00f4te, en fran\u00e7ais original de Proust et en anglais.",
+    "guidedPathsTitle": "Parcours de lecture guid\u00e9s",
+    "guidedPathsIntro": "Nouveau chez Proust ? Suivez un parcours guid\u00e9 \u00e0 travers le roman, un passage \u00e0 la fois.",
+    "viewPaths": "D\u00e9couvrir les parcours guid\u00e9s",
+    "pathStepsLabel": "{{count}} \u00e9tapes",
+    "pathStartStep": "Explorer ce passage",
+    "pathsLoadError": "Impossible de charger les parcours pour le moment.",
+    "pathsEmpty": "Aucun parcours guid\u00e9 disponible pour l'instant.",
     "explorePrompts": {
       "madeleine": "La sc\u00e8ne de la madeleine",
       "swannOdette": "Swann et Odette",
@@ -103,6 +111,13 @@
     "deleteConfirm": "Supprimer cette conversation\u00a0?",
     "toggleSidebar": "Afficher/masquer le panneau",
     "resizeReader": "Redimensionner le panneau de lecture",
+    "switchModeConfirm": "Changer de mode ? Cela démarre une nouvelle conversation.",
+    "export": "Exporter",
+    "exportConversation": "Exporter la conversation",
+    "exportBookmarks": "Exporter",
+    "copied": "Copié dans le presse-papiers",
+    "exportFailed": "Échec de la copie",
+    "nothingToExport": "Rien à exporter pour l'instant",
     "explorePromptPool": [
       "De quoi parle vraiment la sc\u00e8ne de la madeleine\u00a0?",
       "Comment l'amour de Swann pour Odette \u00e9volue-t-il avec le temps\u00a0?",
@@ -162,7 +177,8 @@
     "previousChapter": "Chapitre pr\u00e9c\u00e9dent",
     "nextChapter": "Chapitre suivant",
     "bilingualHide": "Masquer la traduction",
-    "bilingualShow": "Afficher la traduction c\u00f4te \u00e0 c\u00f4te"
+    "bilingualShow": "Afficher la traduction c\u00f4te \u00e0 c\u00f4te",
+    "bilingualTocNote": "Ouvrez un chapitre et activez EN + FR pour lire le fran\u00e7ais original de Proust c\u00f4te \u00e0 c\u00f4te."
   },
   "about": {
     "title": "\u00C0 propos de ProustGPT",
@@ -175,6 +191,8 @@
     "howItWorks": "Comment \u00e7a marche",
     "exploreLostTime": "<strong>Explorer le Temps perdu</strong> \u2014 Posez une question ou nommez un th\u00e8me, et ProustGPT recherche dans le texte int\u00e9gral les passages pertinents. Il utilise la g\u00e9n\u00e9ration augment\u00e9e par la recherche (RAG) pour ancrer chaque r\u00e9ponse dans les propres mots de Proust.",
     "reflectOnMyDay": "<strong>R\u00e9fl\u00e9chir sur ma journ\u00e9e</strong> \u2014 D\u00e9crivez un moment de votre vie, et ProustGPT r\u00e9pond dans le style introspectif et riche de Proust lui-m\u00eame, \u00e9tablissant des liens entre votre exp\u00e9rience et les th\u00e8mes du roman.",
+    "bilingualTitle": "Lecture bilingue",
+    "bilingualDesc": "Chaque chapitre peut \u00eatre lu c\u00f4te \u00e0 c\u00f4te, dans la traduction anglaise de Scott Moncrieff et le fran\u00e7ais original de Proust. Ouvrez un chapitre dans la vue Lire et activez \u00ab EN + FR \u00bb.",
     "backToHome": "Retour \u00e0 l'accueil",
     "translationTitle": "Traduction",
     "translationWork": "\u00C0 LA RECHERCHE DU TEMPS PERDU",

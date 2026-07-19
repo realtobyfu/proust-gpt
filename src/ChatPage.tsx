@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import styled, { keyframes } from 'styled-components';
-import PassageCard from './components/PassageCard';
 import ReaderPanel from './components/ReaderPanel';
-import MarkdownMessage from './components/MarkdownMessage';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import ChatSidebar from './components/chat/ChatSidebar';
+import MessageList from './components/chat/MessageList';
+import ChatInput from './components/chat/ChatInput';
 import { useLanguage } from './contexts/LanguageContext';
 import { useStreamingQuery, Passage, HistoryMessage } from './hooks/useStreamingQuery';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useChatSessions, Message } from './hooks/useChatSessions';
+import { Bookmark, bookmarkMatches } from './types';
+import { copyToClipboard } from './utils/clipboard';
 
 const STREAM_DEBUG = import.meta.env.DEV || import.meta.env.VITE_STREAM_DEBUG === 'true';
 
@@ -30,544 +32,20 @@ function useIsDesktop() {
   return isDesktop;
 }
 
-// ── Styled Components ────────────────────────────────────────────────────────
-
-const ChatContainer = styled.div`
-  display: flex;
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  background-color: #f7f4f0;
-  overflow: hidden;
-`;
-
-const Sidebar = styled.div<{ $isOpen: boolean }>`
-  width: ${props => props.$isOpen ? '250px' : '0'};
-  background-color: #faf8f5;
-  border-right: ${props => props.$isOpen ? '1px solid #e0d8cf' : 'none'};
-  padding: ${props => props.$isOpen ? '2rem' : '0'};
-  box-sizing: border-box;
-  color: #333;
-  overflow-x: hidden;
-  overflow-y: ${props => props.$isOpen ? 'auto' : 'hidden'};
-  scrollbar-width: none;
-  &::-webkit-scrollbar { display: none; }
-  transition: all 0.3s ease;
-`;
-
-const ChatContent = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-
-  @media (min-width: 1025px) {
-    flex-direction: row;
-  }
-`;
-
-const ConversationPane = styled.div<{ $readerOpen: boolean; $splitPercent: number }>`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  transition: flex 0.3s ease;
-
-  @media (min-width: 1025px) {
-    flex: ${props => props.$readerOpen ? `0 0 ${props.$splitPercent}%` : '1'};
-  }
-`;
-
-const Divider = styled.div`
-  width: 6px;
-  cursor: col-resize;
-  background: transparent;
-  position: relative;
-  flex-shrink: 0;
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 2px;
-    width: 2px;
-    background: #e0d8cf;
-    transition: background 0.15s;
-  }
-
-  &:hover::after {
-    background: #8b4513;
-  }
-`;
-
-const Header = styled.div`
-  background-color: #faf8f5;
-  border-bottom: 1px solid #e0d8cf;
-  padding: 1.25rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const BackButton = styled.button`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  background: rgba(139, 69, 19, 0.05);
-  border: none;
-  border-radius: 20px;
-  padding: 0.4rem 1rem;
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.85rem;
-  color: #8b4513;
-  cursor: pointer;
-  transition: all 0.15s ease;
-
-  &:hover {
-    background: rgba(139, 69, 19, 0.1);
-  }
-`;
-
-const ModeLabel = styled.span`
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.95rem;
-  color: #666;
-  font-weight: 500;
-`;
-
-const MessagesArea = styled.div`
-  flex: 1;
-  padding: 2rem;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-
-  &::-webkit-scrollbar {
-    width: 5px;
-  }
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: #d4ccc3;
-    border-radius: 3px;
-  }
-`;
-
-const MessageBubble = styled.div<{ $isUser: boolean }>`
-  background-color: ${props => props.$isUser ? '#6b3410' : '#f0ebe4'};
-  border-radius: ${props => props.$isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px'};
-  border: ${props => props.$isUser ? 'none' : '1px solid #e0d8cf'};
-  border-left: ${props => !props.$isUser ? '3px solid #8b4513' : undefined};
-  color: ${props => props.$isUser ? '#fff' : '#3a3a3a'};
-  padding: 1rem;
-  margin-bottom: 1rem;
-  max-width: ${props => props.$isUser ? '60%' : '80%'};
-  align-self: ${props => props.$isUser ? 'flex-end' : 'flex-start'};
-  font-family: 'Georgia', serif;
-  line-height: 1.6;
-`;
-
-const StreamingBubble = styled(MessageBubble)``;
-
-const blink = keyframes`
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
-`;
-
-const StreamingCursor = styled.span`
-  display: inline-block;
-  width: 2px;
-  height: 1em;
-  background-color: #8b4513;
-  margin-left: 2px;
-  vertical-align: text-bottom;
-  animation: ${blink} 1s infinite;
-`;
-
-const SynthesisBanner = styled.div`
-  border-left: 3px solid #c4a882;
-  background: rgba(196, 168, 130, 0.08);
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.75rem;
-  font-family: 'Georgia', serif;
-  font-style: italic;
-  font-size: 0.9rem;
-  color: #555;
-  line-height: 1.5;
-  border-radius: 0 6px 6px 0;
-  max-width: 80%;
-  align-self: flex-start;
-`;
-
-const ResultsHeader = styled.div`
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.82rem;
-  color: #6e6459;
-  margin-bottom: 0.5rem;
-  max-width: 80%;
-  align-self: flex-start;
-`;
-
-const FloatingInputArea = styled.div`
-  padding: 1rem 2rem 1.5rem;
-  position: relative;
-`;
-
-const InputLabel = styled.div`
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.75rem;
-  color: #6e6459;
-  margin-bottom: 0.4rem;
-  padding-left: 1rem;
-`;
-
-const InputPill = styled.div`
-  display: flex;
-  align-items: center;
-  position: relative;
-  max-width: 800px;
-  margin: 0 auto;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid #d4ccc3;
-  border-radius: 24px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
-
-  &:focus-within {
-    border-color: #8b4513;
-    box-shadow: 0 4px 20px rgba(139, 69, 19, 0.1);
-  }
-`;
-
-const Input = styled.input`
-  width: 100%;
-  padding: 0.9rem 1.2rem;
-  padding-right: 3rem;
-  border: none;
-  border-radius: 24px;
-  font-size: 1rem;
-  color: #333;
-  background: transparent;
-  font-family: 'Georgia', serif;
-
-  &::placeholder {
-    color: #7a6e5e;
-  }
-
-  &:focus {
-    outline: none;
-  }
-`;
-
-const SendButton = styled.button`
-  position: absolute;
-  right: 8px;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: none;
-  background-color: #8b4513;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: #6b3410;
-  }
-
-  &:disabled {
-    background-color: #ccc;
-    cursor: default;
-  }
-`;
-
-const StopButton = styled.button`
-  background-color: #8b4513;
-  color: white;
-  border: none;
-  border-radius: 20px;
-  padding: 0.5rem 1rem;
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.9rem;
-  cursor: pointer;
-  margin-right: 0.5rem;
-
-  &:hover {
-    background-color: #6b3410;
-  }
-`;
-
-const pulse = keyframes`
-  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
-  40% { opacity: 1; transform: scale(1); }
-`;
-
-const LoadingIndicator = styled.div`
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.9rem;
-  color: #8b4513;
-  text-align: center;
-  margin: 1rem 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-`;
-
-const LoadingDot = styled.span<{ $delay: string }>`
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: #8b4513;
-  animation: ${pulse} 1.4s ease-in-out infinite;
-  animation-delay: ${props => props.$delay};
-`;
-
-const HamburgerButton = styled.button`
-  background: none;
-  border: none;
-  color: #8b4513;
-  cursor: pointer;
-  padding: 0.3rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  transition: color 0.2s ease;
-
-  &:hover {
-    color: #6b3410;
-  }
-`;
-
-
-const SidebarSection = styled.div`
-  margin-bottom: 2rem;
-`;
-
-const SidebarTitle = styled.h3`
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-  color: #333;
-`;
-
-const SidebarList = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 0;
-`;
-
-const SidebarItem = styled.li`
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.9rem;
-  padding: 0.25rem 0;
-  color: #666;
-  cursor: pointer;
-  transition: color 0.2s ease;
-
-  &:hover {
-    color: #8b4513;
-  }
-`;
-
-const ErrorMessage = styled.div`
-  background-color: #fdf6f0;
-  border: 1px solid #e0c8b0;
-  color: #8b4513;
-  border-radius: 10px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  max-width: 80%;
-  align-self: flex-start;
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.9rem;
-
-  &::before {
-    content: '\26A0  ';
-  }
-`;
-
-const RetryButton = styled.button`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  margin-top: 0.6rem;
-  background: rgba(139, 69, 19, 0.08);
-  border: 1px solid #c4a882;
-  border-radius: 20px;
-  padding: 0.35rem 0.9rem;
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.82rem;
-  color: #8b4513;
-  cursor: pointer;
-  transition: background 0.15s ease;
-
-  &:hover {
-    background: rgba(139, 69, 19, 0.15);
-  }
-`;
-
-const StoppedNote = styled.div`
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.72rem;
-  font-style: italic;
-  color: #6e6459;
-  margin: 0.25rem 0 1rem;
-  max-width: 80%;
-  align-self: flex-start;
-`;
-
-const NewChatRow = styled.div`
-  display: flex;
-  gap: 6px;
-  margin-bottom: 0.5rem;
-`;
-
-const NewChatButton = styled.button<{ $mode?: 'explore' | 'reflect' }>`
-  flex: 1;
-  padding: 0.4rem 0;
-  background: ${props => props.$mode === 'reflect' ? 'rgba(90, 107, 90, 0.06)' : 'rgba(139, 69, 19, 0.08)'};
-  border: 1px dashed ${props => props.$mode === 'reflect' ? '#8a9b8a' : '#c4a882'};
-  border-radius: 8px;
-  color: ${props => props.$mode === 'reflect' ? '#5a6b5a' : '#8b4513'};
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.72rem;
-  line-height: 1.2;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.3rem;
-  transition: background 0.2s ease;
-
-  &:hover {
-    background: ${props => props.$mode === 'reflect' ? 'rgba(90, 107, 90, 0.15)' : 'rgba(139, 69, 19, 0.15)'};
-  }
-`;
-
-const SessionItem = styled.div<{ $active: boolean }>`
-  padding: 0.5rem 0.6rem;
-  border-radius: 6px;
-  cursor: pointer;
-  background: ${props => props.$active ? 'rgba(139, 69, 19, 0.1)' : 'transparent'};
-  border-left: ${props => props.$active ? '3px solid #8b4513' : '3px solid transparent'};
-  margin-bottom: 0.25rem;
-  position: relative;
-  transition: background 0.15s ease;
-
-  &:hover {
-    background: rgba(139, 69, 19, 0.06);
-  }
-
-  &:hover .delete-btn {
-    opacity: 1;
-  }
-`;
-
-const SessionTitle = styled.div`
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.82rem;
-  color: #333;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding-right: 1.2rem;
-`;
-
-const SessionMeta = styled.div`
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.7rem;
-  color: #6e6459;
-  margin-top: 0.15rem;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-`;
-
-const SessionModeTag = styled.span<{ $mode: string }>`
-  font-size: 0.65rem;
-  padding: 0.05rem 0.35rem;
-  border-radius: 3px;
-  background: ${props => props.$mode === 'refine_prose' ? 'rgba(90, 120, 160, 0.12)' : 'rgba(139, 69, 19, 0.08)'};
-  color: ${props => props.$mode === 'refine_prose' ? '#5a78a0' : '#8b4513'};
-`;
-
-const DeleteButton = styled.button`
-  position: absolute;
-  top: 0.45rem;
-  right: 0.3rem;
-  background: none;
-  border: none;
-  color: #c4a882;
-  cursor: pointer;
-  font-size: 0.9rem;
-  line-height: 1;
-  padding: 0.1rem 0.25rem;
-  border-radius: 3px;
-  opacity: 0.5;
-  transition: opacity 0.15s, color 0.15s;
-
-  &:hover,
-  &:focus-visible {
-    opacity: 1;
-    color: #a03030;
-    background: rgba(160, 48, 48, 0.08);
-  }
-
-  @media (hover: hover) {
-    opacity: 0;
-  }
-`;
-
-const EmptyState = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.2rem;
-`;
-
-const EmptyStateTitle = styled.h2`
-  font-family: 'Belgrano', serif;
-  font-weight: 400;
-  font-size: 1.3rem;
-  color: #2a2a2a;
-  margin: 0;
-`;
-
-const SuggestionChips = styled.div`
-  display: flex;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-  justify-content: center;
-`;
-
-const SuggestionChip = styled.button`
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.85rem;
-  color: #3a3028;
-  background: rgba(58, 48, 40, 0.04);
-  border: 1px solid #d4ccc3;
-  border-radius: 20px;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  transition: all 0.15s ease;
-
-  &:hover {
-    background: rgba(58, 48, 40, 0.1);
-    border-color: #564a40;
-  }
-`;
+// ── Styled components (extracted to ChatPage.styles.ts, I1) ──
+import {
+  ChatContainer,
+  ChatContent,
+  ConversationPane,
+  Divider,
+  Header,
+  BackButton,
+  ModeSwitcher,
+  ModeSwitchButton,
+  HeaderTextButton,
+  CopyNotice,
+  HamburgerButton,
+} from './ChatPage.styles';
 
 // ── Prompt pools ─────────────────────────────────────────────────────────────
 // Suggestion prompts live in the i18n files (chat.explorePromptPool /
@@ -584,32 +62,10 @@ function shuffleArray<T>(arr: T[]): T[] {
 
 // ── Interfaces ───────────────────────────────────────────────────────────────
 
-interface Bookmark {
-  id: string;
-  text: string;
-  book: string;
-  chapter: string;
-  index?: number;
-  savedAt: string;
-}
-
 interface LastPassagePosition {
   book: string;
   chapter: string;
   index?: number;
-}
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-/** Extract cited [N] indices from response text (single-digit only). */
-function extractCitedIndices(text: string): Set<number> {
-  const indices = new Set<number>();
-  const re = /\[(\d)\]/g;
-  let m;
-  while ((m = re.exec(text)) !== null) {
-    indices.add(parseInt(m[1], 10));
-  }
-  return indices;
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -962,7 +418,7 @@ const ChatPage: React.FC = () => {
     switch (activeMode) {
       case 'explore_lost_time':
         return t('chat.exploringMode');
-      case 'refine_prose':
+      case 'reflect':
         return t('chat.reflectingMode');
       default:
         return t('chat.readingMode');
@@ -990,7 +446,7 @@ const ChatPage: React.FC = () => {
     setUserInput('');
     setSelectedPassage(null);
 
-    const queryMode = activeMode === 'refine_prose' ? 'reflect' : 'explore';
+    const queryMode = activeMode === 'reflect' ? 'reflect' : 'explore';
     await streamQuery(message, queryMode, language, history.length > 0 ? history : undefined);
   };
 
@@ -1013,7 +469,7 @@ const ChatPage: React.FC = () => {
       role: m.isUser ? 'user' as const : 'assistant' as const,
       content: m.text,
     }));
-    const queryMode = activeMode === 'refine_prose' ? 'reflect' : 'explore';
+    const queryMode = activeMode === 'reflect' ? 'reflect' : 'explore';
     streamQuery(lastUser.text, queryMode, language, history.length > 0 ? history : undefined);
   };
 
@@ -1031,24 +487,77 @@ const ChatPage: React.FC = () => {
     }
   };
 
+  // Mode switching from the header (H3)
+  const handleSwitchMode = (mode: string) => {
+    if (mode === activeMode) return;
+    if (messages.length > 0 && !window.confirm(t('chat.switchModeConfirm'))) return;
+    handleNewConversation(mode);
+  };
+
+  // Export / share (H5) — markdown to clipboard
+  const [copyNotice, setCopyNotice] = useState<string | null>(null);
+  const copyNoticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flashNotice = useCallback((msg: string) => {
+    setCopyNotice(msg);
+    if (copyNoticeTimer.current) clearTimeout(copyNoticeTimer.current);
+    copyNoticeTimer.current = setTimeout(() => setCopyNotice(null), 2200);
+  }, []);
+  useEffect(() => () => {
+    if (copyNoticeTimer.current) clearTimeout(copyNoticeTimer.current);
+  }, []);
+
+  const passageToMarkdown = (p: Passage) =>
+    `> ${p.text}\n> — ${p.book || 'In Search of Lost Time'}${p.chapter ? `, ${p.chapter}` : ''}`;
+
+  const handleExportConversation = async () => {
+    if (messages.length === 0) {
+      flashNotice(t('chat.nothingToExport'));
+      return;
+    }
+    const body = messages.map(m => {
+      if (m.isUser) return `**You:** ${m.text}`;
+      let block = `**ProustGPT:** ${m.text}`;
+      if (m.passages && m.passages.length > 0) {
+        block += '\n\n' + m.passages.map(passageToMarkdown).join('\n>\n');
+      }
+      return block;
+    }).join('\n\n');
+    const md = `# ProustGPT — ${getModeDisplay()}\n\n${body}\n`;
+    const ok = await copyToClipboard(md);
+    flashNotice(ok ? t('chat.copied') : t('chat.exportFailed'));
+  };
+
+  const handleExportBookmarks = async () => {
+    if (bookmarks.length === 0) {
+      flashNotice(t('chat.nothingToExport'));
+      return;
+    }
+    const body = bookmarks
+      .map(b => `> ${b.text}\n> — ${b.book}${b.chapter ? `, ${b.chapter}` : ''}`)
+      .join('\n\n');
+    const md = `# ProustGPT — ${t('chat.bookmarks', { count: bookmarks.length })}\n\n${body}\n`;
+    const ok = await copyToClipboard(md);
+    flashNotice(ok ? t('chat.copied') : t('chat.exportFailed'));
+  };
+
   const handleBookmark = (passage: Passage) => {
-    const existing = bookmarks.find(b => b.text === passage.text);
-    if (existing) {
-      setBookmarks(bookmarks.filter(b => b.text !== passage.text));
-    } else {
-      setBookmarks([...bookmarks, {
+    setBookmarks(prev => {
+      if (prev.some(b => bookmarkMatches(b, passage))) {
+        return prev.filter(b => !bookmarkMatches(b, passage));
+      }
+      return [...prev, {
         id: Date.now().toString(),
         text: passage.text,
         book: passage.book || "Unknown",
         chapter: passage.chapter || "Unknown",
         index: passage.index,
         savedAt: new Date().toISOString(),
-      }]);
-    }
+      }];
+    });
   };
 
-  const isBookmarked = (passageText: string) => {
-    return bookmarks.some(b => b.text === passageText);
+  const isBookmarked = (passage: Passage) => {
+    return bookmarks.some(b => bookmarkMatches(b, passage));
   };
 
   const handleReadInContext = useCallback(async (passage: Passage) => {
@@ -1078,120 +587,20 @@ const ChatPage: React.FC = () => {
     setSelectedPassageGroup(allPassages);
   }, []);
 
-  const characters = [
-    'Marcel (Narrator)',
-    'Swann',
-    'Odette',
-    'Gilberte',
-    'Albertine',
-    'Baron de Charlus',
-    'Mme de Guermantes'
-  ];
-
   return (
     <ChatContainer>
-      <Sidebar as="nav" aria-label={t('chat.conversations')} $isOpen={sidebarOpen}>
-        <SidebarSection>
-          <NewChatRow>
-            <NewChatButton $mode="explore" onClick={() => handleNewConversation('explore_lost_time')} title={t('chat.modeExplore')}>
-              + {t('chat.modeExplore')}
-            </NewChatButton>
-            <NewChatButton $mode="reflect" onClick={() => handleNewConversation('refine_prose')} title={t('chat.modeReflect')}>
-              + {t('chat.modeReflect')}
-            </NewChatButton>
-          </NewChatRow>
-          <SidebarTitle>{t('chat.conversations')}</SidebarTitle>
-          {sessions.length === 0 ? (
-            <SidebarItem style={{ color: '#aaa', cursor: 'default' }}>
-              {t('chat.noConversations')}
-            </SidebarItem>
-          ) : (
-            sessions.map(s => (
-              <SessionItem
-                key={s.id}
-                $active={s.id === currentSessionIdRef.current}
-                role="button"
-                tabIndex={0}
-                aria-current={s.id === currentSessionIdRef.current ? 'true' : undefined}
-                onClick={() => handleSelectSession(s.id)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleSelectSession(s.id);
-                  }
-                }}
-              >
-                <SessionTitle>{s.title}</SessionTitle>
-                <SessionMeta>
-                  <SessionModeTag $mode={s.mode}>
-                    {s.mode === 'refine_prose' ? t('chat.modeReflect') : t('chat.modeExplore')}
-                  </SessionModeTag>
-                  {new Date(s.updatedAt).toLocaleDateString(language)}
-                </SessionMeta>
-                <DeleteButton
-                  className="delete-btn"
-                  onClick={(e) => handleDeleteSession(e, s.id)}
-                  aria-label={t('chat.deleteConversation')}
-                  title={t('chat.deleteConversation')}
-                >
-                  &times;
-                </DeleteButton>
-              </SessionItem>
-            ))
-          )}
-        </SidebarSection>
-
-        <SidebarSection>
-          <SidebarTitle>{t('chat.characters')}</SidebarTitle>
-          <SidebarList>
-            {characters.map(char => (
-              <SidebarItem
-                key={char}
-                role="button"
-                tabIndex={0}
-                onClick={() => setUserInput(t('chat.tellMeAbout', { character: char }))}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    setUserInput(t('chat.tellMeAbout', { character: char }));
-                  }
-                }}
-              >
-                {char}
-              </SidebarItem>
-            ))}
-          </SidebarList>
-        </SidebarSection>
-
-        <SidebarSection>
-          <SidebarTitle>{t('chat.bookmarks', { count: bookmarks.length })}</SidebarTitle>
-          <SidebarList>
-            {bookmarks.length === 0 ? (
-              <SidebarItem style={{ color: '#aaa', cursor: 'default' }}>
-                {t('chat.noBookmarks')}
-              </SidebarItem>
-            ) : (
-              bookmarks.map(bm => (
-                <SidebarItem
-                  key={bm.id}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setUserInput(`Tell me more about this passage: "${bm.text.slice(0, 80)}..."`)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setUserInput(`Tell me more about this passage: "${bm.text.slice(0, 80)}..."`);
-                    }
-                  }}
-                  title={bm.text.slice(0, 200)}
-                >
-                  {bm.book} &mdash; {bm.text.slice(0, 40)}...
-                </SidebarItem>
-              ))
-            )}
-          </SidebarList>
-        </SidebarSection>
-      </Sidebar>
+      <ChatSidebar
+        sidebarOpen={sidebarOpen}
+        sessions={sessions}
+        currentSessionId={currentSessionIdRef.current}
+        bookmarks={bookmarks}
+        language={language}
+        onNewConversation={handleNewConversation}
+        onSelectSession={handleSelectSession}
+        onDeleteSession={handleDeleteSession}
+        onFillInput={setUserInput}
+        onExportBookmarks={handleExportBookmarks}
+      />
 
       <ChatContent ref={chatContentRef}>
         <ConversationPane $readerOpen={readerOpen} $splitPercent={splitPercent}>
@@ -1205,9 +614,33 @@ const ChatPage: React.FC = () => {
                 </svg>
               </HamburgerButton>
               <BackButton onClick={() => navigate('/')} aria-label={t('common.back')}>&larr;</BackButton>
-              <ModeLabel>{getModeDisplay()}</ModeLabel>
+              <ModeSwitcher role="group" aria-label={getModeDisplay()}>
+                <ModeSwitchButton
+                  type="button"
+                  $mode="explore"
+                  $active={activeMode === 'explore_lost_time'}
+                  aria-pressed={activeMode === 'explore_lost_time'}
+                  onClick={() => handleSwitchMode('explore_lost_time')}
+                >
+                  {t('chat.modeExplore')}
+                </ModeSwitchButton>
+                <ModeSwitchButton
+                  type="button"
+                  $mode="reflect"
+                  $active={activeMode === 'reflect'}
+                  aria-pressed={activeMode === 'reflect'}
+                  onClick={() => handleSwitchMode('reflect')}
+                >
+                  {t('chat.modeReflect')}
+                </ModeSwitchButton>
+              </ModeSwitcher>
             </div>
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '0.9rem', alignItems: 'center' }}>
+              {messages.length > 0 && (
+                <HeaderTextButton onClick={handleExportConversation} title={t('chat.exportConversation')}>
+                  {t('chat.exportConversation')}
+                </HeaderTextButton>
+              )}
               <Link to="/about" style={{ color: '#8b4513', fontFamily: "'IBM Plex Sans', sans-serif", fontSize: '0.9rem', textDecoration: 'underline' }}>
                 {t('common.about')}
               </Link>
@@ -1215,163 +648,36 @@ const ChatPage: React.FC = () => {
             </div>
           </Header>
 
-          <MessagesArea as="main">
-            {messages.length === 0 && !isLoading && !isStreaming && (
-              <EmptyState>
-                <EmptyStateTitle>
-                  {activeMode === 'refine_prose'
-                    ? t('chat.emptyReflect')
-                    : t('chat.emptyExplore')}
-                </EmptyStateTitle>
-                <SuggestionChips>
-                  {(activeMode === 'refine_prose' ? reflectSuggestions : exploreSuggestions).map((text, i) => (
-                    <SuggestionChip key={i} onClick={() => handleSendMessage(text)}>
-                      {text}
-                    </SuggestionChip>
-                  ))}
-                </SuggestionChips>
-              </EmptyState>
-            )}
+          <MessageList
+            messages={messages}
+            isDesktop={isDesktop}
+            isLoading={isLoading}
+            isStreaming={isStreaming}
+            streamingResponse={streamingResponse}
+            streamingStatus={streamingStatus}
+            streamCommitted={streamCommittedRef.current}
+            error={error}
+            activeMode={activeMode}
+            exploreSuggestions={exploreSuggestions}
+            reflectSuggestions={reflectSuggestions}
+            messagesEndRef={messagesEndRef}
+            onSendMessage={handleSendMessage}
+            onSelectPassageForReader={handleSelectPassageForReader}
+            onBookmark={handleBookmark}
+            isBookmarked={isBookmarked}
+            onReadInContext={handleReadInContext}
+            onRetry={handleRetry}
+          />
 
-            {messages.map(message => {
-              if (message.isUser) {
-                return (
-                  <MessageBubble key={message.id} $isUser>
-                    {message.text}
-                  </MessageBubble>
-                );
-              }
-
-              // Determine which passages were actually cited
-              const allPassages = message.passages || [];
-              const citedIndices = extractCitedIndices(message.text);
-              const citedPassages = allPassages.filter(
-                p => p.citation_index != null && citedIndices.has(p.citation_index)
-              );
-              // Show cited passages if any, otherwise fall back to all passages
-              const displayPassages = citedPassages.length > 0 ? citedPassages : allPassages;
-              const hasPassages = displayPassages.length > 0;
-
-              return (
-                <div key={message.id}>
-                  {message.text && (
-                    <MessageBubble $isUser={false}>
-                      <MarkdownMessage
-                        content={message.text}
-                        passages={allPassages}
-                        onCitationClick={(n) => {
-                          const target = allPassages.find(p => p.citation_index === n);
-                          if (target && isDesktop) {
-                            handleSelectPassageForReader(target, displayPassages);
-                          } else {
-                            // Scroll to the passage carousel card
-                            const el = document.getElementById(`passage-carousel-${message.id}`);
-                            el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                          }
-                        }}
-                      />
-                    </MessageBubble>
-                  )}
-
-                  {message.stopped && (
-                    <StoppedNote>{t('chat.stopped')}</StoppedNote>
-                  )}
-
-                  {message.metadata?.synthesis && (
-                    <SynthesisBanner>{message.metadata.synthesis}</SynthesisBanner>
-                  )}
-
-                  {hasPassages && (
-                    <>
-                      <ResultsHeader>
-                        {t('chat.passagesFound', { count: displayPassages.length })}
-                      </ResultsHeader>
-
-                      <div id={`passage-carousel-${message.id}`} style={{ alignSelf: 'flex-start', maxWidth: '80%' }}>
-                        <PassageCard
-                          passages={displayPassages}
-                          onBookmark={handleBookmark}
-                          isBookmarked={isBookmarked}
-                          onReadInContext={handleReadInContext}
-                          onSelectPassage={isDesktop ? (p) => handleSelectPassageForReader(p, displayPassages) : undefined}
-                          isDesktop={isDesktop}
-                        />
-                      </div>
-                    </>
-                  )}
-                </div>
-              );
-            })}
-
-            {/* Show streaming bubble while actively streaming OR while waiting for commit */}
-            {!streamCommittedRef.current && ((isStreaming && streamingResponse) || (!isLoading && !isStreaming && streamingResponse)) && (
-              <StreamingBubble $isUser={false}>
-                <MarkdownMessage content={streamingResponse} />
-                {isStreaming && <StreamingCursor />}
-              </StreamingBubble>
-            )}
-
-            {error && (
-              <ErrorMessage>
-                {t('common.error')}: {error}
-                {messages.some(m => m.isUser) && (
-                  <div>
-                    <RetryButton onClick={handleRetry} disabled={isLoading}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M23 4v6h-6M1 20v-6h6" />
-                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-                      </svg>
-                      {t('chat.retry')}
-                    </RetryButton>
-                  </div>
-                )}
-              </ErrorMessage>
-            )}
-
-            {isLoading && !streamingResponse && (
-              <LoadingIndicator>
-                <LoadingDot $delay="0s" />
-                <LoadingDot $delay="0.2s" />
-                <LoadingDot $delay="0.4s" />
-                {streamingStatus || t('chat.searching')}
-              </LoadingIndicator>
-            )}
-
-            <div ref={messagesEndRef} />
-          </MessagesArea>
-
-          <FloatingInputArea>
-            <InputLabel>
-              {activeMode === 'refine_prose'
-                ? t('chat.inputLabelReflect')
-                : t('chat.inputLabelExplore')}
-            </InputLabel>
-            <InputPill as="form" onSubmit={handleFormSubmit}>
-              <Input
-                type="text"
-                placeholder={activeMode === 'refine_prose'
-                  ? t('chat.placeholderReflect')
-                  : t('chat.placeholderExplore')}
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                disabled={isLoading}
-                aria-label={activeMode === 'refine_prose'
-                  ? t('chat.inputLabelReflect')
-                  : t('chat.inputLabelExplore')}
-              />
-              {isStreaming ? (
-                <StopButton type="button" onClick={handleStopGenerating}>
-                  {t('common.stop')}
-                </StopButton>
-              ) : (
-                <SendButton type="submit" disabled={isLoading} aria-label={t('common.search')}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 19V5M5 12l7-7 7 7" />
-                  </svg>
-                </SendButton>
-              )}
-            </InputPill>
-          </FloatingInputArea>
+          <ChatInput
+            activeMode={activeMode}
+            userInput={userInput}
+            onUserInput={setUserInput}
+            isLoading={isLoading}
+            isStreaming={isStreaming}
+            onSubmit={handleFormSubmit}
+            onStop={handleStopGenerating}
+          />
         </ConversationPane>
 
         {readerOpen && (
@@ -1396,6 +702,7 @@ const ChatPage: React.FC = () => {
           </>
         )}
       </ChatContent>
+      {copyNotice && <CopyNotice role="status" aria-live="polite">{copyNotice}</CopyNotice>}
     </ChatContainer>
   );
 };

@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import styled from 'styled-components';
 import { useNavigate, Link } from 'react-router-dom';
-import { useTranslation, Trans } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import ProustImage from './assets/proust.jpg';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import ReadingPaths from './components/ReadingPaths';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -358,32 +359,43 @@ const NavLink = styled(Link)`
   }
 `;
 
-const GuidanceSection = styled.div<{ $visible: boolean }>`
-  position: fixed;
-  bottom: 5rem;
-  left: 2rem;
-  max-width: 24rem;
-  font-size: 0.9rem;
-  line-height: 1.6;
-  color: #666;
-  background: #f7f4f0;
-  padding: ${props => props.$visible ? '1rem' : '0'};
-  border-radius: 8px;
-  box-shadow: ${props => props.$visible ? '0 2px 8px rgba(0,0,0,0.1)' : 'none'};
-  height: ${props => props.$visible ? 'auto' : '0'};
-  opacity: ${props => props.$visible ? '1' : '0'};
-  overflow: hidden;
-  transition: all 0.3s ease;
-  z-index: 100;
+const BilingualPromo = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0 0 1rem;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.82rem;
+  color: #6e6459;
+  text-decoration: none;
+  transition: color 0.15s ease;
 
-  a {
+  &:hover {
     color: #8b4513;
-    text-decoration: underline;
-    cursor: pointer;
+  }
 
-    &:hover {
-      color: #6b3410;
-    }
+  @media (max-width: 768px) {
+    margin-left: 0;
+  }
+`;
+
+const BilingualGlyph = styled.span`
+  display: inline-flex;
+  border: 1px solid #c4a882;
+  border-radius: 4px;
+  overflow: hidden;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+
+  span {
+    padding: 0.1rem 0.3rem;
+    color: #8b4513;
+  }
+  span + span {
+    border-left: 1px solid #c4a882;
+    color: #5f5648;
   }
 `;
 
@@ -484,7 +496,7 @@ const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [inputValue, setInputValue] = useState('');
-  const [showGuidance, setShowGuidance] = useState(false);
+  const [showPaths, setShowPaths] = useState(false);
   const [hasHistory, setHasHistory] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -516,7 +528,8 @@ const LandingPage: React.FC = () => {
     navigate('/chat', { state: { mode, prompt } });
   };
 
-  const handleGuidanceExplore = (prompt: string) => {
+  const handleSelectPathModule = (prompt: string) => {
+    setShowPaths(false);
     navigate('/chat', { state: { mode: 'explore_lost_time', prompt } });
   };
 
@@ -572,12 +585,12 @@ const LandingPage: React.FC = () => {
               <Button
                 key={chip.textKey}
                 $mode="reflect"
-                onClick={() => handleChipClick('refine_prose', t(chip.promptKey))}
+                onClick={() => handleChipClick('reflect', t(chip.promptKey))}
               >
                 {t(chip.textKey)}
               </Button>
             ))}
-            <NewChatChip onClick={() => navigate('/chat', { state: { mode: 'refine_prose', prompt: '' } })}>
+            <NewChatChip onClick={() => navigate('/chat', { state: { mode: 'reflect', prompt: '' } })}>
               +
             </NewChatChip>
           </ButtonContainer>
@@ -591,6 +604,11 @@ const LandingPage: React.FC = () => {
             </svg>
             {t('common.beginReading')}
           </MobileReadCta>
+
+          <BilingualPromo to="/read">
+            <BilingualGlyph aria-hidden="true"><span>FR</span><span>EN</span></BilingualGlyph>
+            {t('landing.bilingualNote')}
+          </BilingualPromo>
         </ContentColumn>
 
         <ProustSection>
@@ -607,20 +625,16 @@ const LandingPage: React.FC = () => {
         </ProustSection>
       </MainRow>
 
-      <GuidanceToggle onClick={() => setShowGuidance(!showGuidance)}>
-        {showGuidance ? t('common.hide') : t('landing.newToProust')}
+      <GuidanceToggle onClick={() => setShowPaths(true)} aria-haspopup="dialog">
+        {t('landing.newToProust')}
       </GuidanceToggle>
 
-      <GuidanceSection $visible={showGuidance}>
-        <Trans
-          i18nKey="landing.guidance"
-          components={{
-            em: <em />,
-            // eslint-disable-next-line jsx-a11y/anchor-is-valid
-            1: <a style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => handleGuidanceExplore('What is the madeleine scene really about?')} />,
-          }}
+      {showPaths && (
+        <ReadingPaths
+          onClose={() => setShowPaths(false)}
+          onSelectModule={handleSelectPathModule}
         />
-      </GuidanceSection>
+      )}
 
       {hasHistory && (
         <FloatingChatButton onClick={() => navigate('/chat', { state: { resumeLastSession: true } })}>
