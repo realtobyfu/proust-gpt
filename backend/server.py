@@ -476,6 +476,29 @@ async def reflect_on_day(request: Request, body: QueryRequest):
 _READ_CACHE_CONTROL = "public, max-age=86400"
 ReadLang = Literal["en", "fr", "both"]
 
+_READING_PATHS_FILE = os.path.join(os.path.dirname(__file__), "reading_paths.json")
+_reading_paths_cache: Optional[dict] = None
+
+
+def _load_reading_paths() -> dict:
+    """Load and cache the guided reading-paths data (H4)."""
+    global _reading_paths_cache
+    if _reading_paths_cache is None:
+        try:
+            with open(_READING_PATHS_FILE, encoding="utf-8") as f:
+                _reading_paths_cache = json.load(f)
+        except (OSError, json.JSONDecodeError) as e:
+            req_logger.warning("Failed to load reading_paths.json: %s", e)
+            _reading_paths_cache = {"paths": {}}
+    return _reading_paths_cache
+
+
+@app.get("/api/read/paths")
+async def read_paths(response: Response):
+    """Return the guided reading paths (New-to-Proust journeys)."""
+    response.headers["Cache-Control"] = _READ_CACHE_CONTROL
+    return _load_reading_paths()
+
 
 @app.get("/api/read/toc")
 async def read_toc(
