@@ -8,6 +8,7 @@ const MarkdownWrapper = styled.div`
   font-family: 'Georgia', serif;
   line-height: 1.85;
   text-align: justify;
+  hyphens: auto;
   color: inherit;
 
   p {
@@ -129,11 +130,22 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = React.memo(({ content, p
         components={{
           'cite-ref': ({ node, ...props }) => {
             const n = parseInt((props as Record<string, string>)['data-n'], 10);
+            const activate = () => onCitationClick?.(n);
             return (
               <CitationRef
+                role="button"
+                tabIndex={0}
+                aria-label={`Passage ${n}`}
                 onClick={(e) => {
                   e.stopPropagation();
-                  onCitationClick?.(n);
+                  activate();
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    activate();
+                  }
                 }}
                 title={`Passage ${n}`}
               >

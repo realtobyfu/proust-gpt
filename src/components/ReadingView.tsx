@@ -46,7 +46,7 @@ const ProgressLabel = styled.div`
   padding: 0.2rem 1rem 0.15rem;
   font-family: 'IBM Plex Sans', sans-serif;
   font-size: 0.7rem;
-  color: #aaa;
+  color: #6e6459;
 `;
 
 const ProgressTrack = styled.div`
@@ -76,6 +76,7 @@ const PassageText = styled.p`
   line-height: 1.95;
   color: #333;
   text-align: justify;
+  hyphens: auto;
   margin: 0;
   padding: 0.5rem 0;
 `;
@@ -150,7 +151,7 @@ const HeaderRow = styled.div`
 const PageInfo = styled.span`
   font-family: 'IBM Plex Sans', sans-serif;
   font-size: 0.78rem;
-  color: #999;
+  color: #6e6459;
 `;
 
 const SideArrow = styled.button<{ $side: 'left' | 'right'; $visible: boolean }>`
@@ -185,6 +186,54 @@ const SideArrow = styled.button<{ $side: 'left' | 'right'; $visible: boolean }>`
   @media (max-width: 900px) {
     display: none;
   }
+`;
+
+// Bottom pagination bar for phones/tablets (the fixed SideArrows are hidden < 900px).
+const MobileNav = styled.nav`
+  display: none;
+
+  @media (max-width: 900px) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0.75rem 1rem 2.5rem;
+  }
+`;
+
+const MobileNavButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(139, 69, 19, 0.06);
+  border: 1px solid #d4ccc3;
+  border-radius: 20px;
+  padding: 0.55rem 1.1rem;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.85rem;
+  color: #8b4513;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(139, 69, 19, 0.12);
+  }
+
+  &:disabled {
+    color: #c4b8a8;
+    border-color: #e8e2da;
+    background: none;
+    cursor: default;
+  }
+`;
+
+const MobileNavInfo = styled.span`
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.8rem;
+  color: #6e6459;
+  white-space: nowrap;
 `;
 
 const BackButton = styled.button`
@@ -313,8 +362,9 @@ const SecondaryPassageText = styled.p`
   font-family: 'Georgia', serif;
   font-size: 1.08rem;
   line-height: 1.9;
-  color: #666;
+  color: #5f5648;
   text-align: justify;
+  hyphens: auto;
   margin: 0;
   padding: 0.5rem 0;
 `;
@@ -552,10 +602,11 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <BilingualToggle
               $active={bilingual}
+              aria-pressed={bilingual}
               onClick={() => setBilingual(!bilingual)}
-              title={bilingual ? 'Hide translation' : 'Show side-by-side translation'}
+              title={bilingual ? t('readPage.bilingualHide') : t('readPage.bilingualShow')}
             >
-              {bilingual ? 'EN / FR' : 'EN / FR'}
+              {bilingual ? 'EN + FR' : (textLanguage === 'fr' ? 'FR' : 'EN')}
             </BilingualToggle>
             {totalPages > 1 && <PageInfo>{t('readPage.pageOf', { current: page + 1, total: totalPages })}</PageInfo>}
           </div>
@@ -582,14 +633,14 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
           return (
             <React.Fragment key={`group-${firstPassage.index}`}>
               <PassageBlock data-passage-indices={group.map(p => p.index).join(',')}>
-                <ParagraphNumber>{gi + 1}</ParagraphNumber>
+                <ParagraphNumber aria-hidden="true">{gi + 1}</ParagraphNumber>
                 {bilingual ? (() => {
                   const frText = group.map(p => (p.text_fr || '').trim()).filter(Boolean).join(' ');
                   return (
                     <BilingualRow>
                       <BilingualColumn>
                         {frText
-                          ? <PassageText>{formatPassageText(frText)}</PassageText>
+                          ? <PassageText lang="fr">{formatPassageText(frText)}</PassageText>
                           : <UnavailableNote>{t('passage.frenchUnavailable')}</UnavailableNote>
                         }
                       </BilingualColumn>
@@ -600,7 +651,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
                   );
                 })() : (
                   <>
-                    <PassageText>{formatPassageText(mergedText)}</PassageText>
+                    <PassageText lang={textLanguage === 'fr' ? 'fr' : undefined}>{formatPassageText(mergedText)}</PassageText>
                     {textLanguage === 'fr' && group.some(p => p.text_unavailable) && (
                       <UnavailableNote>{t('passage.frenchUnavailable')}</UnavailableNote>
                     )}
@@ -631,26 +682,47 @@ const ReadingView: React.FC<ReadingViewProps> = ({ volume, chapter, page, onNavi
         )}
       </Container>
 
+      {/* Bottom pagination for phones/tablets — the fixed SideArrows are hidden < 900px */}
+      <MobileNav aria-label={t('readPage.contents')}>
+        <MobileNavButton
+          onClick={() => (isFirstPage ? handleChapterNav(prevChapter) : handlePageNav(page - 1))}
+          disabled={isFirstPage && !prevChapter}
+          aria-label={isFirstPage ? t('readPage.previousChapter') : t('readPage.previousPage')}
+        >
+          &#8249; {isFirstPage ? t('readPage.previousChapter') : t('readPage.previousPage')}
+        </MobileNavButton>
+        {totalPages > 1 && (
+          <MobileNavInfo>{t('readPage.pageOf', { current: page + 1, total: totalPages })}</MobileNavInfo>
+        )}
+        <MobileNavButton
+          onClick={() => (isLastPage ? handleChapterNav(nextChapter) : handlePageNav(page + 1))}
+          disabled={isLastPage && !nextChapter}
+          aria-label={isLastPage ? t('readPage.nextChapter') : t('readPage.nextPage')}
+        >
+          {isLastPage ? t('readPage.nextChapter') : t('readPage.nextPage')} &#8250;
+        </MobileNavButton>
+      </MobileNav>
+
       {isFirstPage ? (
         prevChapter && (
-          <SideArrow $side="left" $visible={atBottom} onClick={() => handleChapterNav(prevChapter)} aria-label="Previous chapter">
+          <SideArrow $side="left" $visible={atBottom} onClick={() => handleChapterNav(prevChapter)} aria-label={t('readPage.previousChapter')}>
             &#8249;
           </SideArrow>
         )
       ) : (
-        <SideArrow $side="left" $visible={atBottom} onClick={() => handlePageNav(page - 1)} aria-label="Previous page">
+        <SideArrow $side="left" $visible={atBottom} onClick={() => handlePageNav(page - 1)} aria-label={t('readPage.previousPage')}>
           &#8249;
         </SideArrow>
       )}
 
       {isLastPage ? (
         nextChapter && (
-          <SideArrow $side="right" $visible={atBottom} onClick={() => handleChapterNav(nextChapter)} aria-label="Next chapter">
+          <SideArrow $side="right" $visible={atBottom} onClick={() => handleChapterNav(nextChapter)} aria-label={t('readPage.nextChapter')}>
             &#8250;
           </SideArrow>
         )
       ) : (
-        <SideArrow $side="right" $visible={atBottom} onClick={() => handlePageNav(page + 1)} aria-label="Next page">
+        <SideArrow $side="right" $visible={atBottom} onClick={() => handlePageNav(page + 1)} aria-label={t('readPage.nextPage')}>
           &#8250;
         </SideArrow>
       )}

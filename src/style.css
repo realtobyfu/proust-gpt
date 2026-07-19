@@ -1,13 +1,16 @@
+/* ProustGPT global reset — cream/brown literary theme.
+   Intentionally minimal: styled-components own most styling. */
+
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Georgia, 'Times New Roman', serif;
   line-height: 1.5;
   font-weight: 400;
   font-style: normal;
 
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* Cream theme — prevents a dark flash before styled-components mount. */
+  color-scheme: light;
+  color: #333;
+  background-color: #f7f4f0;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -15,28 +18,19 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  width: 100%;   /* Ensure the body takes full width */
-  height: 100%;  /* Ensure the body takes full height */
-  background-color: #242424;
+  width: 100%;
+  height: 100%;
+  background-color: #f7f4f0;
+  color: #333;
 }
 
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+a {
+  color: inherit;
+  text-decoration: inherit;
 }
 
 #app {
@@ -44,57 +38,11 @@ h1 {
   height: 100%;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vanilla:hover {
-  filter: drop-shadow(0 0 2em #3178c6aa);
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: none;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+/* Visible keyboard focus ring consistent with the brown theme.
+   Only shows for keyboard navigation, not mouse clicks. */
+:focus-visible {
+  outline: 2px solid #8b4513;
+  outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {

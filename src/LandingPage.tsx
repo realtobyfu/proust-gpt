@@ -77,7 +77,6 @@ const HeaderTitle = styled.h1`
   font-style: normal;
   font-weight: 400;
   font-size: 4.5rem;
-  text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 
   @media (max-width: 1024px) {
     font-size: 3.5rem;
@@ -258,25 +257,65 @@ const ModeDivider = styled.div`
 const ModeDividerText = styled.span`
   font-family: 'IBM Plex Sans', sans-serif;
   font-size: 0.8rem;
-  color: #999;
+  color: #6e6459;
   white-space: nowrap;
 `;
 
+const MainRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+`;
+
+const ContentColumn = styled.div`
+  flex: 1;
+  min-width: 0;
+`;
+
 const ProustSection = styled.div`
-  position: absolute;
-  right: 8rem;
-  top: 20rem;
   display: flex;
   flex-direction: column;
   align-items: center;
+  flex-shrink: 0;
+  margin-right: 4rem;
 
   @media (max-width: 1024px) {
-    right: 3rem;
-    top: 18rem;
+    margin-right: 1rem;
   }
 
   @media (max-width: 768px) {
     display: none;
+  }
+`;
+
+const MobileReadCta = styled(Link)`
+  display: none;
+
+  @media (max-width: 768px) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 1.25rem 0 0.5rem;
+    padding: 12px 16px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.95rem;
+    color: #8b4513;
+    background: rgba(139, 69, 19, 0.06);
+    border: 1px solid #c4a882;
+    border-radius: 10px;
+    text-decoration: none;
+
+    &:hover {
+      background: rgba(139, 69, 19, 0.12);
+    }
   }
 `;
 
@@ -360,14 +399,9 @@ const GuidanceToggle = styled.button`
   bottom: 3rem;
   left: 2rem;
   padding: 0.5rem 0;
-  outline: none;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   z-index: 100;
-
-  &:focus, &:focus-visible {
-    outline: none;
-  }
 
   &:hover {
     color: #6b3410;
@@ -494,57 +528,84 @@ const LandingPage: React.FC = () => {
         <NavLink to="/about">{t('common.about')}</NavLink>
       </TopNavLinks>
 
-      <HeaderTitle>{t('common.proustGpt')}</HeaderTitle>
-      <SubHeader>{t('landing.subtitle')}</SubHeader>
-      <Question>{t('landing.question')}</Question>
+      <MainRow>
+        <ContentColumn>
+          <HeaderTitle>{t('common.proustGpt')}</HeaderTitle>
+          <SubHeader>{t('landing.subtitle')}</SubHeader>
+          <Question>{t('landing.question')}</Question>
 
-      <SearchForm onSubmit={handleSearchSubmit}>
-        <SearchInputPill>
-          <SearchInput
-            ref={inputRef}
-            type="text"
-            placeholder={t('landing.placeholder')}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-          />
-          <SearchSendButton type="submit" aria-label={t('common.search')}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 19V5M5 12l7-7 7 7" />
+          <SearchForm onSubmit={handleSearchSubmit}>
+            <SearchInputPill>
+              <SearchInput
+                ref={inputRef}
+                type="text"
+                placeholder={t('landing.placeholder')}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+              />
+              <SearchSendButton type="submit" aria-label={t('common.search')}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 19V5M5 12l7-7 7 7" />
+                </svg>
+              </SearchSendButton>
+            </SearchInputPill>
+          </SearchForm>
+
+          <ButtonContainer>
+            {exploreChips.map((chip) => (
+              <Button
+                key={chip.textKey}
+                $mode="explore"
+                onClick={() => handleChipClick('explore_lost_time', t(chip.promptKey))}
+              >
+                {t(chip.textKey)}
+              </Button>
+            ))}
+          </ButtonContainer>
+
+          <ModeDivider>
+            <ModeDividerText>{t('landing.divider')}</ModeDividerText>
+          </ModeDivider>
+
+          <ButtonContainer $noWrap>
+            {reflectChips.map((chip) => (
+              <Button
+                key={chip.textKey}
+                $mode="reflect"
+                onClick={() => handleChipClick('refine_prose', t(chip.promptKey))}
+              >
+                {t(chip.textKey)}
+              </Button>
+            ))}
+            <NewChatChip onClick={() => navigate('/chat', { state: { mode: 'refine_prose', prompt: '' } })}>
+              +
+            </NewChatChip>
+          </ButtonContainer>
+
+          <MobileReadCta to="/read">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                 strokeLinejoin="round">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
             </svg>
-          </SearchSendButton>
-        </SearchInputPill>
-      </SearchForm>
+            {t('common.beginReading')}
+          </MobileReadCta>
+        </ContentColumn>
 
-      <ButtonContainer>
-        {exploreChips.map((chip) => (
-          <Button
-            key={chip.textKey}
-            $mode="explore"
-            onClick={() => handleChipClick('explore_lost_time', t(chip.promptKey))}
-          >
-            {t(chip.textKey)}
-          </Button>
-        ))}
-      </ButtonContainer>
-
-      <ModeDivider>
-        <ModeDividerText>{t('landing.divider')}</ModeDividerText>
-      </ModeDivider>
-
-      <ButtonContainer $noWrap>
-        {reflectChips.map((chip) => (
-          <Button
-            key={chip.textKey}
-            $mode="reflect"
-            onClick={() => handleChipClick('refine_prose', t(chip.promptKey))}
-          >
-            {t(chip.textKey)}
-          </Button>
-        ))}
-        <NewChatChip onClick={() => navigate('/chat', { state: { mode: 'refine_prose', prompt: '' } })}>
-          +
-        </NewChatChip>
-      </ButtonContainer>
+        <ProustSection>
+          <ProustImageContainer src={ProustImage} alt="Marcel Proust" />
+          <ReadLink to="/read">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                 strokeLinejoin="round">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+            {t('common.beginReading')}
+          </ReadLink>
+        </ProustSection>
+      </MainRow>
 
       <GuidanceToggle onClick={() => setShowGuidance(!showGuidance)}>
         {showGuidance ? t('common.hide') : t('landing.newToProust')}
@@ -560,19 +621,6 @@ const LandingPage: React.FC = () => {
           }}
         />
       </GuidanceSection>
-
-      <ProustSection>
-        <ProustImageContainer src={ProustImage} alt="Marcel Proust" />
-        <ReadLink to="/read">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-               strokeLinejoin="round">
-            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-          </svg>
-          {t('common.beginReading')}
-        </ReadLink>
-      </ProustSection>
 
       {hasHistory && (
         <FloatingChatButton onClick={() => navigate('/chat', { state: { resumeLastSession: true } })}>

@@ -74,6 +74,7 @@ const TextPreview = styled.div<{ $expanded: boolean; $maxHeight: string }>`
   font-size: ${props => props.$expanded ? '1.1rem' : '1.0rem'};
   line-height: 1.9;
   text-align: justify;
+  hyphens: auto;
   color: #333;
   position: relative;
   transition: max-height 0.35s ease, font-size 0.2s ease;
@@ -398,7 +399,19 @@ const PassageCard: React.FC<PassageCardProps> = ({
   ].filter(Boolean).join(' — ') + indexSuffix;
 
   return (
-    <CardWrapper $expanded={expanded} onClick={handleCardClick}>
+    <CardWrapper
+      $expanded={expanded}
+      onClick={handleCardClick}
+      role="button"
+      tabIndex={0}
+      aria-expanded={expanded}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleCardClick();
+        }
+      }}
+    >
       <CardInner>
         <BookmarkIcon
           $active={isBookmarked(passage.text)}

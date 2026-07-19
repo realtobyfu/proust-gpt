@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import i18n from '../i18n';
 import { Passage, QueryMetadata } from './useStreamingQuery';
 
 export interface Message {
@@ -7,6 +8,8 @@ export interface Message {
   isUser: boolean;
   passages?: Passage[];
   metadata?: QueryMetadata;
+  /** Set when the user stopped generation mid-stream; rendered as a localized meta note. */
+  stopped?: boolean;
 }
 
 export interface ChatSession {
@@ -85,7 +88,7 @@ function generateId(): string {
 
 function deriveTitle(messages: Message[]): string {
   const firstUser = messages.find(m => m.isUser);
-  if (!firstUser) return 'New conversation';
+  if (!firstUser) return i18n.t('chat.newConversation');
   const text = firstUser.text.trim();
   return text.length > 50 ? text.slice(0, 50) + '...' : text;
 }
@@ -106,7 +109,7 @@ export function useChatSessions() {
     const now = new Date().toISOString();
     const session: ChatSession = {
       id: generateId(),
-      title: 'New conversation',
+      title: i18n.t('chat.newConversation'),
       mode,
       createdAt: now,
       updatedAt: now,

@@ -167,6 +167,7 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ volumes, onSelectChap
                   <ChapterRow
                     key={ch.name}
                     onClick={() => onSelectChapter(vol.volume, ch.name)}
+                    aria-label={ch.display_name || ch.name}
                   >
                     <ChapterName>{ch.display_name || ch.name}</ChapterName>
                     <ChapterMeta>

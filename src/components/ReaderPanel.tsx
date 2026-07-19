@@ -100,6 +100,7 @@ const PassageText = styled.div`
   line-height: 1.95;
   color: #333;
   text-align: justify;
+  hyphens: auto;
   margin-bottom: 1.5rem;
 `;
 
