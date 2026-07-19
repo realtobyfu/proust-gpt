@@ -63,12 +63,12 @@ curl -X POST http://127.0.0.1:5000/api/explore_lost_time \
 
 python backend/test_metadata.py  # Run backend tests
 
-# RAG evaluation
-cd backend
-python scripts/evaluate.py              # Full eval with LLM-as-judge
-python scripts/evaluate.py --fast       # Retrieval metrics only (faster)
-python scripts/evaluate.py -n 5 -v      # First 5 questions, verbose
-python scripts/evaluate.py --export results.json  # Export to JSON
+# Backend unit/integration tests
+cd backend && pytest                    # Full suite (external services mocked)
+pytest tests/test_agent.py              # Agent router/streaming/citation tests
+
+# Retrieval evaluation (gold-set Recall@k / MRR / latency — the single eval system)
+cd evals && python run.py               # See evals/README.md
 ```
 
 ## Architecture
@@ -93,7 +93,7 @@ backend/                # FastAPI + Python
 ├── text_utils.py       # Shared text cleaning (OCR artifact fixes)
 ├── metadata.py         # Metadata extraction (characters, themes, reading time)
 ├── connection_mapper.py # Semantic relationship building
-├── evaluation.py       # RAG evaluation metrics (precision, recall, faithfulness)
+# (retrieval evaluation lives in the top-level evals/ harness)
 ├── scripts/
 │   ├── sanitize_passages.py  # Clean & re-chunk parsed.json → parsed_clean.json
 │   ├── download_english_corpus.py  # Download EN from Standard Ebooks + PG Australia
@@ -101,7 +101,7 @@ backend/                # FastAPI + Python
 │   ├── align_sentences.py           # Sentence-level bilingual alignment (Cohere + DP)
 │   ├── verify_alignment.py         # Alignment quality verification
 │   ├── ingest_pinecone.py    # Data ingestion to Pinecone (supports bilingual)
-│   └── evaluate.py           # CLI runner for evaluation suite
+│   # (evaluate.py retired — use the top-level evals/ harness)
 ├── .env.example        # Environment variable template
 ├── parsed_clean_bilingual.json  # Bilingual passages (~12,924 passages, EN + FR)
 ├── parsed_clean.json   # Sanitized EN-only passages (~12,764 passages, legacy)
