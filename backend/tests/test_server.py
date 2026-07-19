@@ -129,7 +129,7 @@ def test_reflect_stream_returns_sse(client):
 
 
 def test_explore_stream_agent_returns_expected_order(client):
-    with patch("server.needs_agent", return_value=True):
+    with patch("server.route_query", return_value=(True, "complex_pattern")):
         resp = client.post(
             "/api/explore_lost_time/stream",
             json={"query": "compare Swann and Charlus"},

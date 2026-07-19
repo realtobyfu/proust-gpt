@@ -5,10 +5,15 @@ All external services (Pinecone, Groq, Cohere) are mocked so tests
 run without API keys or network access.
 """
 import json
+import os
 from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
+
+# Disable per-IP rate limiting during tests (the suite fires many chat requests
+# from a single client IP, which would otherwise trip the limit — B1).
+os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
 
 
 # ---------------------------------------------------------------------------
@@ -20,7 +25,7 @@ def _mock_check_pinecone_connection():
     return {"connected": False, "error": "Mocked — no API key in CI"}
 
 
-def _mock_query_rag(query: str, lang: str = "en"):
+def _mock_query_rag(query: str, lang: str = "en", history=None):
     return {
         "reply": f"Mocked reply for: {query}",
         "passages": [
@@ -39,7 +44,7 @@ def _mock_query_reflect(message: str, lang: str = "en"):
     return f"Mocked reflection for: {message}"
 
 
-def _mock_stream_rag_response(query: str, lang: str = "en"):
+def _mock_stream_rag_response(query: str, lang: str = "en", history=None):
     yield {
         "type": "sources",
         "passages": [
@@ -103,6 +108,10 @@ def _mock_needs_agent(query: str, history=None):
     return False
 
 
+def _mock_route_query(query: str, history=None):
+    return (False, "fast_default")
+
+
 def _mock_stream_reflect_agent_response(message: str, history=None, lang="en"):
     yield {"type": "status", "status": "Reflecting..."}
     yield {"type": "token", "token": "Mocked "}
@@ -155,6 +164,7 @@ def client():
         patch("server.stream_agent_response", side_effect=_mock_stream_agent_response),
         patch("server.query_agent", side_effect=_mock_query_agent),
         patch("server.needs_agent", side_effect=_mock_needs_agent),
+        patch("server.route_query", side_effect=_mock_route_query),
         patch("server.stream_reflect_agent_response", side_effect=_mock_stream_reflect_agent_response),
         patch("server.query_reflect_agent", side_effect=_mock_query_reflect_agent),
         patch("server.retrieve_passages", return_value=[]),

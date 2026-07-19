@@ -4,6 +4,9 @@ Provides embeddings (Cohere), LLM (Groq), reranking (Cohere),
 vector store (Pinecone SDK), and RAG retrieval + streaming.
 """
 import re
+import threading
+import time
+from collections import OrderedDict
 from typing import Generator, Optional
 
 from langchain_cohere import CohereEmbeddings, CohereRerank
@@ -49,6 +52,7 @@ def _preview_passage(p: dict) -> dict:
 
 _embeddings: Optional[CohereEmbeddings] = None
 _llm: Optional[ChatGroq] = None
+_agent_llm: Optional[ChatGroq] = None
 _reranker: Optional[CohereRerank] = None
 _pinecone_client: Optional[Pinecone] = None
 _pinecone_index = None
@@ -60,6 +64,8 @@ def get_embeddings() -> CohereEmbeddings:
         _embeddings = CohereEmbeddings(
             model=config.COHERE_EMBED_MODEL,
             cohere_api_key=config.COHERE_API_KEY,
+            request_timeout=config.COHERE_TIMEOUT,
+            max_retries=2,
         )
     return _embeddings
 
@@ -74,8 +80,28 @@ def get_llm() -> ChatGroq:
             api_key=config.GROQ_API_KEY,
             temperature=config.LLM_TEMPERATURE,
             max_tokens=config.LLM_MAX_TOKENS,
+            request_timeout=config.GROQ_TIMEOUT,
+            max_retries=config.GROQ_MAX_RETRIES,
         )
     return _llm
+
+
+def get_agent_llm() -> ChatGroq:
+    """LLM tuned for tool-calling: lower temperature for reliable structured
+    tool calls (A8), separate from the higher-temperature generation LLM."""
+    global _agent_llm
+    if _agent_llm is None:
+        if not config.GROQ_API_KEY:
+            raise ValueError("GROQ_API_KEY not configured")
+        _agent_llm = ChatGroq(
+            model=config.LLM_MODEL_NAME,
+            api_key=config.GROQ_API_KEY,
+            temperature=config.AGENT_TEMPERATURE,
+            max_tokens=config.LLM_MAX_TOKENS,
+            request_timeout=config.GROQ_TIMEOUT,
+            max_retries=config.GROQ_MAX_RETRIES,
+        )
+    return _agent_llm
 
 
 def get_reranker() -> CohereRerank:
@@ -115,8 +141,67 @@ def initialize_clients() -> None:
     """
     get_embeddings()
     get_llm()
+    get_agent_llm()
     get_reranker()
     get_pinecone_index()
+
+
+# ── Caching (E1/E2) ───────────────────────────────────────────────────────────
+# Simple thread-safe TTL+LRU caches. We cache only *retrieval* (embeddings,
+# vector results, health stats) — never generation output.
+
+class _TTLCache:
+    """Thread-safe bounded cache with per-entry TTL and LRU eviction."""
+
+    def __init__(self, maxsize: int, ttl: float):
+        self._maxsize = maxsize
+        self._ttl = ttl
+        self._data: "OrderedDict[object, tuple[float, object]]" = OrderedDict()
+        self._lock = threading.Lock()
+        self.hits = 0
+        self.misses = 0
+
+    def get(self, key):
+        with self._lock:
+            item = self._data.get(key)
+            if item is None:
+                self.misses += 1
+                return None
+            ts, value = item
+            if time.monotonic() - ts > self._ttl:
+                del self._data[key]
+                self.misses += 1
+                return None
+            self._data.move_to_end(key)
+            self.hits += 1
+            return value
+
+    def set(self, key, value):
+        with self._lock:
+            self._data[key] = (time.monotonic(), value)
+            self._data.move_to_end(key)
+            while len(self._data) > self._maxsize:
+                self._data.popitem(last=False)
+
+    def clear(self):
+        with self._lock:
+            self._data.clear()
+
+
+_embed_cache = _TTLCache(maxsize=512, ttl=config.RETRIEVAL_CACHE_TTL)
+_retrieval_cache = _TTLCache(
+    maxsize=config.RETRIEVAL_CACHE_SIZE, ttl=config.RETRIEVAL_CACHE_TTL
+)
+
+
+def _cached_embed_query(query: str) -> list[float]:
+    """Embed a query, reusing a recent identical embedding when available."""
+    cached = _embed_cache.get(query)
+    if cached is not None:
+        return cached
+    vector = get_embeddings().embed_query(query)
+    _embed_cache.set(query, vector)
+    return vector
 
 
 # ── Prompts ───────────────────────────────────────────────────────────────────
@@ -156,6 +241,70 @@ def _get_rag_fallback_template(lang: str = "en") -> str:
     return _RAG_FALLBACK_TEMPLATE_FR if lang == "fr" else _RAG_FALLBACK_TEMPLATE
 
 
+# ── Conversation history helpers (C1/C4) ──────────────────────────────────────
+
+_CITATION_MARKER = re.compile(r"\s*\[\d+\]")
+
+_CONDENSE_PROMPT = """Rewrite the reader's follow-up as a single standalone search query that captures its full meaning using context from the conversation. Return ONLY the rewritten query — no preamble, no quotes.
+
+Conversation so far:
+{history}
+
+Follow-up: {query}
+
+Standalone query:"""
+
+
+def strip_citation_markers(text: str) -> str:
+    """Remove inline [1]/[2] citation markers from assistant text before replay,
+    so stale markers referencing invisible passages don't leak into new turns."""
+    return _CITATION_MARKER.sub("", text or "").strip()
+
+
+def cap_history(history: Optional[list[dict]], max_turns: Optional[int] = None) -> list[dict]:
+    """Return at most the last `max_turns` exchanges of history (a turn ≈ one
+    user + one assistant message), stripping citation markers from assistant
+    turns. Guards against unbounded client-supplied history (C4/B2)."""
+    if not history:
+        return []
+    if max_turns is None:
+        max_turns = config.MAX_HISTORY_TURNS
+    trimmed = history[-(max_turns * 2):]
+    out: list[dict] = []
+    for m in trimmed:
+        role = m.get("role", "user")
+        content = m.get("content", "") or ""
+        if role == "assistant":
+            content = strip_citation_markers(content)
+        out.append({"role": role, "content": content[: config.MAX_QUERY_CHARS]})
+    return out
+
+
+def _condense_query(query: str, history: Optional[list[dict]]) -> str:
+    """Turn a follow-up into a standalone retrieval query using recent context.
+
+    Only invoked when there is prior history; falls back to the raw query on any
+    failure so the fast path never breaks on condensation issues."""
+    if not history:
+        return query
+    recent = cap_history(history, max_turns=2)
+    if not recent:
+        return query
+    transcript = "\n".join(
+        f"{m['role']}: {m['content'][:500]}" for m in recent
+    )
+    try:
+        resp = get_agent_llm().invoke(
+            _CONDENSE_PROMPT.format(history=transcript, query=query)
+        )
+        condensed = (resp.content or "").strip().strip('"')
+        if condensed and len(condensed) <= 300:
+            return condensed
+    except Exception:
+        pass
+    return query
+
+
 # ── Retrieval helpers ─────────────────────────────────────────────────────────
 
 @traceable(name="pinecone_query")
@@ -165,8 +314,7 @@ def _pinecone_query(
     lang: str = "en",
     metadata_filter: dict | None = None,
 ) -> list[Document]:
-    embeddings = get_embeddings()
-    query_vector = embeddings.embed_query(query)
+    query_vector = _cached_embed_query(query)
 
     index = get_pinecone_index()
     query_kwargs: dict = dict(
@@ -321,10 +469,18 @@ def _format_passages(docs: list[Document], relevance_summaries: list[str] | None
 
 @traceable(name="retrieve_passages")
 def retrieve_passages(query: str, lang: str = "en") -> list[Document]:
+    cache_key = (query, lang)
+    cached = _retrieval_cache.get(cache_key)
+    if cached is not None:
+        # Return copies so downstream mutation can't corrupt the cache.
+        return [Document(page_content=d.page_content, metadata=dict(d.metadata)) for d in cached]
+
     candidates = _pinecone_query(query, top_k=config.RETRIEVAL_CANDIDATES, lang=lang)
     reranker = get_reranker()
     reranked = list(reranker.compress_documents(candidates, query))
-    return _stitch_context(reranked, lang=lang)
+    stitched = _stitch_context(reranked, lang=lang)
+    _retrieval_cache.set(cache_key, stitched)
+    return stitched
 
 
 # ── Repetition detection ─────────────────────────────────────────────────────
@@ -343,23 +499,32 @@ def _detect_repetition(text: str, window: int = 60, threshold: int = 3) -> bool:
 # ── Public API ────────────────────────────────────────────────────────────────
 
 @traceable(name="stream_rag_response")
-def stream_rag_response(query: str, lang: str = "en") -> Generator[dict, None, None]:
+def stream_rag_response(
+    query: str,
+    lang: str = "en",
+    history: Optional[list[dict]] = None,
+) -> Generator[dict, None, None]:
     """
     Stream a RAG response: retrieve passages, then stream one LLM call.
+
+    When `history` is provided (a follow-up on the fast path), the query is
+    condensed into a standalone retrieval query and the recent exchange is
+    replayed to the generation LLM so follow-ups stay coherent (C1).
 
     Yields:
         - {"type": "token", "token": "..."} for each token/chunk
         - {"type": "sources", "passages": [...]} for retrieved passages
         - {"type": "done", "done": True} when complete
     """
-    docs = retrieve_passages(query, lang=lang)
+    search_query = _condense_query(query, history)
+    docs = retrieve_passages(search_query, lang=lang)
     passages = _format_passages(docs, lang=lang)
 
-    # Send sources as individual events with truncated text so each stays
+    # Send sources as individual events with truncated text (A6) so each stays
     # well under proxy buffer limits (~500B vs 5-60KB).
     # Frontend lazy-loads full text on card expand.
     for p in passages:
-        yield {"type": "sources", "passages": [p]}
+        yield {"type": "sources", "passages": [_preview_passage(p)]}
 
     context = "\n\n---\n\n".join(
         f"[{i+1}] {doc.page_content}"
@@ -368,8 +533,17 @@ def stream_rag_response(query: str, lang: str = "en") -> Generator[dict, None, N
     prompt = _get_rag_fallback_template(lang).format(context=context, question=query)
 
     llm = get_llm()
+    # Replay recent turns so follow-ups have conversational context.
+    messages: list = []
+    for m in cap_history(history, max_turns=4):
+        if m["role"] == "user":
+            messages.append({"role": "user", "content": m["content"]})
+        elif m["role"] == "assistant":
+            messages.append({"role": "assistant", "content": m["content"]})
+    messages.append({"role": "user", "content": prompt})
+
     accumulated = ""
-    for chunk in llm.stream(prompt):
+    for chunk in llm.stream(messages):
         if chunk.content:
             accumulated += chunk.content
             yield {"type": "token", "token": chunk.content}
@@ -379,7 +553,7 @@ def stream_rag_response(query: str, lang: str = "en") -> Generator[dict, None, N
     yield {"type": "done", "done": True}
 
 
-def query_rag(query: str, lang: str = "en") -> dict:
+def query_rag(query: str, lang: str = "en", history: Optional[list[dict]] = None) -> dict:
     """
     Execute a RAG query (non-streaming).
 
@@ -389,7 +563,7 @@ def query_rag(query: str, lang: str = "en") -> dict:
     reply_parts = []
     passages = []
 
-    for event in stream_rag_response(query, lang=lang):
+    for event in stream_rag_response(query, lang=lang, history=history):
         if event["type"] == "token":
             reply_parts.append(event["token"])
         elif event["type"] == "sources":
@@ -437,8 +611,34 @@ def query_reflect(message: str, lang: str = "en") -> str:
     return response.content
 
 
+_health_cache: dict = {"ts": 0.0, "value": None}
+_health_lock = threading.Lock()
+
+
 def check_pinecone_connection() -> dict:
-    """Check if Pinecone is properly configured and accessible."""
+    """Check if Pinecone is properly configured and accessible.
+
+    The Pinecone `describe_index_stats` result is cached module-level for
+    HEALTH_STATS_TTL seconds so frequent health polling (Render/Docker every
+    ~30s) doesn't hammer Pinecone on every hit (E2)."""
+    now = time.monotonic()
+    with _health_lock:
+        if (
+            _health_cache["value"] is not None
+            and now - _health_cache["ts"] < config.HEALTH_STATS_TTL
+        ):
+            return _health_cache["value"]
+
+    result = _check_pinecone_connection_uncached()
+    # Only cache successful connections; retry failures on the next poll.
+    if result.get("connected"):
+        with _health_lock:
+            _health_cache["ts"] = time.monotonic()
+            _health_cache["value"] = result
+    return result
+
+
+def _check_pinecone_connection_uncached() -> dict:
     try:
         index = get_pinecone_index()
         stats = index.describe_index_stats()

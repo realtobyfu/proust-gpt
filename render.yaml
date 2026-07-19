@@ -12,7 +12,7 @@ services:
       - key: COHERE_API_KEY
         sync: false
       - key: PINECONE_INDEX_NAME
-        value: "proust-index-v2"
+        value: "proust-index-v3"
       - key: SERVE_STATIC
         value: "true"
       - key: STATIC_DIR

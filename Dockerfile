@@ -20,17 +20,18 @@ RUN npm run build
 # ============================================================
 FROM python:3.11-slim
 
-# System deps for spaCy and curl (healthcheck)
+# curl is used by the healthcheck below
 RUN apt-get update && \
     apt-get install -y --no-install-recommends curl && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Install Python dependencies
+# Install Python dependencies. Note: spaCy's en_core_web_sm model is NOT
+# downloaded here — the serving path (server/retrieval/agent/corpus) never
+# imports spaCy; entity extraction lives in offline preprocessing scripts (K2).
 COPY backend/requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt && \
-    python -m spacy download en_core_web_sm
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy backend code
 COPY backend/ ./

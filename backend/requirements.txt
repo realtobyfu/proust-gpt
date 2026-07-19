@@ -2,6 +2,7 @@
 fastapi
 uvicorn[standard]
 pydantic-settings
+slowapi
 
 # LLM and embeddings (API-based)
 langchain-groq

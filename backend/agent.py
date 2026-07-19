@@ -4,13 +4,19 @@ LangGraph ReAct agent for ProustGPT.
 Provides a tool-calling agent that can decompose complex literary questions
 into multiple targeted searches across the Proust corpus, with conversation
 memory for follow-up questions.
+
+Concurrency model (A1): each request builds its own set of tools closed over a
+per-request `_PassageAccumulator`. There is no shared mutable state — safe under
+the thread-pool executor regardless of contextvar propagation.
 """
+import logging
 import re
-from contextvars import ContextVar
-from typing import Generator
+import time
+from typing import Generator, Optional
 
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain_core.tools import tool
+from langgraph.errors import GraphRecursionError
 from langgraph.prebuilt import create_react_agent
 
 from config import config
@@ -24,181 +30,191 @@ from retrieval import (
     _pinecone_query,
     _stitch_context,
     _format_passages,
-    _detect_repetition,
     _preview_passage,
+    cap_history,
     get_llm,
+    get_agent_llm,
     get_reranker,
 )
 
-
-# ── Thread-safe passage accumulation ─────────────────────────────────────────
-# Each request gets its own list via contextvars, safe for concurrent use.
-_tool_passages_var: ContextVar[list[dict]] = ContextVar("tool_passages", default=[])
+logger = logging.getLogger("proust.agent")
 
 
-# ── Tool definitions ─────────────────────────────────────────────────────────
+# ── Per-request passage accumulation (A1/A2/A3) ───────────────────────────────
 
 
-@tool
-def search_passages(query: str, top_k: int = 5, lang: str = "en") -> str:
-    """Search the complete text of Proust's 'In Search of Lost Time' for passages matching a query.
+class _PassageAccumulator:
+    """Collects passages surfaced by tools during one request.
 
-    Use this for general questions about themes, scenes, characters, or quotes.
-    Returns the top matching passages with volume/chapter info.
+    Dedupes by corpus `index` and assigns globally-monotonic citation numbers so
+    the `[n]` markers the model sees in tool output are exactly the `[n]` shown
+    in the final sources list (A3). Not shared across requests (A1)."""
 
-    Args:
-        query: Natural language search query (e.g. "jealousy in Swann's love")
-        top_k: Number of passages to return (default 5, max 8)
-        lang: Language for results — "en" for English, "fr" for French
-    """
-    top_k = min(top_k, 8)
-    candidates = _pinecone_query(query, top_k=20, lang=lang)
-    reranker = get_reranker()
-    reranked = list(reranker.compress_documents(candidates, query))[:top_k]
-    docs = _stitch_context(reranked, lang=lang)
-    passages = _format_passages(docs, lang=lang)
+    def __init__(self) -> None:
+        self.passages: list[dict] = []
+        self._pos_by_index: dict[int, int] = {}
 
-    _tool_passages_var.get().extend(passages)
+    def add(self, passages: list[dict]) -> list[dict]:
+        """Register a batch of passages; return them (with stable citation
+        numbers), reusing the existing entry for any already-seen index."""
+        batch: list[dict] = []
+        for p in passages:
+            idx = p.get("index")
+            if idx is not None and idx in self._pos_by_index:
+                batch.append(self.passages[self._pos_by_index[idx]])
+                continue
+            entry = dict(p)
+            entry["citation_index"] = len(self.passages) + 1
+            if idx is not None:
+                self._pos_by_index[idx] = len(self.passages)
+            self.passages.append(entry)
+            batch.append(entry)
+        return batch
 
+
+def _render_batch(batch: list[dict], *, snippet: int = 400) -> str:
+    """Render passages for the model: citation number + global passage index
+    (so get_adjacent_passages can be grounded — A2) + location + text."""
     lines = []
-    for i, p in enumerate(passages):
-        text = p.get("text", "")[:400]
+    for p in batch:
+        text = (p.get("text", "") or "")[:snippet]
         lines.append(
-            f"[{p.get('citation_index', i+1)}] ({p.get('book', '?')}, {p.get('chapter', '?')}) "
-            f"{text}"
-        )
-    return "\n\n".join(lines) if lines else "No passages found."
-
-
-@tool
-def search_by_volume(query: str, volume: int, top_k: int = 5, lang: str = "en") -> str:
-    """Search for passages within a specific volume of Proust's novel.
-
-    Use this when the question targets a particular volume, or when doing
-    comparative analysis across volumes (call once per volume).
-
-    Args:
-        query: Natural language search query
-        volume: Volume number (1-7)
-        top_k: Number of passages to return (default 5, max 8)
-        lang: Language for results — "en" or "fr"
-    """
-    top_k = min(top_k, 8)
-    metadata_filter = {"volume": {"$eq": volume}}
-    candidates = _pinecone_query(query, top_k=20, lang=lang, metadata_filter=metadata_filter)
-    reranker = get_reranker()
-    reranked = list(reranker.compress_documents(candidates, query))[:top_k]
-    docs = _stitch_context(reranked, lang=lang)
-    passages = _format_passages(docs, lang=lang)
-
-    _tool_passages_var.get().extend(passages)
-
-    lines = []
-    for i, p in enumerate(passages):
-        text = p.get("text", "")[:400]
-        lines.append(
-            f"[{p.get('citation_index', i+1)}] ({p.get('book', '?')}, {p.get('chapter', '?')}) "
-            f"{text}"
-        )
-    return "\n\n".join(lines) if lines else f"No passages found in Volume {volume}."
-
-
-@tool
-def get_adjacent_passages(passage_index: int, before: int = 2, after: int = 2, lang: str = "en") -> str:
-    """Get passages immediately before and/or after a known passage.
-
-    Use this to read what happens next or before a scene you've already found.
-    This is a FREE operation (no API calls) — prefer it over new searches when
-    you already know the passage location.
-
-    Args:
-        passage_index: The index of the known passage
-        before: Number of passages to fetch before (default 2)
-        after: Number of passages to fetch after (default 2)
-        lang: Language — "en" or "fr"
-    """
-    results = []
-    for offset in range(-before, after + 1):
-        idx = passage_index + offset
-        p = get_passage_text(idx, lang=lang)
-        if p:
-            marker = " <<< [anchor]" if offset == 0 else ""
-            results.append(f"[passage {idx}]{marker} ({p.get('book', '?')}, {p.get('chapter', '?')})\n{p.get('text', '')[:500]}")
-    return "\n\n---\n\n".join(results) if results else "Passage not found."
-
-
-@tool
-def get_chapter_overview(volume: int, chapter: str, lang: str = "en") -> str:
-    """Get an overview of a specific chapter — first few passages to understand what it covers.
-
-    This is a FREE operation (no API calls). Use it to understand the scope of a
-    chapter before doing targeted searches within it.
-
-    Args:
-        volume: Volume number (1-7)
-        chapter: Chapter name (e.g. "Overture", "Swann in Love")
-        lang: Language — "en" or "fr"
-    """
-    result = get_chapter_passages(volume, chapter, offset=0, limit=5, lang=lang)
-    if result is None:
-        return f"Chapter '{chapter}' not found in Volume {volume}."
-
-    lines = [f"Chapter: {result.get('chapter_name', chapter)} (Volume {volume})"]
-    lines.append(f"Total passages: {result.get('total_in_chapter', '?')}")
-    lines.append("")
-    for p in result.get("passages", []):
-        lines.append(f"[passage {p.get('index', '?')}] {p.get('text', '')[:300]}")
-        lines.append("")
-    return "\n".join(lines)
-
-
-@tool
-def find_character_mentions(character: str, volume: int | None = None, lang: str = "en") -> str:
-    """Find passages that mention a specific character by name.
-
-    This is a FREE operation (in-memory text search, no API calls). Use it for
-    character analysis, tracking character appearances across the novel.
-
-    Args:
-        character: Character name to search for (e.g. "Swann", "Albertine", "Charlus")
-        volume: Optional volume number to limit search (1-7). Omit to search all volumes.
-        lang: Language — "en" or "fr"
-    """
-    results = search_passages_by_text(character, volume=volume, limit=8, lang=lang)
-    if not results:
-        scope = f" in Volume {volume}" if volume else ""
-        return f"No mentions of '{character}' found{scope}."
-
-    lines = []
-    for p in results:
-        lines.append(
-            f"[passage {p.get('index', '?')}] ({p.get('book', '?')}, {p.get('chapter', '?')})\n"
-            f"{p.get('text', '')[:300]}"
+            f"[{p.get('citation_index', '?')}] (passage #{p.get('index', '?')}) "
+            f"({p.get('book', '?')}, {p.get('chapter', '?')})\n{text}"
         )
     return "\n\n---\n\n".join(lines)
 
 
-@tool
-def get_toc(lang: str = "en") -> str:
-    """Get the complete table of contents for all 7 volumes.
-
-    This is a FREE operation. Use it to understand the novel's structure,
-    find chapter names, or help the user navigate.
-
-    Args:
-        lang: Language for volume/chapter names — "en" or "fr"
-    """
-    toc = get_table_of_contents(lang=lang)
-    lines = []
-    for vol in toc:
-        lines.append(f"Volume {vol['volume']}: {vol['volume_name']} ({vol['total_passages']} passages)")
-        for ch in vol["chapters"]:
-            lines.append(f"  - {ch['display_name']} ({ch['passage_count']} passages)")
-        lines.append("")
-    return "\n".join(lines)
+# ── Tool factory (A1/A7) ──────────────────────────────────────────────────────
 
 
-# ── Agent system prompt ──────────────────────────────────────────────────────
+def _build_tools(lang: str, acc: _PassageAccumulator):
+    """Build the full tool set for one request, binding `lang` and the passage
+    accumulator into closures. `lang` and `top_k` are NOT model-chosen (A7)."""
+
+    @tool
+    def search_passages(query: str, volume: Optional[int] = None) -> str:
+        """Search Proust's "In Search of Lost Time" for passages matching a query.
+
+        Use this for questions about themes, scenes, characters, or quotes. For
+        comparative questions, call it once per entity/volume.
+
+        Args:
+            query: Natural language search query (e.g. "jealousy in Swann's love")
+            volume: Optional volume number (1-7) to restrict the search. Omit to
+                search all volumes.
+        """
+        try:
+            metadata_filter = {"volume": {"$eq": volume}} if volume else None
+            candidates = _pinecone_query(
+                query, top_k=config.RETRIEVAL_CANDIDATES, lang=lang,
+                metadata_filter=metadata_filter,
+            )
+            reranker = get_reranker()
+            reranked = list(reranker.compress_documents(candidates, query))[: config.RERANK_TOP_N]
+            docs = _stitch_context(reranked, lang=lang)
+            batch = acc.add(_format_passages(docs, lang=lang))
+        except Exception as e:  # noqa: BLE001 — surface a usable message, don't crash the graph
+            logger.warning("search_passages failed: %s", e)
+            return (
+                "Search is temporarily unavailable (service error). Answer from "
+                "passages already gathered, or try find_character_mentions."
+            )
+        if not batch:
+            scope = f" in Volume {volume}" if volume else ""
+            return f"No passages found{scope}."
+        return _render_batch(batch)
+
+    @tool
+    def get_adjacent_passages(passage_index: int, before: int = 2, after: int = 2) -> str:
+        """Get passages immediately before and/or after a known passage.
+
+        Use this to read what happens next or before a scene you already found.
+        FREE (no API calls). Pass the passage number (the #N shown in search
+        results) as passage_index.
+
+        Args:
+            passage_index: The #N passage number shown in a prior tool result.
+            before: Number of passages to fetch before (default 2).
+            after: Number of passages to fetch after (default 2).
+        """
+        found: list[dict] = []
+        for offset in range(-before, after + 1):
+            p = get_passage_text(passage_index + offset, lang=lang)
+            if p:
+                found.append(p)
+        if not found:
+            return "Passage not found."
+        batch = acc.add(found)
+        return _render_batch(batch, snippet=500)
+
+    @tool
+    def get_chapter_overview(volume: int, chapter: str) -> str:
+        """Overview of a chapter — its first few passages to understand scope.
+
+        FREE (no API calls). Use before targeted searches within a chapter.
+
+        Args:
+            volume: Volume number (1-7).
+            chapter: Chapter name (e.g. "Overture", "Swann in Love").
+        """
+        result = get_chapter_passages(volume, chapter, offset=0, limit=5, lang=lang)
+        if result is None:
+            return f"Chapter '{chapter}' not found in Volume {volume}."
+        batch = acc.add(result.get("passages", []))
+        header = (
+            f"Chapter: {result.get('chapter_name', chapter)} (Volume {volume}) — "
+            f"{result.get('total_in_chapter', '?')} passages\n\n"
+        )
+        return header + _render_batch(batch, snippet=300)
+
+    @tool
+    def find_character_mentions(character: str, volume: Optional[int] = None) -> str:
+        """Find passages that mention a character by name.
+
+        FREE (in-memory text search, no API calls). Use for character analysis or
+        tracking appearances across the novel.
+
+        Args:
+            character: Character name (e.g. "Swann", "Albertine", "Charlus").
+            volume: Optional volume number (1-7). Omit to search all volumes.
+        """
+        results = search_passages_by_text(character, volume=volume, limit=8, lang=lang)
+        if not results:
+            scope = f" in Volume {volume}" if volume else ""
+            return f"No mentions of '{character}' found{scope}."
+        batch = acc.add(results)
+        return _render_batch(batch, snippet=300)
+
+    @tool
+    def get_toc() -> str:
+        """Get the complete table of contents for all 7 volumes.
+
+        FREE. Use to understand the novel's structure or find chapter names.
+        """
+        toc = get_table_of_contents(lang=lang)
+        lines = []
+        for vol in toc:
+            lines.append(
+                f"Volume {vol['volume']}: {vol['volume_name']} ({vol['total_passages']} passages)"
+            )
+            for ch in vol["chapters"]:
+                lines.append(f"  - {ch['display_name']} ({ch['passage_count']} passages)")
+            lines.append("")
+        return "\n".join(lines)
+
+    explore_tools = [
+        search_passages,
+        get_adjacent_passages,
+        get_chapter_overview,
+        find_character_mentions,
+        get_toc,
+    ]
+    reflect_tools = [search_passages, get_adjacent_passages, find_character_mentions]
+    return explore_tools, reflect_tools
+
+
+# ── Agent system prompts ──────────────────────────────────────────────────────
 
 AGENT_SYSTEM_PROMPT = """You are a literary companion for Marcel Proust's "In Search of Lost Time" (7 volumes, ~12,900 passages).
 
@@ -207,11 +223,11 @@ You have tools to search and browse the complete text. Use them to find evidence
 Strategy:
 - Simple questions: one search_passages call is enough
 - Comparative questions: search each entity/theme separately, then synthesize
-- "What happens next/before": find the scene, then use get_adjacent_passages
+- "What happens next/before": find the scene, then use get_adjacent_passages with the #N passage number shown in results
 - Character arcs: use find_character_mentions, then get_adjacent for context
-- Prefer free tools (get_adjacent, find_character, chapter_overview, toc) over search
+- Prefer free tools (get_adjacent, find_character, chapter_overview, toc) over new searches
 
-Style: Write in flowing prose. Be concise — aim for 2-3 short paragraphs, not essays. Cite passages with [1], [2], etc. Quote brief phrases directly rather than summarizing at length. Do not restate the question. End with one thoughtful follow-up question to deepen the reader's exploration. Keep to 2-3 tool calls max."""
+Style: Write in flowing prose. Be concise — aim for 2-3 short paragraphs, not essays. Cite passages with the [1], [2] numbers shown in tool results. Quote brief phrases directly rather than summarizing at length. Do not restate the question. End with one thoughtful follow-up question to deepen the reader's exploration. Keep to 2-3 tool calls max."""
 
 AGENT_SYSTEM_PROMPT_FR = """Vous êtes un compagnon littéraire pour « À la recherche du temps perdu » de Marcel Proust (7 volumes, ~12 900 passages).
 
@@ -220,14 +236,12 @@ Vous disposez d'outils pour rechercher et parcourir le texte intégral. Utilisez
 Stratégie :
 - Questions simples : un seul appel à search_passages suffit
 - Questions comparatives : cherchez chaque entité/thème séparément, puis synthétisez
-- « Que se passe-t-il ensuite/avant » : trouvez la scène, puis utilisez get_adjacent_passages
+- « Que se passe-t-il ensuite/avant » : trouvez la scène, puis utilisez get_adjacent_passages avec le numéro #N indiqué dans les résultats
 - Arcs narratifs : utilisez find_character_mentions, puis get_adjacent pour le contexte
-- Préférez les outils gratuits aux recherches quand c'est possible
+- Préférez les outils gratuits aux nouvelles recherches quand c'est possible
 
-Style : Écrivez en prose fluide. Soyez concis — visez 2-3 courts paragraphes. Citez les passages avec [1], [2], etc. Citez de brèves phrases directement. Ne reformulez pas la question. Terminez par une question de suivi réfléchie pour approfondir l'exploration du lecteur. Limitez-vous à 2-3 appels d'outils. Répondez en français."""
+Style : Écrivez en prose fluide. Soyez concis — visez 2-3 courts paragraphes. Citez les passages avec les numéros [1], [2] indiqués dans les résultats. Citez de brèves phrases directement. Ne reformulez pas la question. Terminez par une question de suivi réfléchie pour approfondir l'exploration du lecteur. Limitez-vous à 2-3 appels d'outils. Répondez en français."""
 
-
-# ── Reflect agent system prompts ─────────────────────────────────────────
 
 REFLECT_AGENT_SYSTEM_PROMPT = """You are a wise, reflective conversationalist in the spirit of Marcel Proust. You help the reader contemplate their inner life — memory, time, sensation, habit, desire, and the self.
 
@@ -246,7 +260,7 @@ WHEN NOT TO SEARCH:
 - The first message in a conversation (build rapport first)
 - Abstract philosophical musings without a concrete sensory anchor
 
-When you do find a passage, weave it naturally into your reflection — "This reminds me of a moment in Proust where..." or "Your experience echoes something the narrator describes when..." Use [1], [2] citation markers. Never list passages academically.
+When you do find a passage, weave it naturally into your reflection — "This reminds me of a moment in Proust where..." or "Your experience echoes something the narrator describes when..." Use the [1], [2] citation numbers shown in tool results. Never list passages academically.
 
 Style: Write in flowing prose paragraphs — no lists, no headings, no bullet points. Use *italics* sparingly for emphasis. Match length to the depth of the reflection. Always end with a thoughtful follow-up question that invites the reader to explore their experience more deeply."""
 
@@ -267,347 +281,306 @@ QUAND NE PAS CHERCHER :
 - Le premier message d'une conversation (établir le rapport d'abord)
 - Réflexions philosophiques abstraites sans ancrage sensoriel concret
 
-Lorsque vous trouvez un passage, intégrez-le naturellement — « Cela me rappelle un moment chez Proust où... » Utilisez les marqueurs [1], [2]. Ne citez jamais de manière académique.
+Lorsque vous trouvez un passage, intégrez-le naturellement — « Cela me rappelle un moment chez Proust où... » Utilisez les numéros [1], [2] indiqués dans les résultats. Ne citez jamais de manière académique.
 
 Style : Écrivez en prose fluide — ni listes, ni titres. Utilisez les *italiques* avec parcimonie. Terminez toujours par une question réfléchie qui invite le lecteur à explorer son expérience plus profondément. Répondez en français."""
 
 
-# ── Agent factory ────────────────────────────────────────────────────────────
+_DEGRADE_TEMPLATE = """You gathered evidence but ran out of research steps. Answer the reader's question NOW using ONLY the passages below. Be concise (2-3 short paragraphs), cite with [1], [2], and end with one follow-up question.
 
-_TOOLS = [
-    search_passages,
-    search_by_volume,
-    get_adjacent_passages,
-    get_chapter_overview,
-    find_character_mentions,
-    get_toc,
-]
+Passages:
+{context}
 
+Reader's question: {question}"""
 
-def create_proust_agent(lang: str = "en"):
-    """Create and return a LangGraph ReAct agent configured for Proust exploration."""
-    llm = get_llm()
-    system_prompt = AGENT_SYSTEM_PROMPT_FR if lang == "fr" else AGENT_SYSTEM_PROMPT
-    agent = create_react_agent(llm, _TOOLS, prompt=system_prompt)
-    return agent
+_DEGRADE_TEMPLATE_FR = """Vous avez rassemblé des preuves mais manqué d'étapes de recherche. Répondez MAINTENANT à la question en utilisant UNIQUEMENT les passages ci-dessous. Soyez concis (2-3 courts paragraphes), citez avec [1], [2], et terminez par une question de suivi. Répondez en français.
+
+Passages :
+{context}
+
+Question du lecteur : {question}"""
 
 
-_REFLECT_TOOLS = [
-    search_passages,
-    get_adjacent_passages,
-    find_character_mentions,
-]
-
-
-def create_reflect_agent(lang: str = "en"):
-    """Create and return a LangGraph ReAct agent configured for Proustian reflection."""
-    llm = get_llm()
-    system_prompt = REFLECT_AGENT_SYSTEM_PROMPT_FR if lang == "fr" else REFLECT_AGENT_SYSTEM_PROMPT
-    agent = create_react_agent(llm, _REFLECT_TOOLS, prompt=system_prompt)
-    return agent
-
-
-# ── Complexity router ────────────────────────────────────────────────────────
+# ── Complexity router (C2/C3) ─────────────────────────────────────────────────
 
 _COMPLEX_PATTERNS = re.compile(
     r"\b("
+    # English
     r"compare|comparison|vs\.?|versus|differ|difference|contrast"
-    r"|evolve|evolution|develop|change over time|across volumes"
-    r"|what happens (after|next|before|then)"
+    r"|evolve|evolution|develop|change over time|across volumes|throughout"
+    r"|what happens (after|next|before|then)|what comes (next|after|before)"
     r"|how does .+ change"
     r"|trace|track|arc|journey"
     r"|relationship between"
+    r"|which volume"
+    # French
+    r"|compare[rz]|comparaison|différence|différent|contraste|opposer|opposition"
+    r"|évolue|évolution|au fil (des|du)|à travers les volumes"
+    r"|que se passe-t-il (après|ensuite|avant)|et (ensuite|après)"
+    r"|relation entre|quel volume|comment .+ (change|évolue)"
     r")\b",
     re.IGNORECASE,
 )
 
 
-def needs_agent(query: str, history: list[dict] | None = None) -> bool:
-    """Determine whether a query needs the full agent or can use the fast path.
+def route_query(query: str, history: Optional[list[dict]] = None) -> tuple[bool, str]:
+    """Decide fast-path vs agent for a query and return (chose_agent, rule).
 
-    Returns True for complex/comparative queries or follow-up questions.
-    """
+    Routes on the *current query's* complexity only (C2) — history no longer
+    forces the agent, because the fast path is now history-aware (C1). Supports
+    French comparative queries (C3)."""
     if not config.AGENT_ENABLED:
-        return False
+        return False, "agent_disabled"
 
-    # Any conversation with 2+ prior user messages likely needs context
-    if history:
-        user_msgs = [m for m in history if m.get("role") == "user"]
-        if len(user_msgs) >= 2:
-            return True
-
-    # Check for complexity patterns
     if _COMPLEX_PATTERNS.search(query):
-        return True
+        return True, "complex_pattern"
 
-    # Short follow-up queries (likely referencing prior context)
-    if history and len(query.split()) <= 6:
-        return True
+    # Multi-part questions (several '?' or explicit enumeration) benefit from the
+    # agent's multi-search decomposition.
+    if query.count("?") >= 2:
+        return True, "multi_question"
 
-    return False
+    return False, "fast_default"
 
 
-# ── Streaming generator ─────────────────────────────────────────────────────
+def needs_agent(query: str, history: Optional[list[dict]] = None) -> bool:
+    """Boolean wrapper around route_query (kept for backwards compatibility)."""
+    chose_agent, _ = route_query(query, history)
+    return chose_agent
+
+
+# ── Tool-call status + leak detection ─────────────────────────────────────────
+
 
 def describe_tool_call(tool_call: dict) -> str:
-    """Generate a human-readable status message for a tool call."""
+    """Human-readable status message for a tool call."""
     name = tool_call.get("name", "")
     args = tool_call.get("args", {})
-
     if name == "search_passages":
         q = args.get("query", "")
-        return f"Searching for passages about {q[:60]}..."
-    elif name == "search_by_volume":
-        q = args.get("query", "")
-        v = args.get("volume", "?")
-        return f"Searching Volume {v} for {q[:50]}..."
-    elif name == "get_adjacent_passages":
+        v = args.get("volume")
+        scope = f" in Volume {v}" if v else ""
+        return f"Searching{scope} for passages about {q[:60]}..."
+    if name == "get_adjacent_passages":
         idx = args.get("passage_index", "?")
         return f"Reading surrounding passages near #{idx}..."
-    elif name == "get_chapter_overview":
-        ch = args.get("chapter", "?")
-        v = args.get("volume", "?")
-        return f"Reviewing {ch} (Volume {v})..."
-    elif name == "find_character_mentions":
+    if name == "get_chapter_overview":
+        return f"Reviewing {args.get('chapter', '?')} (Volume {args.get('volume', '?')})..."
+    if name == "find_character_mentions":
         ch = args.get("character", "?")
         v = args.get("volume")
         scope = f" in Volume {v}" if v else ""
         return f"Looking for mentions of {ch}{scope}..."
-    elif name == "get_toc":
+    if name == "get_toc":
         return "Checking table of contents..."
     return f"Using {name}..."
 
 
-def stream_agent_response(
-    query: str,
-    history: list[dict] | None = None,
-    lang: str = "en",
-) -> Generator[dict, None, None]:
-    """
-    Run the LangGraph agent and yield SSE events.
+# A content chunk that begins like a serialized tool call is a Groq malfunction
+# (A8) — suppress it rather than streaming raw JSON to the reader.
+_TOOL_LEAK_RE = re.compile(
+    r'^\s*(<tool_call|<function|<\|python_tag\||\{\s*"name"\s*:|\{\s*"type"\s*:\s*"function")',
+    re.IGNORECASE,
+)
 
-    Yields:
-        {"type": "status", "status": "..."}   — tool-call status updates
-        {"type": "token", "token": "..."}      — streamed response tokens
-        {"type": "sources", "passages": [...]} — accumulated passage sources
-        {"type": "done", "done": True}         — stream complete
-    """
-    # Each request gets its own passage list (thread-safe via contextvars)
-    passage_list: list[dict] = []
-    _tool_passages_var.set(passage_list)
 
-    yield {"type": "status", "status": "Thinking..."}
+def _looks_like_tool_leak(head: str) -> bool:
+    return bool(_TOOL_LEAK_RE.match(head))
 
-    # Build message history for the agent
+
+# ── Shared streaming generator (A4/A6/D1/D2) ──────────────────────────────────
+
+
+def _build_messages(text: str, history: Optional[list[dict]]) -> list:
+    """Build LangChain message history (C4: capped + citation markers stripped)."""
     messages: list = []
-    if history:
-        for msg in history:
-            role = msg.get("role", "user")
-            content = msg.get("content", "")
-            if role == "user":
-                messages.append(HumanMessage(content=content))
-            elif role == "assistant":
-                messages.append(AIMessage(content=content))
-    messages.append(HumanMessage(content=query))
+    for msg in cap_history(history):
+        if msg["role"] == "user":
+            messages.append(HumanMessage(content=msg["content"]))
+        elif msg["role"] == "assistant":
+            messages.append(AIMessage(content=msg["content"]))
+    messages.append(HumanMessage(content=text))
+    return messages
 
-    agent = create_proust_agent(lang=lang)
 
-    # Stream the agent execution
-    accumulated_response = ""
-    steps_taken = 0
-    sources_sent = False
+def _stream_agent(
+    agent,
+    messages: list,
+    acc: _PassageAccumulator,
+    *,
+    preview: bool,
+    intro: str,
+    lang: str,
+) -> Generator[dict, None, None]:
+    """Run a LangGraph agent and yield SSE events with TRUE token streaming (D1).
 
-    def _dedupe_sources() -> list[dict]:
-        """Deduplicate accumulated passages and return per-passage event list."""
-        nonlocal sources_sent
-        if sources_sent:
-            return []
-        sources_sent = True
-        seen_indices: set[int] = set()
-        unique: list[dict] = []
-        cit = 1
-        for p in passage_list:
-            p_idx = p.get("index")
-            if p_idx is not None and p_idx in seen_indices:
-                continue
-            if p_idx is not None:
-                seen_indices.add(p_idx)
-            p["citation_index"] = cit
-            cit += 1
-            unique.append(p)
-        return [{"type": "sources", "passages": [p]} for p in unique]
+    - `stream_mode=["updates", "messages"]`: `updates` drives tool-call status
+      events; `messages` forwards real LLM tokens from the final answer node.
+    - Sources are emitted (once) right before the first answer token.
+    - On recursion limit (A4) or wall-clock timeout (D2), degrade gracefully by
+      answering from the evidence already gathered.
+    """
+    yield {"type": "status", "status": intro}
 
-    for event in agent.stream(
-        {"messages": messages},
-        config={"recursion_limit": config.AGENT_MAX_STEPS * 2 + 2},
-        stream_mode="updates",
-    ):
-        for node_name, node_output in event.items():
-            if node_name == "agent":
-                agent_messages = node_output.get("messages", [])
-                for msg in agent_messages:
-                    # Check for tool calls
-                    if hasattr(msg, "tool_calls") and msg.tool_calls:
-                        for tc in msg.tool_calls:
-                            steps_taken += 1
-                            if steps_taken > config.AGENT_MAX_STEPS:
-                                break
-                            status = describe_tool_call(tc)
-                            yield {"type": "status", "status": status}
-                    # Final text content (no tool calls)
-                    elif hasattr(msg, "content") and msg.content and (
-                        not hasattr(msg, "tool_calls") or not msg.tool_calls
-                    ):
-                        # Send sources BEFORE the first token so the frontend
-                        # has passage data even if the proxy drops later events
-                        for src_event in _dedupe_sources():
-                            yield src_event
+    sources_flushed = False
 
-                        content = msg.content
-                        chunk_size = 12
-                        for i in range(0, len(content), chunk_size):
-                            chunk = content[i:i + chunk_size]
-                            accumulated_response += chunk
-                            yield {"type": "token", "token": chunk}
-                            if _detect_repetition(accumulated_response):
-                                break
+    def flush_sources():
+        nonlocal sources_flushed
+        if sources_flushed:
+            return
+        sources_flushed = True
+        for p in acc.passages:
+            src = _preview_passage(p) if preview else dict(p)
+            yield {"type": "sources", "passages": [src]}
 
-    # Fallback: if no text response was generated, send sources now
-    for src_event in _dedupe_sources():
-        yield src_event
+    start = time.monotonic()
+    answer_head = ""
+    streamed_any = False
+    suppressed = False
+    degrade = False
+
+    try:
+        for mode, chunk in agent.stream(
+            {"messages": messages},
+            config={"recursion_limit": config.AGENT_MAX_STEPS * 2 + 2},
+            stream_mode=["updates", "messages"],
+        ):
+            if time.monotonic() - start > config.AGENT_TIMEOUT:
+                logger.warning("Agent wall-clock timeout after %.1fs", config.AGENT_TIMEOUT)
+                degrade = True
+                break
+
+            if mode == "updates":
+                for _node, node_output in (chunk or {}).items():
+                    if not isinstance(node_output, dict):
+                        continue
+                    for msg in node_output.get("messages", []):
+                        for tc in getattr(msg, "tool_calls", None) or []:
+                            yield {"type": "status", "status": describe_tool_call(tc)}
+
+            elif mode == "messages":
+                msg_chunk, _meta = chunk
+                # Structured tool-call chunks carry no answer text — skip them.
+                if getattr(msg_chunk, "tool_call_chunks", None):
+                    continue
+                content = getattr(msg_chunk, "content", "") or ""
+                if not isinstance(content, str) or not content:
+                    continue
+
+                if not streamed_any and not suppressed:
+                    answer_head += content
+                    if _looks_like_tool_leak(answer_head):
+                        suppressed = True
+                        logger.warning("Suppressed tool-call-shaped content leak")
+                        continue
+                    # First real token — emit sources first, then the token.
+                    yield from flush_sources()
+                    streamed_any = True
+                    yield {"type": "token", "token": content}
+                elif suppressed:
+                    continue
+                else:
+                    yield {"type": "token", "token": content}
+    except GraphRecursionError:
+        logger.warning("Agent hit recursion limit — degrading to evidence-only answer")
+        degrade = True
+
+    if degrade or not streamed_any:
+        yield from _degraded_answer(acc, messages, lang, flush_sources)
+    else:
+        yield from flush_sources()
     yield {"type": "done", "done": True}
 
 
-def query_agent(
+def _degraded_answer(acc, messages, lang, flush_sources) -> Generator[dict, None, None]:
+    """One final tool-free LLM call answering from gathered evidence (A4/D2)."""
+    question = ""
+    for m in reversed(messages):
+        if isinstance(m, HumanMessage):
+            question = m.content
+            break
+
+    yield from flush_sources()
+
+    if not acc.passages:
+        msg = (
+            "Je n'ai pas pu rassembler de passages pour cette question — pourriez-vous la reformuler ?"
+            if lang == "fr"
+            else "I couldn't gather passages for that question — could you rephrase it?"
+        )
+        yield {"type": "token", "token": msg}
+        return
+
+    context = "\n\n---\n\n".join(
+        f"[{p.get('citation_index', '?')}] {p.get('text', '')}" for p in acc.passages
+    )
+    template = _DEGRADE_TEMPLATE_FR if lang == "fr" else _DEGRADE_TEMPLATE
+    prompt = template.format(context=context, question=question)
+    try:
+        for chunk in get_llm().stream(prompt):
+            if chunk.content:
+                yield {"type": "token", "token": chunk.content}
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Degraded answer failed: %s", e)
+        yield {"type": "token", "token": " ".join(
+            f"[{p.get('citation_index')}]" for p in acc.passages
+        )}
+
+
+# ── Public streaming entrypoints ──────────────────────────────────────────────
+
+
+def stream_agent_response(
     query: str,
-    history: list[dict] | None = None,
+    history: Optional[list[dict]] = None,
     lang: str = "en",
-) -> dict:
-    """Run the agent non-streaming. Returns {"reply": ..., "passages": [...]}."""
-    reply_parts = []
-    passages = []
-
-    for event in stream_agent_response(query, history=history, lang=lang):
-        if event["type"] == "token":
-            reply_parts.append(event["token"])
-        elif event["type"] == "sources":
-            passages.extend(event["passages"])
-
-    return {
-        "reply": "".join(reply_parts),
-        "passages": passages,
-    }
-
-
-# ── Reflect agent streaming ─────────────────────────────────────────────
+) -> Generator[dict, None, None]:
+    """Run the Explore agent and yield SSE events (see _stream_agent)."""
+    acc = _PassageAccumulator()
+    explore_tools, _ = _build_tools(lang, acc)
+    system_prompt = AGENT_SYSTEM_PROMPT_FR if lang == "fr" else AGENT_SYSTEM_PROMPT
+    agent = create_react_agent(get_agent_llm(), explore_tools, prompt=system_prompt)
+    messages = _build_messages(query, history)
+    yield from _stream_agent(
+        agent, messages, acc, preview=True, intro="Thinking...", lang=lang
+    )
 
 
 def stream_reflect_agent_response(
     message: str,
-    history: list[dict] | None = None,
+    history: Optional[list[dict]] = None,
     lang: str = "en",
 ) -> Generator[dict, None, None]:
-    """
-    Run the reflect LangGraph agent and yield SSE events.
-
-    Same event format as stream_agent_response but uses the reflect agent
-    (fewer tools, introspective system prompt).
-    """
-    passage_list: list[dict] = []
-    _tool_passages_var.set(passage_list)
-
-    yield {"type": "status", "status": "Reflecting..."}
-
-    messages: list = []
-    if history:
-        for msg in history:
-            role = msg.get("role", "user")
-            content = msg.get("content", "")
-            if role == "user":
-                messages.append(HumanMessage(content=content))
-            elif role == "assistant":
-                messages.append(AIMessage(content=content))
-    messages.append(HumanMessage(content=message))
-
-    agent = create_reflect_agent(lang=lang)
-
-    accumulated_response = ""
-    steps_taken = 0
-    sources_sent = False
-
-    def _dedupe_sources() -> list[dict]:
-        nonlocal sources_sent
-        if sources_sent:
-            return []
-        sources_sent = True
-        seen_indices: set[int] = set()
-        unique: list[dict] = []
-        cit = 1
-        for p in passage_list:
-            p_idx = p.get("index")
-            if p_idx is not None and p_idx in seen_indices:
-                continue
-            if p_idx is not None:
-                seen_indices.add(p_idx)
-            p["citation_index"] = cit
-            cit += 1
-            unique.append(p)
-        return [{"type": "sources", "passages": [_preview_passage(p)]} for p in unique]
-
-    for event in agent.stream(
-        {"messages": messages},
-        config={"recursion_limit": config.AGENT_MAX_STEPS * 2 + 2},
-        stream_mode="updates",
-    ):
-        for node_name, node_output in event.items():
-            if node_name == "agent":
-                agent_messages = node_output.get("messages", [])
-                for msg in agent_messages:
-                    if hasattr(msg, "tool_calls") and msg.tool_calls:
-                        for tc in msg.tool_calls:
-                            steps_taken += 1
-                            if steps_taken > config.AGENT_MAX_STEPS:
-                                break
-                            status = describe_tool_call(tc)
-                            yield {"type": "status", "status": status}
-                    elif hasattr(msg, "content") and msg.content and (
-                        not hasattr(msg, "tool_calls") or not msg.tool_calls
-                    ):
-                        # Send sources BEFORE tokens (same fix as explore agent)
-                        for src_event in _dedupe_sources():
-                            yield src_event
-
-                        content = msg.content
-                        chunk_size = 12
-                        for i in range(0, len(content), chunk_size):
-                            chunk = content[i:i + chunk_size]
-                            accumulated_response += chunk
-                            yield {"type": "token", "token": chunk}
-                            if _detect_repetition(accumulated_response):
-                                break
-
-    # Fallback: if no text response was generated, send sources now
-    for src_event in _dedupe_sources():
-        yield src_event
-    yield {"type": "done", "done": True}
+    """Run the Reflect agent and yield SSE events (see _stream_agent)."""
+    acc = _PassageAccumulator()
+    _, reflect_tools = _build_tools(lang, acc)
+    system_prompt = REFLECT_AGENT_SYSTEM_PROMPT_FR if lang == "fr" else REFLECT_AGENT_SYSTEM_PROMPT
+    agent = create_react_agent(get_agent_llm(), reflect_tools, prompt=system_prompt)
+    messages = _build_messages(message, history)
+    yield from _stream_agent(
+        agent, messages, acc, preview=True, intro="Reflecting...", lang=lang
+    )
 
 
-def query_reflect_agent(
-    message: str,
-    history: list[dict] | None = None,
-    lang: str = "en",
-) -> dict:
-    """Run the reflect agent non-streaming. Returns {"reply": ..., "passages": [...]}."""
-    reply_parts = []
-    passages = []
+# ── Non-streaming wrappers ────────────────────────────────────────────────────
 
-    for event in stream_reflect_agent_response(message, history=history, lang=lang):
+
+def _collect(gen) -> dict:
+    reply_parts: list[str] = []
+    passages: list[dict] = []
+    for event in gen:
         if event["type"] == "token":
             reply_parts.append(event["token"])
         elif event["type"] == "sources":
             passages.extend(event["passages"])
+    return {"reply": "".join(reply_parts), "passages": passages}
 
-    return {
-        "reply": "".join(reply_parts),
-        "passages": passages,
-    }
+
+def query_agent(query: str, history: Optional[list[dict]] = None, lang: str = "en") -> dict:
+    """Run the Explore agent non-streaming."""
+    return _collect(stream_agent_response(query, history=history, lang=lang))
+
+
+def query_reflect_agent(message: str, history: Optional[list[dict]] = None, lang: str = "en") -> dict:
+    """Run the Reflect agent non-streaming."""
+    return _collect(stream_reflect_agent_response(message, history=history, lang=lang))
